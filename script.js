@@ -278,3 +278,28 @@ window.onload = async () => {
     configurarEventos(); 
 };
 
+function atualizarListaEsquerda() {
+    const containerLista = document.getElementById("container-lista-todos");
+    const mapaAtivo = document.querySelector(".caixa-maximizada").id; // 'container-gsp' ou 'container-esp'
+    containerLista.innerHTML = "";
+
+    // Descobre quais IDs de paths existem no mapa que acabou de subir
+    const pathsNoMapa = Array.from(document.querySelectorAll(`#${mapaAtivo} path`)).map(p => p.id);
+
+    // Filtra os dados da planilha que pertencem a esses paths
+    const residenciaisDoMapa = dadosGerais.filter(d => pathsNoMapa.includes(d.idPath));
+
+    residenciaisDoMapa.forEach(res => {
+        const btn = document.createElement("button");
+        btn.className = "btRes"; 
+        btn.style.fontSize = "12px"; // Lista lateral pode ter fonte menor
+        btn.innerHTML = `<strong>${res.residencial}</strong><br><small>${obterNomeFormatado(res.idPath)}</small>`;
+        
+        btn.onclick = () => {
+            // Lógica futura: destacar path e abrir ficha à direita
+            console.log("Selecionar:", res.residencial);
+        };
+        
+        containerLista.appendChild(btn);
+    });
+}
