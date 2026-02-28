@@ -1,171 +1,101 @@
-/* --- ESTILOS GERAIS --- */
+/* --- RESET E BASE --- */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; font-family: 'Segoe UI', Arial, sans-serif; background: #ffffff; color: #333; }
+html, body { height: 100%; font-family: 'Segoe UI', Arial, sans-serif; background: #fff; overflow: hidden; }
 
 header { 
-    background: rgb(6, 94, 3); 
-    color: white; 
-    display: grid;
-    grid-template-columns: 80px 1fr 80px; 
-    align-items: center; 
-    padding: 0 15px; 
-    height: 50px; 
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    background: rgb(6, 94, 3); color: white; display: grid; grid-template-columns: 80px 1fr 80px; 
+    align-items: center; padding: 0 15px; height: 50px; z-index: 1000;
+}
+header h1 { grid-column: 2; text-align: center; font-size: 18px; }
+
+/* --- LAYOUT TRÊS COLUNAS --- */
+.container { 
+    display: flex; 
+    height: calc(100% - 50px); 
+    width: 100vw;
 }
 
-header h1 { grid-column: 2; text-align: center; font-size: 18px; font-weight: bold; }
-
-.btn-sobre { 
-    grid-column: 3; justify-self: end; background: rgba(255,255,255,0.2); 
-    border: 1px solid white; color: white; padding: 5px 10px; 
-    border-radius: 20px; font-size: 11px; cursor: pointer; font-weight: bold;
+/* Colunas Laterais (Esq e Dir) */
+.coluna-lateral {
+    flex: 0 0 300px; /* Largura fixa das listas */
+    display: flex;
+    flex-direction: column;
+    background: #f8f9fa;
+    border-right: 1px solid #eee;
+    border-left: 1px solid #eee;
 }
 
-/* --- LAYOUT --- */
-.container { display: flex; flex-direction: column; padding: 5px; gap: 5px; }
-.mapa-area { width: 100%; display: flex; flex-direction: column; order: 1; overflow: hidden; }
-.info { width: 100%; order: 2; padding: 10px; }
-
-@media (max-width: 899px) {
-    .caixa-maximizada { transform: scale(1.25); transform-origin: center top; margin-bottom: 40px; }
-    .caixa-minimizada { margin-top: -10px !important; }
+.header-coluna {
+    background: #e9ecef;
+    padding: 12px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 14px;
+    color: rgb(6, 94, 3);
+    border-bottom: 1px solid #ddd;
 }
 
-@media (min-width: 900px) {
-    body { overflow: hidden; }
-    .container { flex-direction: row; gap: 30px; height: calc(100% - 50px); padding: 15px; }
-    .mapa-area { flex: 1; height: 100%; order: 1; }
-    .info { flex: 0 0 550px; height: 100%; overflow-y: auto; padding-left: 10px; border-left: 1px solid #f0f0f0; order: 2; }
+.scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
 }
 
-/* --- MAPAS E PATHS --- */
-.titulo-mapa { min-height: 35px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: #333; text-align: center; z-index: 20; position: relative; }
-.caixa-mapa { background: transparent; display: flex; align-items: center; justify-content: center; position: relative; width: 100%; border: none; }
-.caixa-maximizada { flex: 1; min-height: 320px; z-index: 1; }
-
-.caixa-minimizada { 
-    height: 110px; 
-    cursor: pointer; 
-    opacity: 0.7; 
-    filter: grayscale(0.5); 
-    overflow: hidden; 
-    z-index: 10; 
-    margin-top: 5px; 
+/* Área Central (Mapas) */
+.mapa-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    background: #fff;
+    min-width: 0; /* Evita que o flex quebre com SVGs grandes */
 }
 
-.caixa-minimizada svg { transform: scale(1.2); transition: transform 0.3s; }
-
-svg { width: 100%; height: 100%; max-height: 65vh; display: block; }
-
-path { fill: #888888; stroke: #ffffff; stroke-width: 0.6; transition: fill 0.1s; cursor: default; outline: none; }
-
-@media (min-width: 900px) {
-    path:hover { fill: #555555; stroke: #000; }
-    .commrv:hover { fill: rgb(255, 153, 0) !important; }
+.titulo-mapa {
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 10px;
+    min-height: 30px;
 }
 
+/* --- ESTILOS DOS MAPAS --- */
+.caixa-mapa { width: 100%; transition: all 0.3s ease; }
+.caixa-maximizada { flex: 1; position: relative; }
+.caixa-minimizada { height: 100px; cursor: pointer; opacity: 0.6; filter: grayscale(1); border-top: 1px solid #eee; margin-top: 10px; }
+.caixa-minimizada:hover { opacity: 1; filter: grayscale(0); }
+
+svg { width: 100%; height: 100%; display: block; }
+path { fill: #ccc; stroke: #fff; stroke-width: 0.6; transition: 0.1s; outline: none; }
 .commrv { fill: rgb(6, 94, 3) !important; cursor: pointer; }
 .ativo { fill: rgb(255, 153, 0) !important; stroke: #000 !important; stroke-width: 1.5px !important; }
 
-/* --- COMPONENTES --- */
-.estoque-alerta { color: #dc2626 !important; font-weight: bold; }
-.estoque-vendido { text-decoration: line-through !important; color: #dc2626 !important; font-style: italic; font-weight: bold; }
-
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 200; }
-.modal-box { background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; position: relative; }
-
-.btn-fechar-modal { 
-    position: absolute; 
-    top: 5px; 
-    right: 12px; 
-    font-size: 28px; 
-    cursor: pointer; 
-    color: #888; 
-    border: none; 
-    background: none; 
-    font-weight: bold;
+/* --- COMPONENTES (BOTÕES) --- */
+.btRes {
+    width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #ddd;
+    border-radius: 6px; background: #fff; text-align: left; cursor: pointer;
 }
+.btRes:hover { border-color: #000; background: #f0f0f0; }
+.btRes-ativo { border: 2px solid rgb(255, 153, 0) !important; font-weight: bold; }
 
-.contato-link { 
-    display: block; 
-    background: #25d366; 
-    color: white !important; 
-    text-decoration: none; 
-    padding: 12px; 
-    border-radius: 8px; 
-    font-weight: bold; 
-    margin-top: 15px; 
-    text-align: center;
+.btn-acao { 
+    width: 100%; padding: 8px; margin-top: 5px; border-radius: 4px; border: none;
+    color: white; font-weight: bold; cursor: pointer; font-size: 12px;
 }
+.btn-book { background: rgb(6, 94, 3); }
+.btn-link { background: rgb(255, 153, 0); }
+.btn-acao.copiado { background: #000 !important; }
 
-#titulo-dinamico { margin-bottom: 12px; color: rgb(6, 94, 3); font-size: 20px; }
+/* --- BOXES DE INFO --- */
+#dica-corretor-box, #obs-box { padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; display: none; }
+#dica-corretor-box { background: #f0fdf4; border-left: 4px solid green; }
+#obs-box { background: #fff1f2; border-left: 4px solid red; color: #7f1d1d; }
+#residencial-info { padding: 12px; background: #fffcf5; border: 1px solid #ffeeba; border-radius: 6px; display: none; }
 
-.btRes { 
-    width: 100%; 
-    padding: 8px 15px; 
-    border: 1px solid #eee; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    text-align: left; 
-    background: #fafafa; 
-    margin-bottom: 8px; 
-    line-height: 1.2; 
-    transition: all 0.2s ease;
+/* Mobile */
+@media (max-width: 1023px) {
+    body { overflow: auto; }
+    .container { flex-direction: column; height: auto; }
+    .coluna-lateral { flex: none; width: 100%; height: auto; }
+    .caixa-maximizada { height: 300px; }
 }
-
-.btRes:hover {
-    background: #f0f0f0 !important; 
-    border-color: #000000 !important; 
-    transform: none !important; 
-}
-
-.btRes-ativo { border-color: rgb(255, 153, 0) !important; background: #fff !important; font-weight: bold; border-width: 2px !important; }
-
-/* --- NOVOS BOTÕES DE AÇÃO (CORRIGIDOS) --- */
-.btn-acao {
-    display: inline-block !important;
-    width: 100% !important;
-    margin-top: 8px;
-    padding: 6px 10px !important; 
-    color: white !important;
-    border: 2px solid transparent !important; 
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    text-align: center;
-    font-size: 13px;
-    text-decoration: none;
-    transition: background-color 0.2s, border-color 0.2s;
-    outline: none !important;
-}
-
-.btn-book { background: rgb(6, 94, 3) !important; } 
-.btn-video, .btn-acao { background: rgb(255, 153, 0); }
-
-.btn-acao:hover {
-    border-color: #000000 !important;
-    filter: brightness(1.1);
-}
-
-/* Estado de Sucesso (Link Copiado) */
-.btn-acao.copiado {
-    background-color: #000000 !important;
-    color: #ffffff !important;
-    border-color: #000000 !important;
-    filter: none !important;
-}
-
-/* Reset de Foco para Opera */
-.btn-acao:focus {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-#dica-corretor-box { background: #f0fdf4; border-radius: 8px; padding: 12px; margin-top: 10px; border-left: 5px solid rgb(6, 94, 3); display: none; font-size: 14px; }
-#obs-box { background: #fff1f2; border-left: 5px solid #dc2626; border-radius: 8px; padding: 12px; margin-top: 10px; font-size: 14px; display: none; color: #7f1d1d; }
-
-#residencial-info { margin-top: 15px; padding: 15px; background: #fffcf5; border: 1px solid #ffeeba; border-left: 5px solid rgb(255, 153, 0); border-radius: 8px; display: none; }
-.grid-tecnico { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-.label { font-weight: bold; color: #333; font-size: 13px; }
