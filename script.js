@@ -107,15 +107,28 @@ function resetInterface() {
 async function copiarLink(url, btnElement, textoOriginal) {
     try {
         await navigator.clipboard.writeText(url);
+        
+        // 1. Aplica o texto de sucesso
         btnElement.textContent = "✅ Link Copiado!";
-        // Estilo temporário de confirmação
-        const bgOriginal = btnElement.style.background;
-        btnElement.style.background = "#000";
+        
+        // 2. Adiciona a classe de sucesso (gerencia cor preta e texto branco)
+        btnElement.classList.add('copiado');
+
+        // 3. O PULO DO GATO PARA O OPERA:
+        // Força o navegador a "soltar" o foco do botão.
+        // Isso impede que o contorno de hover/focus fique "preso".
+        btnElement.blur();
+
+        // 4. Retorna ao estado normal após 2 segundos
         setTimeout(() => { 
             btnElement.textContent = textoOriginal; 
-            btnElement.style.background = bgOriginal; 
+            btnElement.classList.remove('copiado');
         }, 2000);
-    } catch (err) { alert("Erro ao copiar."); }
+
+    } catch (err) { 
+        console.error("Erro ao copiar:", err);
+        alert("Erro ao copiar."); 
+    }
 }
 
 function gerarBotoes(idPath) {
