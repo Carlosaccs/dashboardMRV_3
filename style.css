@@ -75,7 +75,6 @@ path { fill: #888888; stroke: #ffffff; stroke-width: 0.6; transition: fill 0.1s;
 
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 200; }
 .modal-box { background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; position: relative; }
-/* --- ADICIONE ISTO ABAIXO DA LINHA 77 --- */
 
 .btn-fechar-modal { 
     position: absolute; 
@@ -101,33 +100,68 @@ path { fill: #888888; stroke: #ffffff; stroke-width: 0.6; transition: fill 0.1s;
     text-align: center;
 }
 
-
-
 #titulo-dinamico { margin-bottom: 12px; color: rgb(6, 94, 3); font-size: 20px; }
 
-/* Botão da lista (Estado Normal) - Altura reduzida em 25% */
 .btRes { 
     width: 100%; 
-    padding: 8px 15px; /* Reduzido de 15px para 11px para diminuir a altura */
+    padding: 8px 15px; 
     border: 1px solid #eee; 
     border-radius: 8px; 
     cursor: pointer; 
     text-align: left; 
     background: #fafafa; 
     margin-bottom: 8px; 
-    line-height: 1.2; /* Reduz o espaço entre linhas do texto */
-    min-height: 0 !important; /* Garante que nenhuma regra antiga force altura mínima */
+    line-height: 1.2; 
     transition: all 0.2s ease;
 }
 
-/* --- Efeito Hover: Sem deslocamento e com contorno preto --- */
 .btRes:hover {
     background: #f0f0f0 !important; 
-    border-color: #000000 !important; /* Contorno preto como solicitado */
-    transform: none !important;      /* Remove o deslocamento lateral */
+    border-color: #000000 !important; 
+    transform: none !important; 
 }
 
 .btRes-ativo { border-color: rgb(255, 153, 0) !important; background: #fff !important; font-weight: bold; border-width: 2px !important; }
+
+/* --- NOVOS BOTÕES DE AÇÃO (CORRIGIDOS) --- */
+.btn-acao {
+    display: inline-block !important;
+    width: 100% !important;
+    margin-top: 8px;
+    padding: 6px 10px !important; 
+    color: white !important;
+    border: 2px solid transparent !important; 
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    font-size: 13px;
+    text-decoration: none;
+    transition: background-color 0.2s, border-color 0.2s;
+    outline: none !important;
+}
+
+.btn-book { background: rgb(6, 94, 3) !important; } 
+.btn-video, .btn-acao { background: rgb(255, 153, 0); }
+
+.btn-acao:hover {
+    border-color: #000000 !important;
+    filter: brightness(1.1);
+}
+
+/* Estado de Sucesso (Link Copiado) */
+.btn-acao.copiado {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-color: #000000 !important;
+    filter: none !important;
+}
+
+/* Reset de Foco para Opera */
+.btn-acao:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
 
 #dica-corretor-box { background: #f0fdf4; border-radius: 8px; padding: 12px; margin-top: 10px; border-left: 5px solid rgb(6, 94, 3); display: none; font-size: 14px; }
 #obs-box { background: #fff1f2; border-left: 5px solid #dc2626; border-radius: 8px; padding: 12px; margin-top: 10px; font-size: 14px; display: none; color: #7f1d1d; }
@@ -135,33 +169,3 @@ path { fill: #888888; stroke: #ffffff; stroke-width: 0.6; transition: fill 0.1s;
 #residencial-info { margin-top: 15px; padding: 15px; background: #fffcf5; border: 1px solid #ffeeba; border-left: 5px solid rgb(255, 153, 0); border-radius: 8px; display: none; }
 .grid-tecnico { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
 .label { font-weight: bold; color: #333; font-size: 13px; }
-
-
-function copiarLink(elemento, url) {
-    // 1. Tenta copiar o texto para a área de transferência
-    navigator.clipboard.writeText(url).then(() => {
-        
-        // Guarda o texto original para voltar depois
-        const textoOriginal = elemento.innerHTML;
-        
-        // 2. Aplica o estado visual de "Copiado"
-        elemento.classList.add('copiado');
-        elemento.innerHTML = 'Link copiado!';
-        
-        // 3. O PULO DO GATO PARA O OPERA: 
-        // Remove o foco do botão imediatamente após o clique
-        elemento.blur();
-
-        // 4. Retorna ao estado normal após 2 segundos
-        setTimeout(() => {
-            elemento.classList.remove('copiado');
-            elemento.innerHTML = textoOriginal;
-        }, 2000);
-        
-    }).catch(err => {
-        console.error('Erro ao copiar: ', err);
-    });
-}
-
-// Exemplo de uso no seu HTML:
-// <button class="btn-acao btn-video" onclick="copiarLink(this, 'https://link.com')">Copiar Vídeo</button>
