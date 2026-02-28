@@ -137,36 +137,31 @@ path { fill: #888888; stroke: #ffffff; stroke-width: 0.6; transition: fill 0.1s;
 .label { font-weight: bold; color: #333; font-size: 13px; }
 
 
-/* --- BOTÕES DE AÇÃO (Versão Slim 80% e Cores do Mapa) --- */
-.btn-acao {
-    display: block !important;
-    width: 100% !important;
-    margin-top: 8px;
-    /* Redução de 80%: de 15px para 3px ou 4px */
-    padding: 4px 10px !important; 
-    color: white !important;
-    border: 2px solid transparent !important; /* Borda preparada para o hover */
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    text-align: center;
-    font-size: 13px;
-    text-decoration: none;
-    transition: border-color 0.2s, filter 0.2s;
+function copiarLink(elemento, url) {
+    // 1. Tenta copiar o texto para a área de transferência
+    navigator.clipboard.writeText(url).then(() => {
+        
+        // Guarda o texto original para voltar depois
+        const textoOriginal = elemento.innerHTML;
+        
+        // 2. Aplica o estado visual de "Copiado"
+        elemento.classList.add('copiado');
+        elemento.innerHTML = 'Link copiado!';
+        
+        // 3. O PULO DO GATO PARA O OPERA: 
+        // Remove o foco do botão imediatamente após o clique
+        elemento.blur();
+
+        // 4. Retorna ao estado normal após 2 segundos
+        setTimeout(() => {
+            elemento.classList.remove('copiado');
+            elemento.innerHTML = textoOriginal;
+        }, 2000);
+        
+    }).catch(err => {
+        console.error('Erro ao copiar: ', err);
+    });
 }
 
-/* Cores fixas baseadas no Mapa */
-.btn-book { background: rgb(6, 94, 3) !important; } /* Verde MRV */
-.btn-video, .btn-acao { background: rgb(255, 153, 0); } /* Laranja Seleção */
-
-/* --- HOVER CORRIGIDO: Mantém a cor e fica com contorno preto --- */
-.btn-acao:hover {
-    border-color: #000000 !important; /* Contorno preto */
-    filter: brightness(1.1);          /* Leve brilho apenas para feedback */
-    /* REMOVEMOS o background: #000 para a cor não mudar para preto */
-}
-
-.btn-book:hover {
-    background: rgb(6, 94, 3) !important; /* Força manter o verde no hover */
-}
-
+// Exemplo de uso no seu HTML:
+// <button class="btn-acao btn-video" onclick="copiarLink(this, 'https://link.com')">Copiar Vídeo</button>
