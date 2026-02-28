@@ -1,30 +1,56 @@
 /* --- CONFIGURAÇÕES --- */
 const LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTqmzCyl1ScBsPr6d4wtq3tADya58_T9DVkhcUSDgmbwNwyZoc4tPrOMUrt8kB7UJH6tiHr_KVxfS2W/pub?output=csv";
-
 let dadosGerais = [];
 let pathSelecionado = null;
 
 const DICIONARIO_NOMES = {
-    "adamantina": "Adamantina", "americana": "Americana", "andradina": "Andradina", "anhanguera": "Anhanguera", "apiai": "Apiaí", "aracatuba": "Araçatuba", "araraquara": "Araraquara", "aricanduva": "Aricanduva", "aruja": "Arujá", "assis": "Assis", "avare": "Avaré", "barretos": "Barretos", "barueri": "Barueri", "bauru": "Bauru", "birigui": "Birigui", "biritibamirim": "Biritiba Mirim", "botucatu": "Botucatu", "bragancapaulista": "Bragança Paulista", "butanta": "Butantã", "caieiras": "Caieiras", "cajamar": "Cajamar", "campinas": "Campinas", "campolimpo": "Campo Limpo", "capivari": "Capivari", "caraguatatuba": "Caraguatatuba", "carapicuiba": "Carapicuíba", "casaverde": "Casa Verde", "catanduva": "Catanduva", "cidadeademar": "Cidade Ademar", "cidadetiradentes": "Cidade Tiradentes", "cotia": "Cotia", "diadema": "Diadema", "embudasartes": "Embu das Artes", "embuguacu": "Embu-Guaçu", "ermelinomatarazzo": "Ermelino Matarazzo", "fernandopolis": "Fernandópolis", "ferrazdevasconcelos": "Ferraz de Vasconcelos", "franca": "Franca", "franciscomorato": "Francisco Morato", "francodarocha": "Franco da Rocha", "freguesiadoo": "Freguesia do Ó", "grandesaopaulo": "Grande São Paulo", "guaianases": "Guaianases", "guararema": "Guararema", "guaratinqueta": "Guaratinguetá", "guarulhos": "Guarulhos", "interlagos": "Interlagos", "ipaussu": "Ipaussu", "ipiranga": "Ipiranga", "itaim": "Itaim", "itapecericadaserra": "Itapecerica da Serra", "itapetininga": "Itapetininga", "itapeva": "Itapeva", "itapevi": "Itapevi", "itaquaquecetuba": "Itaquaquecetuba", "itaquera": "Itaquera", "itarare": "Itararé", "itu": "Itu", "jabaquara": "Jabaquara", "jaboticabal": "Jaboticabal", "jacarei": "Jacareí", "jales": "Jales", "jandira": "Jandira", "jau": "Jaú", "josebonifacio": "José Bonifacio", "jundiai": "Jundiaí", "juquitiba": "Juquitiba", "lapa": "Lapa", "limeira": "Limeira", "lins": "Lins", "mairipora": "Mairiporã", "marilia": "Marília", "maua": "Mauá", "mboimirim": "M'Boi Mirim", "miracatu": "Miracatu", "mirantedoparanapanema": "Mirante do Paranapanema", "mogidascruzes": "Mogi das Cruzes", "mogimirim": "Mogi Mirim", "mooca": "Mooca", "osasco": "Osasco", "ourinhos": "Ourinhos", "parelheiros": "Parelheiros", "penapolis": "Penápolis", "penha": "Penha", "pindamonhangaba": "Pindamonhangaba", "pinheiros": "Pinheiros", "piracicaba": "Piracicaba", "piraju": "Piraju", "piraporadobomjesus": "Pirapora do Bom Jesus", "pirassununga": "Pirassununga", "pirituba": "Pirituba", "poa": "Poá", "presidenteprudente": "Presidente Prudente", "registro": "Registro", "ribeiraopires": "Ribeirão Pires", "ribeiraopreto": "Ribeirão Preto", "riograndedaserra": "Rio Grande da Serra", "salesopolis": "Salesópolis", "santaisabel": "Santa Isabel", "santana": "Santana", "santanadeparnaiba": "Santana de Parnaíba", "santoamaro": "Santo Amaro", "santoanastacio": "Santo Anastácio", "santoandre": "Santo André", "santos": "Santos", "saobernardo": "São Bernardo do Campo", "saocaetano": "São Caetano do Sul", "saocarlos": "São Carlos", "saojoaquimdabarra": "São Joaquim da Barra", "saojoaodaboavista": "São João da Boa Vista", "saojosedoriopreto": "São José do Rio Preto", "saojosedoscampos": "São José dos Campos", "saolourenco": "São Lourenço da Serra", "saomateus": "São Mateus", "saomiguel": "São Miguel", "saoroque": "São Roque", "saovicente": "São Vicente", "se": "Sé", "sertaozinho": "Sertãozinho", "sorocaba": "Sorocaba", "sumare": "Sumaré", "suzano": "Suzano", "taboaodaserra": "Taboão da Serra", "taquaritinga": "Taquaritinga", "taubate": "Taubaté", "tremembe": "Tremembé", "tupa": "Tupã", "vargemgrande": "Vargem Grande Paulista", "vilamaria": "Vila Maria", "vilamariana": "Vila Mariana", "vilaprudente": "Vila Prudente", "votorantim": "Votorantim", "votuporanga": "Votuporanga"
+    "adamantina": "Adamantina", "americana": "Americana", "aracatuba": "Araçatuba", "araraquara": "Araraquara", 
+    "aruja": "Arujá", "barueri": "Barueri", "bauru": "Bauru", "birigui": "Birigui", "caieiras": "Caieiras", 
+    "cajamar": "Cajamar", "campinas": "Campinas", "carapicuiba": "Carapicuíba", "cotia": "Cotia", 
+    "diadema": "Diadema", "embudasartes": "Embu das Artes", "ferrazdevasconcelos": "Ferraz de Vasconcelos", 
+    "franca": "Franca", "franciscomorato": "Francisco Morato", "francodarocha": "Franco da Rocha", 
+    "guarulhos": "Guarulhos", "itapevi": "Itapevi", "itaquaquecetuba": "Itaquaquecetuba", "itapetininga": "Itapetininga",
+    "itu": "Itu", "jundiai": "Jundiaí", "limeira": "Limeira", "marilia": "Marília", "maua": "Mauá", 
+    "mogidascruzes": "Mogi das Cruzes", "osasco": "Osasco", "piracicaba": "Piracicaba", "poa": "Poá", 
+    "presidenteprudente": "Presidente Prudente", "ribeiraopires": "Ribeirão Pires", "ribeiraopreto": "Ribeirão Preto", 
+    "santana": "Santana", "santanadeparnaiba": "Santana de Parnaíba", "santoandre": "Santo André", 
+    "saobernardo": "São Bernardo do Campo", "saocaetano": "São Caetano do Sul", "saojosedoriopreto": "São José do Rio Preto", 
+    "saojosedoscampos": "São José dos Campos", "sorocaba": "Sorocaba", "sumare": "Sumaré", "suzano": "Suzano", 
+    "taboaodaserra": "Taboão da Serra", "taubate": "Taubaté", "vargemgrande": "Vargem Grande Paulista"
+    // Adicione mais cidades conforme sua necessidade
 };
 
-/* --- FUNÇÕES AUXILIARES --- */
-
-function toggleModal(show) {
-    const modal = document.getElementById("modalSobre");
-    if (modal) modal.style.display = show ? 'flex' : 'none';
-}
-
-function obterNomeFormatado(idPath) {
-    if (!idPath) return "Toque em uma região";
-    const idLimpo = idPath.toLowerCase().replace(/[\s-_]/g, '').trim();
-    return DICIONARIO_NOMES[idLimpo] || idPath.toUpperCase();
-}
-
-function formatarLinkSeguro(url) {
-    if (!url || typeof url !== 'string' || url.trim() === "" || url === "-") return "";
-    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    return match ? `https://drive.google.com/file/d/${match[1]}/preview` : url;
+/* --- FUNÇÕES DE DADOS --- */
+async function carregarDados() {
+    try {
+        const resposta = await fetch(LINK_PLANILHA + "&cb=" + new Date().getTime());
+        const texto = await resposta.text();
+        const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
+        const sep = linhas[0].includes(';') ? ';' : ',';
+        
+        dadosGerais = linhas.slice(1).map(linha => {
+            const col = parseCSVLine(linha, sep);
+            const get = (idx) => col[idx] ? col[idx].replace(/^["']|["']$/g, '').trim() : '';
+            return {
+                id: get(0).toLowerCase().replace(/[\s-_]/g, ''),
+                nome: get(2), 
+                estoque: parseInt(get(3)) || 0,
+                endereco: get(4) + (get(5) ? ", " + get(5) : ""),
+                valor: get(8), 
+                previsao: get(7),
+                plantas: `de ${get(9)} até ${get(10)}`,
+                obra: get(11),
+                dica: get(17), 
+                obs: get(18),
+                bookCliente: formatarLinkSeguro(get(19)),
+                bookCorretor: formatarLinkSeguro(get(20)),
+                video1: formatarLinkSeguro(get(21)),
+                localizacaoLink: formatarLinkSeguro(get(28))
+            };
+        }).filter(item => item.id !== "");
+        
+        atualizarListaLateral(); // Chama a função para criar a lista na esquerda
+    } catch (e) { console.error("Erro CSV:", e); }
 }
 
 function parseCSVLine(line, sep) {
@@ -38,81 +64,43 @@ function parseCSVLine(line, sep) {
     result.push(cur.trim()); return result;
 }
 
-function formatarEstoque(qtd) {
-    if (qtd === 0) return `<span class="estoque-vendido">VENDIDO</span>`;
-    if (qtd <= 5) return `<span class="estoque-alerta">restam ${qtd} unids</span>`;
-    return `<span>restam ${qtd} unids</span>`;
+function formatarLinkSeguro(url) {
+    if (!url || url === "-") return "";
+    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    return match ? `https://drive.google.com/file/d/${match[1]}/preview` : url;
 }
 
-/* --- CARREGAMENTO DE DADOS --- */
-
-async function carregarDados() {
-    try {
-        const resposta = await fetch(LINK_PLANILHA + "&cb=" + new Date().getTime());
-        const texto = await resposta.text();
-        const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
-        const sep = linhas[0].includes(';') ? ';' : ',';
-        
-        dadosGerais = linhas.slice(1).map(linha => {
-            const col = parseCSVLine(linha, sep);
-            const get = (idx) => col[idx] ? col[idx].replace(/^["']|["']$/g, '').trim() : '';
-            
-            return {
-                id: get(0).toLowerCase().replace(/[\s-_]/g, ''),
-                nome: get(2), 
-                estoque: parseInt(get(3)) || 0,
-                endereco: get(4) + (get(5) ? ", " + get(5) : ""),
-                cidade: get(6),
-                previsao: get(7), 
-                valor: get(8), 
-                plantas: `de ${get(9)} até ${get(10)}`,
-                obra: get(11), 
-                local: get(12), 
-                mobilidade: get(13), 
-                cultura: get(14), 
-                comercio: get(15), 
-                saude: get(16),
-                dica: get(17), 
-                obs: get(18),
-                bookCliente: formatarLinkSeguro(get(19)),
-                bookCorretor: formatarLinkSeguro(get(20)),
-                video1: formatarLinkSeguro(get(21)),
-                video2: formatarLinkSeguro(get(22)),
-                apVaranda: formatarLinkSeguro(get(23)),
-                apSemVaranda: formatarLinkSeguro(get(24)),
-                apGarden: formatarLinkSeguro(get(25)),
-                outroAp: formatarLinkSeguro(get(26)),
-                localizacaoLink: formatarLinkSeguro(get(28)),
-                descritivo: formatarLinkSeguro(get(29)),
-                diversos: [get(30), get(31), get(32), get(33), get(34), get(35), get(36), get(37), get(38)].map(formatarLinkSeguro)
-            };
-        }).filter(item => item.id !== "");
-    } catch (e) { console.error("Erro CSV:", e); }
+/* --- INTERFACE --- */
+function atualizarListaLateral() {
+    const listaBox = document.getElementById("lista-cidades-scroll");
+    if (!listaBox) return;
+    
+    // Pega IDs únicos que têm MRV
+    const idsUnicos = [...new Set(dadosGerais.map(d => d.id))].sort();
+    
+    listaBox.innerHTML = "";
+    idsUnicos.forEach(id => {
+        const nome = DICIONARIO_NOMES[id] || id.toUpperCase();
+        const btn = document.createElement("button");
+        btn.className = "btRes"; // Reutiliza estilo de botão
+        btn.style.fontSize = "12px";
+        btn.textContent = nome;
+        btn.onclick = () => {
+            // Simula o clique no path do mapa
+            const path = document.getElementById(id);
+            if (path) path.dispatchEvent(new Event('click'));
+            else gerarBotoes(id); // Se não achar o path, gera os botões direto
+        };
+        listaBox.appendChild(btn);
+    });
 }
-
-/* --- INTERFACE E FICHA TÉCNICA (DIREITA) --- */
 
 function resetInterface() {
-    const container = document.getElementById("btRes-container");
-    const titulo = document.getElementById("titulo-dinamico");
-    if(container) container.innerHTML = "";
-    if(titulo) titulo.textContent = "";
+    document.getElementById("btRes-container").innerHTML = "";
+    document.getElementById("titulo-dinamico").textContent = "";
     document.getElementById("residencial-info").style.display = "none";
     document.getElementById("dica-corretor-box").style.display = "none";
     document.getElementById("obs-box").style.display = "none";
-}
-
-async function copiarLink(url, btnElement, textoOriginal) {
-    try {
-        await navigator.clipboard.writeText(url);
-        btnElement.textContent = "✅ Link Copiado!";
-        const bgOriginal = btnElement.style.background;
-        btnElement.style.background = "#000";
-        setTimeout(() => { 
-            btnElement.textContent = textoOriginal; 
-            btnElement.style.background = bgOriginal; 
-        }, 2000);
-    } catch (err) { alert("Erro ao copiar."); }
 }
 
 function gerarBotoes(idPath) {
@@ -121,7 +109,7 @@ function gerarBotoes(idPath) {
     const titulo = document.getElementById("titulo-dinamico");
     const idBusca = idPath.toLowerCase().replace(/[\s-_]/g, '');
     
-    titulo.textContent = "MRV em " + obterNomeFormatado(idPath);
+    titulo.textContent = "MRV em " + (DICIONARIO_NOMES[idBusca] || idPath.toUpperCase());
     const filtrados = dadosGerais.filter(d => d.id === idBusca);
     
     if(filtrados.length === 0) {
@@ -132,7 +120,7 @@ function gerarBotoes(idPath) {
     filtrados.forEach(res => {
         const btn = document.createElement("button");
         btn.className = "btRes";
-        btn.innerHTML = `<strong>${res.nome}</strong> - ${formatarEstoque(res.estoque)}`;
+        btn.innerHTML = `<strong>${res.nome}</strong>`;
         btn.onclick = () => {
             document.querySelectorAll(".btRes").forEach(b => b.classList.remove("btRes-ativo"));
             btn.classList.add("btRes-ativo");
@@ -148,92 +136,90 @@ function abrirFicha(res) {
     const obsBox = document.getElementById("obs-box");
     
     infoBox.style.display = "block";
-    if (res.dica) { dicaBox.innerHTML = `💡 <strong>Dica:</strong> ${res.dica}`; dicaBox.style.display = "block"; } else { dicaBox.style.display = "none"; }
-    if (res.obs) { obsBox.innerHTML = `⚠️ <strong>Obs:</strong> ${res.obs}`; obsBox.style.display = "block"; } else { obsBox.style.display = "none"; }
+    dicaBox.style.display = res.dica ? "block" : "none";
+    dicaBox.innerHTML = `💡 <strong>Dica:</strong> ${res.dica}`;
+    obsBox.style.display = res.obs ? "block" : "none";
+    obsBox.innerHTML = `⚠️ <strong>Obs:</strong> ${res.obs}`;
 
     let botoesHTML = "";
     if (res.bookCliente) botoesHTML += `<button onclick="copiarLink('${res.bookCliente}', this, '📄 Copiar Book Cliente')" class="btn-acao btn-book">📄 Copiar Book Cliente</button>`;
-    if (res.bookCorretor) botoesHTML += `<button onclick="copiarLink('${res.bookCorretor}', this, '📄 Copiar Book Corretor')" class="btn-acao btn-book">📄 Copiar Book Corretor</button>`;
-    if (res.video1) botoesHTML += `<button onclick="copiarLink('${res.video1}', this, '🎥 Copiar Vídeo 1')" class="btn-acao">🎥 Copiar Vídeo 1</button>`;
-    if (res.video2) botoesHTML += `<button onclick="copiarLink('${res.video2}', this, '🎥 Copiar Vídeo 2')" class="btn-acao">🎥 Copiar Vídeo 2</button>`;
-    if (res.apVaranda) botoesHTML += `<button onclick="copiarLink('${res.apVaranda}', this, '📐 Apart. com Varanda')" class="btn-acao">📐 Apart. com Varanda</button>`;
+    if (res.video1) botoesHTML += `<button onclick="copiarLink('${res.video1}', this, '🎥 Copiar Vídeo')" class="btn-acao">🎥 Copiar Vídeo</button>`;
     if (res.localizacaoLink) botoesHTML += `<button onclick="copiarLink('${res.localizacaoLink}', this, '📍 Copiar Localização')" class="btn-acao">📍 Copiar Localização</button>`;
-    if (res.descritivo) botoesHTML += `<button onclick="copiarLink('${res.descritivo}', this, '📝 Copiar Descritivo')" class="btn-acao">📝 Copiar Descritivo</button>`;
-
-    res.diversos.forEach((link, i) => {
-        if (link) botoesHTML += `<button onclick="copiarLink('${link}', this, '🔗 Copiar Diversos ${i+1}')" class="btn-acao">🔗 Copiar Diversos ${i+1}</button>`;
-    });
 
     infoBox.innerHTML = `
         <h3 style="color:rgb(6,94,3); margin-bottom:10px;">${res.nome}</h3>
-        <p style="margin-bottom:10px; font-size:13px;">📍 ${res.endereco}</p>
         <div class="grid-tecnico">
             <div><span class="label">💰 Preço:</span><br>${res.valor}</div>
             <div><span class="label">🔑 Entrega:</span><br>${res.previsao}</div>
-            <div><span class="label">📐 Plantas:</span><br>${res.plantas}</div>
             <div><span class="label">🏗️ Obra:</span><br>${res.obra}%</div>
         </div>
         <div style="margin-top:20px;">${botoesHTML}</div>`;
 }
 
-/* --- LOGICA DO MAPA E TROCA (CENTRO) --- */
+async function copiarLink(url, btnElement, textoOriginal) {
+    try {
+        await navigator.clipboard.writeText(url);
+        btnElement.textContent = "✅ Link Copiado!";
+        btnElement.style.background = "#000";
+        setTimeout(() => { 
+            btnElement.textContent = textoOriginal; 
+            btnElement.style.background = textoOriginal.includes("Book") ? "rgb(6,94,3)" : "rgb(255, 153, 0)"; 
+        }, 2000);
+    } catch (err) { alert("Erro ao copiar."); }
+}
 
-function configurarEventosMapa() {
+function configurarEventos() {
     const display = document.getElementById("nome-regiao");
-    const containerAtivo = document.querySelector(".caixa-maximizada");
-    if (!containerAtivo) return;
-
-    containerAtivo.querySelectorAll("path").forEach(p => {
+    document.querySelectorAll("path").forEach(p => {
         p.onclick = (e) => {
-            e.stopPropagation();
+            if (p.closest(".caixa-minimizada")) return;
             const idNormalizado = p.id.toLowerCase().replace(/[\s-_]/g, '');
+            
+            if (idNormalizado === "grandesaopaulo") {
+                e.stopPropagation();
+                trocarMapas(document.getElementById("container-gsp"));
+                return;
+            }
+
+            display.textContent = DICIONARIO_NOMES[idNormalizado] || p.id.toUpperCase();
 
             if (!p.classList.contains("commrv")) {
-                display.textContent = obterNomeFormatated(p.id);
                 if(pathSelecionado) pathSelecionado.classList.remove("ativo");
                 pathSelecionado = null;
                 resetInterface();
                 return;
             }
 
+            e.stopPropagation();
             if (pathSelecionado === p) {
                 p.classList.remove("ativo");
                 pathSelecionado = null;
-                display.textContent = "Toque em uma região";
                 resetInterface();
             } else {
                 if (pathSelecionado) pathSelecionado.classList.remove("ativo");
                 pathSelecionado = p;
                 p.classList.add("ativo");
-                display.textContent = obterNomeFormatado(p.id);
                 gerarBotoes(p.id);
             }
         };
-
-        p.onmouseenter = () => { display.textContent = obterNomeFormatado(p.id); };
-        p.onmouseleave = () => { display.textContent = pathSelecionado ? obterNomeFormatado(pathSelecionado.id) : "Toque em uma região"; };
     });
 }
 
 function trocarMapas(el) {
     if (!el.classList.contains("caixa-minimizada")) return;
-    const pai = document.getElementById("mapa-container");
+    const container = document.getElementById("mapa-area-container");
     const atualMax = document.querySelector(".caixa-maximizada");
-    
     el.classList.replace("caixa-minimizada", "caixa-maximizada");
     atualMax.classList.replace("caixa-maximizada", "caixa-minimizada");
-    
-    pai.prepend(el); 
+    container.insertBefore(el, document.getElementById("nome-regiao").nextSibling);
     pathSelecionado = null;
     document.querySelectorAll("path").forEach(path => path.classList.remove("ativo"));
-    document.getElementById("nome-regiao").textContent = "Toque em uma região";
-    resetInterface();
-    configurarEventosMapa();
+    resetInterface(); 
 }
 
-/* --- INICIALIZAÇÃO --- */
+function toggleModal(show) { document.getElementById("modalSobre").style.display = show ? 'flex' : 'none'; }
 
 window.onload = async () => { 
     await carregarDados(); 
-    configurarEventosMapa(); 
+    configurarEventos(); 
 };
