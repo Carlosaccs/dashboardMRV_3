@@ -104,30 +104,27 @@ function resetInterface() {
     document.getElementById("obs-box").style.display = "none";
 }
 
-async function copiarLink(url, btnElement, textoOriginal) {
+async function copiarLink(url, elemento, textoOriginal) {
     try {
+        // Tenta copiar o texto para a área de transferência
         await navigator.clipboard.writeText(url);
         
-        // 1. Aplica o texto de sucesso
-        btnElement.textContent = "✅ Link Copiado!";
+        // Aplica o estado visual de "Copiado" usando a classe CSS
+        elemento.classList.add('copiado');
+        elemento.innerHTML = '✅ Link copiado!';
         
-        // 2. Adiciona a classe de sucesso (gerencia cor preta e texto branco)
-        btnElement.classList.add('copiado');
+        // Remove o foco do botão para evitar o bug do contorno no Opera
+        elemento.blur();
 
-        // 3. O PULO DO GATO PARA O OPERA:
-        // Força o navegador a "soltar" o foco do botão.
-        // Isso impede que o contorno de hover/focus fique "preso".
-        btnElement.blur();
-
-        // 4. Retorna ao estado normal após 2 segundos
-        setTimeout(() => { 
-            btnElement.textContent = textoOriginal; 
-            btnElement.classList.remove('copiado');
+        // Retorna ao estado normal após 2 segundos
+        setTimeout(() => {
+            elemento.classList.remove('copiado');
+            elemento.innerHTML = textoOriginal;
         }, 2000);
-
-    } catch (err) { 
-        console.error("Erro ao copiar:", err);
-        alert("Erro ao copiar."); 
+        
+    } catch (err) {
+        console.error('Erro ao copiar: ', err);
+        alert("Erro ao copiar o link.");
     }
 }
 
