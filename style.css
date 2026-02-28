@@ -1,61 +1,278 @@
-/* --- BASE --- */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body, html { height: 100%; font-family: sans-serif; overflow: hidden; }
+/* --- RESET E ESTRUTURA BASE --- */
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+}
 
-/* --- HEADER FIXO --- */
+html, body { 
+    height: 100%; 
+    font-family: 'Segoe UI', Arial, sans-serif; 
+    background: #ffffff; 
+    color: #333; 
+    overflow: hidden; /* Impede scroll na página inteira */
+}
+
+/* --- CABEÇALHO (FAIXA VERDE) --- */
 header { 
-    height: 60px; 
     background: rgb(6, 94, 3); 
     color: white; 
-    display: flex; 
-    justify-content: center; 
+    display: grid;
+    grid-template-columns: 120px 1fr 120px; 
     align-items: center; 
-    position: relative; 
-    z-index: 100; 
+    padding: 0 20px; 
+    height: 60px; 
+    position: relative;
+    z-index: 1000; /* Garante que fique acima de tudo */
 }
-.btn-sobre { position: absolute; right: 20px; padding: 5px 15px; cursor: pointer; border-radius: 20px; border: 1px solid white; background: transparent; color: white; }
 
-/* --- LAYOUT 3 COLUNAS --- */
+header h1 { 
+    grid-column: 2; 
+    text-align: center; 
+    font-size: 20px; 
+    font-weight: bold; 
+    letter-spacing: 1px;
+}
+
+.btn-sobre { 
+    grid-column: 3; 
+    justify-self: end; 
+    background: rgba(255,255,255,0.2); 
+    border: 1px solid white; 
+    color: white; 
+    padding: 6px 15px; 
+    border-radius: 20px; 
+    font-size: 12px; 
+    cursor: pointer; 
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn-sobre:hover {
+    background: rgba(255,255,255,0.4);
+}
+
+/* --- CONTAINER DAS 3 COLUNAS --- */
 .container-principal { 
     display: flex; 
-    height: calc(100% - 60px); /* Desconta o header */
+    height: calc(100% - 60px); /* Altura total menos o header */
     width: 100%;
+    position: relative;
 }
 
+/* --- COLUNAS LATERAIS (ESQUERDA E DIREITA) --- */
 .coluna { 
-    flex: 0 0 280px; /* Largura fixa para as laterais */
-    background: #f4f4f4; 
-    border: 1px solid #ddd;
+    flex: 0 0 300px; /* Largura fixa de 300px */
     display: flex;
     flex-direction: column;
+    background: #fdfdfd; 
+    border-right: 1px solid #eee;
+    border-left: 1px solid #eee;
+    z-index: 10;
 }
 
+.titulo-coluna { 
+    background: #f0f4f0; 
+    padding: 12px; 
+    font-weight: bold; 
+    text-align: center; 
+    border-bottom: 1px solid #ddd; 
+    color: rgb(6, 94, 3);
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.conteudo-scroll { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 15px; 
+}
+
+/* --- ÁREA CENTRAL (MAPA) --- */
 .coluna-mapa { 
-    flex: 1; /* Mapa cresce no meio */
+    flex: 1; /* Ocupa todo o espaço restante no centro */
     display: flex;
     flex-direction: column;
     padding: 10px;
-    background: white;
+    background: #fff;
+    position: relative;
+    z-index: 5; /* Abaixo das laterais para evitar sobreposição de clique */
 }
 
-/* Titulos e Áreas de Scroll */
-.titulo-coluna { background: #eee; padding: 10px; font-weight: bold; text-align: center; border-bottom: 1px solid #ccc; font-size: 14px; }
-.conteudo-scroll { flex: 1; overflow-y: auto; padding: 15px; }
+.display-cidade { 
+    text-align: center; 
+    font-size: 22px; 
+    font-weight: bold; 
+    color: #333;
+    margin-bottom: 10px;
+    min-height: 40px;
+}
 
-/* --- MAPA --- */
-.display-cidade { text-align: center; font-size: 20px; font-weight: bold; padding: 10px; min-height: 45px; }
-#mapa-container { flex: 1; position: relative; }
+#mapa-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
 
-.caixa-mapa { transition: 0.3s; width: 100%; }
-.caixa-maximizada { height: 75%; }
-.caixa-minimizada { height: 20%; cursor: pointer; border-top: 2px solid #ddd; opacity: 0.6; filter: grayscale(1); }
-.caixa-minimizada:hover { opacity: 1; filter: grayscale(0); }
+/* --- CONFIGURAÇÃO DOS MAPAS SVG --- */
+.caixa-mapa { 
+    width: 100%; 
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-svg { width: 100%; height: 100%; }
-path { fill: #888; stroke: #fff; stroke-width: 0.6; transition: 0.2s; }
-.commrv { fill: rgb(6, 94, 3) !important; cursor: pointer; }
-.ativo { fill: rgb(255, 153, 0) !important; stroke: #000 !important; stroke-width: 1.5px !important; }
+.caixa-maximizada { 
+    flex: 1; 
+    z-index: 2;
+}
 
-/* --- MODAL --- */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 999; align-items: center; justify-content: center; }
-.modal-box { background: white; padding: 30px; border-radius: 10px; max-width: 450px; position: relative; }
+.caixa-minimizada { 
+    height: 120px; 
+    cursor: pointer; 
+    opacity: 0.5; 
+    filter: grayscale(1); 
+    border-top: 2px solid #f0f0f0;
+    margin-top: 10px;
+    z-index: 3;
+}
+
+.caixa-minimizada:hover { 
+    opacity: 1; 
+    filter: grayscale(0); 
+    background: #fafafa;
+}
+
+svg { 
+    width: 100%; 
+    height: 100%; 
+    max-height: 70vh;
+    pointer-events: all; /* Garante que os paths recebam clique */
+}
+
+path { 
+    fill: #888888; 
+    stroke: #ffffff; 
+    stroke-width: 0.6; 
+    transition: fill 0.2s, stroke 0.2s; 
+    cursor: default; 
+}
+
+/* Estados dos Paths */
+.commrv { 
+    fill: rgb(6, 94, 3) !important; 
+    cursor: pointer; 
+}
+
+.commrv:hover { 
+    fill: rgb(255, 153, 0) !important; 
+}
+
+.ativo { 
+    fill: rgb(255, 153, 0) !important; 
+    stroke: #000 !important; 
+    stroke-width: 1.5px !important; 
+}
+
+/* --- COMPONENTES DE INTERFACE (BOTÕES E BOXES) --- */
+.btRes {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btRes:hover {
+    border-color: #000;
+    background: #f9f9f9;
+}
+
+.btRes-ativo {
+    border: 2px solid rgb(255, 153, 0) !important;
+    background: #fffdf5 !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+#dica-corretor-box { 
+    background: #f0fdf4; 
+    border-left: 5px solid rgb(6, 94, 3); 
+    padding: 12px; 
+    margin-bottom: 10px; 
+    font-size: 14px; 
+    display: none; 
+}
+
+#obs-box { 
+    background: #fff1f2; 
+    border-left: 5px solid #dc2626; 
+    padding: 12px; 
+    margin-bottom: 10px; 
+    font-size: 14px; 
+    color: #7f1d1d; 
+    display: none; 
+}
+
+/* --- MODAL (SOBRE) --- */
+.modal-overlay { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.7); 
+    display: none; /* Ativado via JS (display: flex) */
+    z-index: 2000; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+.modal-box { 
+    background: white; 
+    padding: 30px; 
+    border-radius: 12px; 
+    max-width: 500px; 
+    width: 90%; 
+    position: relative; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.btn-fechar-modal { 
+    position: absolute; 
+    top: 10px; 
+    right: 15px; 
+    font-size: 30px; 
+    cursor: pointer; 
+    border: none; 
+    background: none; 
+    color: #888; 
+}
+
+.contato-link { 
+    display: block; 
+    background: #25d366; 
+    color: white !important; 
+    text-decoration: none; 
+    padding: 12px; 
+    border-radius: 8px; 
+    font-weight: bold; 
+    margin-top: 15px; 
+    text-align: center; 
+}
+
+/* --- RESPONSIVIDADE (MOBILE) --- */
+@media (max-width: 1024px) {
+    .container-principal { flex-direction: column; overflow-y: auto; }
+    .coluna { flex: none; width: 100%; height: auto; }
+    .coluna-mapa { height: 500px; flex: none; }
+    .caixa-maximizada { height: 350px; }
+}
