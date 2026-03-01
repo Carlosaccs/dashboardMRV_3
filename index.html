@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV 2.0 - Estrutura</title>
+    <title>Dashboard MRV 2.0 - Estrutura Instantânea</title>
     <style>
         /* --- RESET E BASE --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
@@ -33,7 +33,7 @@
             font-weight: bold;
         }
 
-        /* --- CONTAINER PRINCIPAL (9/9) --- */
+        /* --- CONTAINER PRINCIPAL --- */
         .main-wrapper { 
             display: flex; 
             height: calc(100% - 50px); 
@@ -64,7 +64,7 @@
             height: 100%; 
         }
 
-        /* Caixa 1 (Mesma altura da faixa) */
+        /* Caixa 1 (Altura fixa de 50px) */
         .centro-topo { 
             height: 50px; 
             border: 1px solid #ccc; 
@@ -72,19 +72,20 @@
             align-items: center; 
             justify-content: center;
             font-weight: bold;
+            background: white;
         }
 
-        /* Container para as caixas 2 e 3 para gerenciar a altura restante */
+        /* Container para as caixas 2 e 3 */
         .container-mapas { 
             flex: 1; 
             display: flex; 
             flex-direction: column; 
         }
 
-        /* Estilo comum das caixas de troca */
+        /* Estilo das caixas de troca */
         .caixa-troca { 
             width: 100%; 
-            transition: all 0.4s ease-in-out; 
+            /* REMOVIDO: transition: all 0.4s ease-in-out; */
             border: 1px solid #ccc; 
             display: flex; 
             align-items: center; 
@@ -98,7 +99,7 @@
         /* Estado: Caixa em BAIXO (25%) */
         .pos-baixo { height: 25%; cursor: pointer; }
 
-        /* Cor amarela específica para a caixa que sobe e desce */
+        /* Cor amarela para a caixa específica */
         .caixa-amarela { background: #ffff00; }
 
     </style>
@@ -122,7 +123,7 @@
                 </div>
                 
                 <div id="caixa-b" class="caixa-troca pos-baixo caixa-amarela" onclick="executarTroca(this)">
-                    <span>CAIXA 3 (CLIQUE PARA TROCAR)</span>
+                    <span>CAIXA 3</span>
                 </div>
             </div>
         </main>
@@ -132,41 +133,32 @@
 
     <script>
         function executarTroca(elementoClicado) {
-            // Se a caixa clicada já estiver em cima, não faz nada (perdeu função de troca)
+            // Se já estiver em cima, a função é ignorada
             if (elementoClicado.classList.contains('pos-cima')) return;
 
             const container = document.getElementById('container-mapas');
             const caixaA = document.getElementById('caixa-a');
             const caixaB = document.getElementById('caixa-b');
 
-            // Troca as classes de tamanho/posição
             if (caixaB.classList.contains('pos-baixo')) {
-                // Caixa B sobe
+                // Caixa B sobe e perde clique
                 caixaB.classList.replace('pos-baixo', 'pos-cima');
-                caixaB.style.cursor = 'default';
-                
-                // Caixa A desce
-                caixaA.classList.replace('pos-cima', 'pos-baixo');
-                caixaA.style.cursor = 'pointer';
-                
-                // Move o elemento fisicamente no DOM para a ordem visual correta
-                container.insertBefore(caixaB, caixaA);
-                
-                // Transfere a função de clique para a que desceu
                 caixaB.onclick = null;
+                
+                // Caixa A desce e ganha clique
+                caixaA.classList.replace('pos-cima', 'pos-baixo');
                 caixaA.onclick = function() { executarTroca(this); };
+                
+                container.insertBefore(caixaB, caixaA);
             } else {
-                // Caminho inverso (Caso queira que a A volte a subir se clicada embaixo)
+                // Caminho inverso (Caso clique na branca quando ela estiver embaixo)
                 caixaA.classList.replace('pos-baixo', 'pos-cima');
-                caixaA.style.cursor = 'default';
+                caixaA.onclick = null;
                 
                 caixaB.classList.replace('pos-cima', 'pos-baixo');
-                caixaB.style.cursor = 'pointer';
+                caixaB.onclick = function() { executarTroca(this); };
                 
                 container.insertBefore(caixaA, caixaB);
-                
-                caixaA.onclick = null;
-                caixaB.onclick = function() { executarTroca(this); };
             }
         }
     </script>
