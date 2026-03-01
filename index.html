@@ -3,30 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV - Carregamento de Mapas</title>
+    <title>Dashboard MRV - Mapas</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body, html { height: 100%; overflow: hidden; }
-        
-        header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; position: relative; }
-        .btn-sobre { position: absolute; right: 20px; background: none; border: 1px solid white; color: white; padding: 5px 10px; cursor: pointer; }
+        /* --- ESTRUTURA BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body, html { height: 100%; overflow: hidden; background-color: #ffffff; }
+
+        header { 
+            background: rgb(6, 94, 3); height: 50px; display: flex; 
+            align-items: center; justify-content: center; position: relative; color: white;
+        }
+        header h1 { font-size: 20px; font-weight: bold; }
+        .btn-sobre { position: absolute; right: 20px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 4px 12px; border-radius: 4px; cursor: pointer; }
 
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
-        .col-esquerda { width: calc(100% * 2 / 9); border: 1px solid #ccc; }
-        .col-direita { width: calc(100% * 3 / 9); border: 1px solid #ccc; }
+
+        /* Colunas Laterais */
+        .col-esquerda { width: calc(100% * 2 / 9); border: 1px solid #ccc; background: white; }
+        .col-direita { width: calc(100% * 3 / 9); border: 1px solid #ccc; background: white; }
+
+        /* Coluna Central */
         .col-central { flex: 1; display: flex; flex-direction: column; }
         
-        .centro-topo { height: 50px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        /* Caixa de Texto Dinâmica (Caixa 1) */
+        .centro-topo { 
+            height: 50px; border: 1px solid #ccc; display: flex; 
+            align-items: center; justify-content: center; 
+            font-weight: bold; font-size: 18px; color: #333;
+        }
+
         .container-mapas { flex: 1; display: flex; flex-direction: column; }
-        
-        /* Caixas de Troca */
-        .caixa-troca { width: 100%; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+
+        /* Estilo das Caixas de Troca */
+        .caixa-troca { 
+            width: 100%; border: 1px solid #ccc; 
+            display: flex; align-items: center; justify-content: center; 
+            overflow: hidden; position: relative;
+        }
+
+        /* Caixa 2 (Cima - 75%) */
         .pos-cima { height: 75%; background: white; }
+        
+        /* Caixa 3 (Baixo - Amarela - 25%) */
         .pos-baixo { height: 25%; background: #ffff00; cursor: pointer; }
 
-        /* Estilo base dos SVGs para preencherem a caixa */
+        /* --- ESTILO DO SVG --- */
         svg { width: 100%; height: 100%; display: block; }
-        path { fill: #333; stroke: #fff; stroke-width: 0.5; } /* Cor temporária para teste */
+        path { fill: #444; stroke: #fff; stroke-width: 0.5; transition: fill 0.2s; }
+
     </style>
 </head>
 <body>
@@ -38,65 +62,70 @@
 
     <div class="main-wrapper">
         <aside class="col-esquerda"></aside>
+
         <main class="col-central">
-            <div class="centro-topo" id="display-nome">MAPA CARREGADO</div>
+            <div class="centro-topo" id="display-nome"></div>
+
             <div class="container-mapas" id="container-mapas">
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
+                
                 <div id="caixa-b" class="caixa-troca pos-baixo" onclick="executarTroca(this)"></div>
             </div>
         </main>
+
         <aside class="col-direita"></aside>
     </div>
 
     <script src="mrv-data.js"></script>
 
     <script>
-        // Função que pega os dados da biblioteca e desenha o SVG
-        function renderizarMapaNoContainer(idContainer, dadosMapa) {
+        // Função para injetar o SVG baseado na biblioteca
+        function renderizarMapa(idContainer, dadosMapa) {
             const container = document.getElementById(idContainer);
-            if (!dadosMapa || !dadosMapa.paths) {
-                container.innerHTML = "Erro: Dados do mapa não encontrados.";
-                return;
-            }
+            if (!dadosMapa) return;
 
-            // Gera a string de todos os paths
-            const htmlPaths = dadosMapa.paths.map(p => 
+            const pathsHTML = dadosMapa.paths.map(p => 
                 `<path id="${p.id}" d="${p.d}" class="${p.class || ''}"></path>`
             ).join('');
 
-            // Monta o SVG completo
             container.innerHTML = `
                 <svg viewBox="${dadosMapa.viewBox}" preserveAspectRatio="xMidYMid meet">
                     <g transform="${dadosMapa.transform}">
-                        ${htmlPaths}
+                        ${pathsHTML}
                     </g>
                 </svg>
             `;
         }
 
-        // Lógica de Troca (Simplificada para teste)
-        function executarTroca(elemento) {
-            if (elemento.classList.contains('pos-cima')) return;
-            
-            const container = document.getElementById('container-mapas');
-            const a = document.getElementById('caixa-a');
-            const b = document.getElementById('caixa-b');
+        // Lógica de Troca Instantânea (Herdando tamanhos e funções)
+        function executarTroca(elementoClicado) {
+            if (elementoClicado.classList.contains('pos-cima')) return;
 
-            if (b.classList.contains('pos-baixo')) {
-                b.classList.replace('pos-baixo', 'pos-cima');
-                a.classList.replace('pos-cima', 'pos-baixo');
-                container.insertBefore(b, a);
+            const container = document.getElementById('container-mapas');
+            const caixaA = document.getElementById('caixa-a');
+            const caixaB = document.getElementById('caixa-b');
+
+            if (caixaB.classList.contains('pos-baixo')) {
+                // B sobe, A desce
+                caixaB.classList.replace('pos-baixo', 'pos-cima');
+                caixaA.classList.replace('pos-cima', 'pos-baixo');
+                container.insertBefore(caixaB, caixaA);
             } else {
-                a.classList.replace('pos-baixo', 'pos-cima');
-                b.classList.replace('pos-cima', 'pos-baixo');
-                container.insertBefore(a, b);
+                // A sobe, B desce
+                caixaA.classList.replace('pos-baixo', 'pos-cima');
+                caixaB.classList.replace('pos-cima', 'pos-baixo');
+                container.insertBefore(caixaA, caixaB);
             }
         }
 
-        // Inicializa os mapas ao carregar a página
+        // Inicialização
         window.onload = () => {
-            renderizarMapaNoContainer('caixa-a', MAPA_GSP);
-            renderizarMapaNoContainer('caixa-b', MAPA_INTERIOR);
+            if (typeof MAPA_GSP !== 'undefined' && typeof MAPA_INTERIOR !== 'undefined') {
+                renderizarMapa('caixa-a', MAPA_GSP);
+                renderizarMapa('caixa-b', MAPA_INTERIOR);
+            } else {
+                console.error("Erro: As variáveis dos mapas não foram encontradas no mrv-data.js");
+            }
         };
     </script>
 </body>
