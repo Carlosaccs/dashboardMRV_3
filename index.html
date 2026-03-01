@@ -3,77 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP - Ajuste Fino</title>
+    <title>Dashboard MRV SP - Ajuste de Proporção</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         
         body, html { height: 100vh; overflow: hidden; background: #fff; }
         
-        header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; z-index: 10; }
+        header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; position: relative; z-index: 10; }
 
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
 
         /* --- AJUSTE DE LARGURA DAS COLUNAS --- */
-        /* Esquerda: -10% da largura original (era ~22%, agora ~20%) */
-        .col-lateral-esq { width: 20%; border-right: 1px solid #ccc; background: #f9f9f9; }
+        /* Esquerda: Reduzida em 10% (de ~22% para 20%) */
+        .col-lateral-esq { width: 20%; border-right: 1px solid #ccc; background: #fdffdf; }
         
-        /* Direita: -80% da largura original (era ~33%, agora ~6.5%) */
-        .col-lateral-dir { width: 6.5%; border-left: 1px solid #ccc; background: #f9f9f9; }
+        /* Direita: Reduzida em 15% (de ~33% para 28%) */
+        .col-lateral-dir { width: 28%; border-left: 1px solid #ccc; background: #fdffdf; }
         
-        /* Centro: Ganha o que as laterais perderam (ocupa ~73.5%) */
+        /* Centro: Ganha o espaço das reduções (ocupa 52%) */
         .col-central { flex: 1; display: flex; flex-direction: column; height: 100%; }
         
         .centro-topo { 
-            height: 40px; 
+            height: 45px; 
             border-bottom: 1px solid #ccc; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             font-weight: bold; 
-            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .container-mapas { flex: 1; display: flex; flex-direction: column; height: calc(100% - 40px); }
+        .container-mapas { flex: 1; display: flex; flex-direction: column; height: calc(100% - 45px); }
         
         /* --- AJUSTE DE ALTURA E TAMANHO DOS MAPAS --- */
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         
-        /* Cima: Aumentada (agora ocupa 82% do espaço central) */
+        /* Cima: Aumentada para dar destaque ao mapa principal */
         .pos-cima { 
-            height: 82%; 
+            height: 80%; 
             background: white; 
-            padding: 5px; /* Menos respiro para o mapa crescer */
+            padding: 10px;
         }
         
-        /* Baixo: Reduzida em 25% (agora ocupa 18% do espaço central) */
+        /* Baixo: Reduzida em 25% na altura (agora ocupa 20%) */
         .pos-baixo { 
-            height: 18%; 
+            height: 20%; 
             background: #ffff00; 
             cursor: pointer; 
-            padding: 20px; /* Mais respiro para o mapa parecer menor */
-            border-top: 2px solid #ccc;
+            padding: 25px; /* Padding maior para o mapa de baixo parecer menor */
+            border-top: 2px solid #ddd;
         }
 
-        /* Mapa de cima ganha escala de 15% via transform */
+        /* Mapa de cima com aumento de 15% no tamanho visual */
         .pos-cima svg { 
             max-width: 100%; 
             max-height: 100%; 
-            transform: scale(1.15); /* Aumenta o mapa em 15% */
+            transform: scale(1.15); 
             transition: transform 0.3s ease;
         }
 
-        /* Mapa de baixo fica contido pelo padding maior */
         .pos-baixo svg { 
             max-width: 100%; 
             max-height: 100%; 
         }
         
-        path { fill: #888; stroke: #fff; stroke-width: 0.4; transition: fill 0.2s; }
-        path:hover { fill: #555; cursor: pointer; }
+        path { fill: #888; stroke: #fff; stroke-width: 0.5; transition: 0.2s; }
+        path:hover { fill: #444 !important; cursor: pointer; }
 
-        /* Classes de cores conforme seu dashboard anterior */
-        .semmrvZO { fill: #888; }
-        .commrvZL { fill: #006400; } /* Verde escuro */
+        /* Cores das classes vindas do seu mrv-data.js */
+        .semmrvZO { fill: #8c8c8c; }
+        .commrvZL { fill: #006400; }
+        .semmrv { fill: #8c8c8c; }
     </style>
 </head>
 <body>
@@ -84,7 +85,7 @@
         <aside class="col-lateral-esq"></aside>
         
         <main class="col-central">
-            <div class="centro-topo" id="display-nome">MAPA DE SÃO PAULO</div>
+            <div class="centro-topo" id="display-nome">MAPA DA GRANDE SÃO PAULO</div>
             <div class="container-mapas" id="container-mapas">
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
                 <div id="caixa-b" class="caixa-troca pos-baixo" onclick="solicitarTroca()"></div>
