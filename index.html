@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP - Ajuste de Proporção</title>
+    <title>Dashboard MRV SP - Ajuste Final</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         
@@ -13,14 +13,9 @@
 
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
 
-        /* --- AJUSTE DE LARGURA DAS COLUNAS --- */
-        /* Esquerda: Reduzida em 10% (de ~22% para 20%) */
-        .col-lateral-esq { width: 20%; border-right: 1px solid #ccc; background: #fdffdf; }
-        
-        /* Direita: Reduzida em 15% (de ~33% para 28%) */
-        .col-lateral-dir { width: 28%; border-left: 1px solid #ccc; background: #fdffdf; }
-        
-        /* Centro: Ganha o espaço das reduções (ocupa 52%) */
+        /* --- LARGURAS DAS COLUNAS (AJUSTADAS) --- */
+        .col-lateral-esq { width: 20%; border-right: 1px solid #ccc; background: #fdfdfd; }
+        .col-lateral-dir { width: 28%; border-left: 1px solid #ccc; background: #fdfdfd; }
         .col-central { flex: 1; display: flex; flex-direction: column; height: 100%; }
         
         .centro-topo { 
@@ -31,47 +26,47 @@
             justify-content: center; 
             font-weight: bold; 
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .container-mapas { flex: 1; display: flex; flex-direction: column; height: calc(100% - 45px); }
         
-        /* --- AJUSTE DE ALTURA E TAMANHO DOS MAPAS --- */
+        /* --- ALTURAS E ZOOM DOS MAPAS --- */
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         
-        /* Cima: Aumentada para dar destaque ao mapa principal */
+        /* Cima: 80% da altura */
         .pos-cima { 
             height: 80%; 
             background: white; 
-            padding: 10px;
+            padding: 5px; 
         }
         
-        /* Baixo: Reduzida em 25% na altura (agora ocupa 20%) */
+        /* Baixo: 20% da altura */
         .pos-baixo { 
             height: 20%; 
             background: #ffff00; 
             cursor: pointer; 
-            padding: 25px; /* Padding maior para o mapa de baixo parecer menor */
+            padding: 5px; /* Reduzi o padding para o mapa crescer */
             border-top: 2px solid #ddd;
         }
 
-        /* Mapa de cima com aumento de 15% no tamanho visual */
+        /* Mapa de cima: +15% de tamanho */
         .pos-cima svg { 
             max-width: 100%; 
             max-height: 100%; 
             transform: scale(1.15); 
-            transition: transform 0.3s ease;
         }
 
+        /* Mapa de baixo: Aumentado em ~25% via scale */
         .pos-baixo svg { 
             max-width: 100%; 
             max-height: 100%; 
+            transform: scale(1.25); /* Aumenta o mapa em 25% */
         }
         
         path { fill: #888; stroke: #fff; stroke-width: 0.5; transition: 0.2s; }
         path:hover { fill: #444 !important; cursor: pointer; }
 
-        /* Cores das classes vindas do seu mrv-data.js */
+        /* Cores das classes */
         .semmrvZO { fill: #8c8c8c; }
         .commrvZL { fill: #006400; }
         .semmrv { fill: #8c8c8c; }
@@ -117,14 +112,14 @@
                 container.insertBefore(caixaB, caixaA);
                 caixaB.onclick = null;
                 caixaA.onclick = solicitarTroca;
-                titulo.innerText = "MAPA DO INTERIOR";
+                titulo.innerText = (caixaB.innerHTML.includes('adamantina')) ? "MAPA DO INTERIOR" : "MAPA DA GRANDE SÃO PAULO";
             } else {
                 caixaA.classList.replace('pos-baixo', 'pos-cima');
                 caixaB.classList.replace('pos-cima', 'pos-baixo');
                 container.insertBefore(caixaA, caixaB);
                 caixaA.onclick = null;
                 caixaB.onclick = solicitarTroca;
-                titulo.innerText = "MAPA DA GRANDE SÃO PAULO";
+                titulo.innerText = (caixaA.innerHTML.includes('adamantina')) ? "MAPA DO INTERIOR" : "MAPA DA GRANDE SÃO PAULO";
             }
         }
 
