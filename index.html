@@ -43,7 +43,7 @@
         /* Baixo: 20% da altura */
         .pos-baixo { 
             height: 20%; 
-            background: #ffff00; 
+            background: #ffffff; 
             cursor: pointer; 
             padding: 5px; /* Reduzi o padding para o mapa crescer */
             border-top: 2px solid #ddd;
@@ -63,8 +63,14 @@
             transform: scale(1.15); /* Aumenta ou diminui o mapa */
         }
         
+        /* Estilo padrão para todos os mapas */
         path { fill: #888; stroke: #fff; stroke-width: 0.5; transition: 0.2s; }
-        path:hover { fill: #444 !important; cursor: pointer; }
+        
+        /* O efeito de cor e mãozinha SÓ vai funcionar na caixa de cima */
+        .pos-cima path:hover { fill: #444 !important; cursor: pointer; }
+        
+        /* Desativa qualquer interação de mouse nos paths da caixa de baixo */
+        .pos-baixo path { pointer-events: none; }
 
         /* Cores das classes */
         .semmrvZO { fill: #8c8c8c; }
