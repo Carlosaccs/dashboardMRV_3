@@ -1,3 +1,7 @@
+
+
+
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -5,9 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV 2.0</title>
     <style>
-        /* --- ESTILOS GERAIS E LAYOUT --- */
+        /* --- ESTILOS GERAIS --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body, html { height: 100%; overflow: hidden; background-color: #f4f4f4; }
+        body, html { height: 100%; overflow: hidden; background-color: #ffffff; }
 
         header { 
             background: rgb(6, 94, 3); height: 50px; display: flex; 
@@ -24,31 +28,41 @@
 
         /* Área Central */
         .centro { flex: 1; display: flex; flex-direction: column; background: white; }
-        #caixa-texto-dinamica { height: 50px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; text-transform: uppercase; color: #333; }
         
-        .mapa-principal { height: 75%; position: relative; display: flex; align-items: center; justify-content: center; }
-        .mapa-mini { height: 25%; cursor: pointer; border-top: 1px solid #eee; background: #fafafa; display: flex; align-items: center; justify-content: center; opacity: 0.7; transition: 0.3s; }
+        /* Caixa de texto dinâmica com altura fixa para evitar pulos */
+        #caixa-texto-dinamica { 
+            height: 60px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            font-size: 22px; 
+            text-transform: uppercase; 
+            color: #333;
+            background: transparent; 
+        }
+        
+        /* Proporção 4 para 1 entre os mapas */
+        .mapa-principal { flex: 4; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .mapa-mini { flex: 1; cursor: pointer; border-top: 1px solid #eee; background: #fafafa; display: flex; align-items: center; justify-content: center; opacity: 0.6; transition: 0.3s; overflow: hidden; }
         .mapa-mini:hover { opacity: 1; background: #f0f0f0; }
 
         svg { width: 100%; height: 100%; display: block; }
 
-        /* --- ESTILOS DOS PATHS (CLASSES) --- */
-        path { transition: 0.2s; stroke-width: 0.8; }
+        /* --- ESTILOS DOS PATHS (PADRONIZADOS) --- */
+        path { transition: 0.2s; stroke: none !important; } /* REMOVIDO CONTORNO DE TODOS */
         
-        /* Cores Base */
-        .semmrv { fill: #e5e7eb; stroke: none; }
-        .commrv { fill: rgb(6, 94, 3); stroke: none; cursor: pointer; }
+        /* Classes SEM MRV (Cinza) */
+        path[class^="semmrv"] { fill: #e5e7eb; cursor: default; }
+        path[class^="semmrv"]:hover { fill: #d1d5db; }
 
-        /* Bordas Regionais */
-        .semmrvZN, .commrvZN { stroke: #ff9900; } /* Laranja */
-        .semmrvZS, .commrvZS { stroke: #ff0000; } /* Vermelho */
-        .semmrvZL, .commrvZL { stroke: #000080; } /* Azul Escuro */
-        .semmrvZO, .commrvZO { stroke: #00bfff; } /* Azul Claro */
-
-        /* Interações */
-        .semmrv:hover { fill: #d1d5db; }
-        .commrv:hover, .commrv.hover-ativo { fill: #ff9900 !important; }
-        path.clicado { fill: #ff9900 !important; stroke: #000 !important; stroke-width: 1.5px; }
+        /* Classes COM MRV (Verde) */
+        path[class^="commrv"] { fill: rgb(6, 94, 3); cursor: pointer; }
+        path[class^="commrv"]:hover, 
+        path[class^="commrv"].hover-ativo { fill: #ff9900 !important; }
+        
+        /* Estado Clicado (Laranja Fixo) */
+        path.clicado { fill: #ff9900 !important; }
 
         /* --- BOTÕES BTRES --- */
         .btRes { 
@@ -57,14 +71,17 @@
             text-align: left; font-size: 13px; transition: 0.2s;
         }
         .btRes:hover { border-color: #ff9900; }
-        .btRes.ativo { border-color: rgb(6, 94, 3); font-weight: bold; background: #fff; }
+        .btRes.ativo-verde { border-color: rgb(6, 94, 3) !important; border-width: 2px; font-weight: bold; background: #fff; }
+        .btRes.destaque-laranja { border-color: #ff9900 !important; border-width: 2px; }
 
         /* --- FICHA TÉCNICA --- */
         .separador { border-top: 2px solid #eee; margin: 15px 0; }
-        .ficha-nome { color: rgb(6, 94, 3); font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+        .titulo-verde-direita { color: rgb(6, 94, 3); font-weight: bold; font-size: 18px; margin-bottom: 10px; }
+        .ficha-nome { color: rgb(6, 94, 3); font-size: 16px; font-weight: bold; margin-bottom: 8px; }
+        
         .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .ficha-item { font-size: 13px; color: #444; }
-        .ficha-item strong { color: #888; font-size: 10px; text-transform: uppercase; display: block; }
+        .ficha-item b { color: #888; font-size: 10px; text-transform: uppercase; display: block; }
         
         .alerta-dica { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 10px; font-size: 13px; margin-bottom: 10px; color: #166534; }
         
@@ -242,143 +259,10 @@
     </div>
 
     <script>
-        // --- CONFIGURAÇÃO E DADOS ---
-        const LINK_PLANILHA = "SUA_URL_DO_CSV_AQUI"; 
-        
-        const DICIONARIO_NOMES = {
-          "adamantina": "Adamantina",
-          "americana": "Americana",
-          "andradina": "Andradina",
-          "anhanguera": "Anhanguera - ZO",
-          "apiai": "Apiaí",
-          "aracatuba": "Araçatuba",
-          "araraquara": "Araraquara",
-          "aricanduva": "Aricanduva - ZL",
-          "aruja": "Arujá",
-          "assis": "Assis",
-          "avare": "Avaré",
-          "barretos": "Barretos",
-          "barueri": "Barueri",
-          "bauru": "Bauru",
-          "birigui": "Birigui",
-          "biritibamirim": "Biritiba Mirim",
-          "botucatu": "Botucatu",
-          "bragancapaulista": "Bragança Paulista",
-          "butanta": "Butantã - ZO",
-          "caieiras": "Caieiras",
-          "cajamar": "Cajamar",
-          "campinas": "Campinas",
-          "campolimpo": "Campo Limpo - ZS",
-          "capivari": "Capivari",
-          "caraguatatuba": "Caraguatatuba",
-          "carapicuiba": "Carapicuíba",
-          "casaverde": "Casa Verde - ZN",
-          "catanduva": "Catanduva",
-          "cidadeademar": "Cidade Ademar - ZS",
-          "cidadetiradentes": "Cidade Tiradentes - ZL",
-          "cotia": "Cotia",
-          "diadema": "Diadema",
-          "embudasartes": "Embu das Artes",
-          "embuguacu": "Embu-Guaçu",
-          "ermelimdomatarazzo": "Ermelino Matarazzo - ZL",
-          "fernandopolis": "Fernandópolis",
-          "ferrazdevasconcelos": "Ferraz de Vasconcelos",
-          "franca": "Franca",
-          "franciscomorato": "Francisco Morato",
-          "francodarocha": "Franco da Rocha",
-          "freguesiadoo": "Freguesia do Ó - ZO",
-          "grandesaopaulo": "Grande São Paulo",
-          "guaianases": "Guaianases - ZL",
-          "guararema": "Guararema",
-          "guaratinqueta": "Guaratinguetá",
-          "guarulhos": "Guarulhos",
-          "interlagos": "Interlagos - ZS",
-          "ipiranga": "Ipiranga - ZS",
-          "itaim": "Itaim Paulista - ZL",
-          "itaquaquecetuba": "Itaquaquecetuba",
-          "itaquera": "Itaquera - ZL",
-          "itarare": "Itararé",
-          "itapecericadaserra": "Itapecerica da Serra",
-          "itapeva": "Itapeva",
-          "itapetinga": "Itapetininga",
-          "itapevi": "Itapevi",
-          "itu": "Itu",
-          "jaboticabal": "Jaboticabal",
-          "jacarei": "Jacareí",
-          "jales": "Jales",
-          "jandira": "Jandira",
-          "jau": "Jaú",
-          "josebonifacio": "José Bonifácio",
-          "jundiai": "Jundiaí",
-          "juquitiba": "Juquitiba",
-          "lapa": "Lapa - ZO",
-          "limeira": "Limeira",
-          "lins": "Lins",
-          "mairipora": "Mairiporã",
-          "marilia": "Marília",
-          "maua": "Mauá",
-          "miracatu": "Miracatu",
-          "mirantedoparanapanema": "Mirante do Paranapanema",
-          "mboimirim": "M’Boi Mirim - ZS",
-          "mogidascruzes": "Mogi das Cruzes",
-          "mogimirim": "Mogi Mirim",
-          "mooca": "Mooca - ZL",
-          "osasco": "Osasco",
-          "ourinhos": "Ourinhos",
-          "parelheiros": "Parelheiros - ZS",
-          "penapolis": "Penápolis",
-          "penha": "Penha - ZL",
-          "pindamonhangaba": "Pindamonhangaba",
-          "pinheiros": "Pinheiros - ZO",
-          "piracicaba": "Piracicaba",
-          "piraju": "Piraju",
-          "piraporadobomjesus": "Pirapora do Bom Jesus",
-          "pirassununga": "Pirassununga",
-          "poa": "Poá",
-          "presidenteprudente": "Presidente Prudente",
-          "registro": "Registro",
-          "ribeiraopires": "Ribeirão Pires",
-          "ribeiraopreto": "Ribeirão Preto",
-          "riograndedaserra": "Rio Grande da Serra",
-          "salesopolis": "Salesópolis",
-          "santana": "Santana - ZN",
-          "santanadeparnaiba": "Santana de Parnaíba",
-          "santoanastacio": "Santo Anastácio",
-          "santoamaro": "Santo Amaro - ZS",
-          "santoandre": "Santo André",
-          "saobernardo": "São Bernardo do Campo",
-          "saocaetano": "São Caetano do Sul",
-          "saocarlos": "São Carlos",
-          "saojoaquimdabarra": "São Joaquim da Barra",
-          "saojoaodaboavista": "São João da Boa Vista",
-          "saojosedoriopreto": "São José do Rio Preto",
-          "saojosedoscampos": "São José dos Campos",
-          "saolourenco": "São Lourenço da Serra",
-          "saomateus": "São Mateus - ZL",
-          "saomiguel": "São Miguel - ZL",
-          "saoroque": "São Roque",
-          "santos": "Santos",
-          "sé": "Sé - Centro",
-          "sertaozinho": "Sertãozinho",
-          "sorocaba": "Sorocaba",
-          "sumare": "Sumaré",
-          "suzano": "Suzano",
-          "taboaodaserra": "Taboão da Serra",
-          "taquaritinga": "Taquaritinga",
-          "taubate": "Taubaté",
-          "tremembe": "Tremembé - ZN",
-          "tupa": "Tupã",
-          "vargemgrande": "Vargem Grande Paulista",
-          "vilamariana": "Vila Mariana - ZS",
-          "vilamaria": "Vila Maria - ZN",
-          "vilaprudente": "Vila Prudente - ZL",
-          "votuporanga": "Votuporanga",
-          "votorantim": "Votorantim"
-     };
-        
+        const LINK_PLANILHA = "SUA_URL_AQUI"; 
+        const DICIONARIO_NOMES = { /* 'id': 'Nome' */ };
         let dadosGlobais = [];
         let idPathClicado = null;
-        let mapaAtivo = "gsp"; // ou "interior"
 
         async function init() {
             await carregarDados();
@@ -392,12 +276,12 @@
                 const csv = await res.text();
                 const linhas = csv.split(/\r?\n/).filter(l => l.trim() !== "");
                 dadosGlobais = linhas.slice(1).map(linha => {
-                    const col = linha.split(/,|;/); // Ajustar separador se necessário
+                    const col = linha.split(/,|;/); 
                     return {
                         id: col[0]?.toLowerCase().trim(),
-                        nome: col[1],
-                        unidades: col[2], // Coluna de unidades
-                        endereco: col[4],
+                        nome: col[2],
+                        unidades: col[3],
+                        endereco: col[4] + ", " + col[5] + " - " + col[6],
                         preco: col[8],
                         entrega: col[7],
                         plantas: `${col[9]}m² a ${col[10]}m²`,
@@ -406,28 +290,27 @@
                         book: col[19],
                         video: col[21]
                     };
-                });
-            } catch (e) { console.error("Erro ao carregar dados", e); }
+                }).filter(d => d.id);
+            } catch (e) { console.error(e); }
         }
 
-        // --- LÓGICA DE MAPA ---
         function configurarEventosPath() {
             document.querySelectorAll('path').forEach(p => {
                 p.addEventListener('mouseenter', () => {
-                    if (!idPathClicado) document.getElementById('caixa-texto-dinamica').innerText = DICIONARIO_NOMES[p.id] || p.id;
-                    if (p.classList.contains('commrv')) destacarBotaoEsquerda(p.id, true);
+                    document.getElementById('caixa-texto-dinamica').innerText = DICIONARIO_NOMES[p.id] || p.id;
+                    if (p.classList.contains('commrv')) destacarBtResEsquerda(p.id, true);
                 });
 
                 p.addEventListener('mouseleave', () => {
-                    if (!idPathClicado) document.getElementById('caixa-texto-dinamica').innerText = "";
-                    destacarBotaoEsquerda(p.id, false);
+                    document.getElementById('caixa-texto-dinamica').innerText = idPathClicado ? (DICIONARIO_NOMES[idPathClicado] || idPathClicado) : "";
+                    if (p.classList.contains('commrv')) destacarBtResEsquerda(p.id, false);
                 });
 
                 p.addEventListener('click', (e) => {
-                    if (p.closest('.mapa-mini')) return; // Evita clique no mapa pequeno
-                    if (!p.classList.contains('commrv')) return;
+                    if (p.closest('.mapa-mini')) return; 
+                    const isVerde = Array.from(p.classList).some(c => c.startsWith('commrv'));
+                    if (!isVerde) return;
 
-                    // Limpar seleção anterior
                     document.querySelectorAll('path.clicado').forEach(el => el.classList.remove('clicado'));
                     
                     if (idPathClicado === p.id) {
@@ -436,7 +319,6 @@
                     } else {
                         idPathClicado = p.id;
                         p.classList.add('clicado');
-                        document.getElementById('caixa-texto-dinamica').innerText = DICIONARIO_NOMES[p.id] || p.id;
                         atualizarSidebarDireita(p.id);
                     }
                 });
@@ -452,24 +334,17 @@
             principal.appendChild(svgM);
             mini.appendChild(svgP);
 
-            mapaAtivo = (svgM.id === "svg-gsp") ? "gsp" : "interior";
-            
-            // Reset de estado
             idPathClicado = null;
+            document.querySelectorAll('path.clicado').forEach(el => el.classList.remove('clicado'));
             document.getElementById('sidebar-direita').innerHTML = "";
             document.getElementById('caixa-texto-dinamica').innerText = "";
             atualizarSidebarEsquerda();
         }
 
-        // --- LÓGICA DAS SIDEBARS ---
         function atualizarSidebarEsquerda() {
             const container = document.getElementById('sidebar-esquerda');
             container.innerHTML = "";
             
-            // 1. Identificar quais IDs pertencem ao mapa que está em cima agora
-            const idsNoMapaAtivo = Array.from(document.querySelectorAll(`#wrapper-principal path.commrv`)).map(p => p.id);
-            
-            // 2. Filtrar dados e agrupar por Classe (ZS -> ZN -> ZL -> ZO -> Normal)
             const ordemClasses = ['commrvZS', 'commrvZN', 'commrvZL', 'commrvZO', 'commrv'];
             
             ordemClasses.forEach(classe => {
@@ -480,12 +355,17 @@
                 filtrados.forEach(res => {
                     const btn = document.createElement('button');
                     btn.className = 'btRes';
-                    btn.id = `btn-esq-${res.nome.replace(/\s/g, '')}`;
                     btn.innerHTML = `${res.nome} - restam ${res.unidades} unidades`;
                     
                     btn.onmouseenter = () => document.getElementById(res.id)?.classList.add('hover-ativo');
                     btn.onmouseleave = () => document.getElementById(res.id)?.classList.remove('hover-ativo');
-                    btn.onclick = () => document.getElementById(res.id).dispatchEvent(new Event('click'));
+                    
+                    btn.onclick = () => {
+                        document.querySelectorAll('.col-esquerda .btRes').forEach(b => b.classList.remove('ativo-verde'));
+                        btn.classList.add('ativo-verde');
+                        document.getElementById(res.id).dispatchEvent(new Event('click'));
+                        // Destaque no botão correspondente da direita será feito no atualizarSidebarDireita
+                    };
                     
                     container.appendChild(btn);
                 });
@@ -493,57 +373,3 @@
         }
 
         function atualizarSidebarDireita(idPath) {
-            const container = document.getElementById('sidebar-direita');
-            container.innerHTML = `<div style="color:rgb(6, 94, 3); font-weight:bold; margin-bottom:15px;">MRV em ${DICIONARIO_NOMES[idPath] || idPath}</div>`;
-            
-            const filtrados = dadosGlobais.filter(d => d.id === idPath);
-            filtrados.forEach(res => {
-                const btn = document.createElement('button');
-                btn.className = 'btRes';
-                btn.innerHTML = res.nome;
-                btn.onclick = () => exibirFicha(res, btn);
-                container.appendChild(btn);
-            });
-        }
-
-        function exibirFicha(res, btnAtivo) {
-            // Remover destaque de outros botões da direita
-            document.querySelectorAll('#sidebar-direita .btRes').forEach(b => b.classList.remove('ativo'));
-            btnAtivo.classList.add('ativo');
-
-            // Limpar fichas anteriores se houver
-            const fichaAntiga = document.getElementById('detalhe-residencial');
-            if (fichaAntiga) fichaAntiga.remove();
-
-            const ficha = document.createElement('div');
-            ficha.id = 'detalhe-residencial';
-            ficha.innerHTML = `
-                <div class="separador"></div>
-                <div class="ficha-nome">${res.nome}</div>
-                ${res.dica ? `<div class="alerta-dica">💡 ${res.dica}</div>` : ''}
-                <div class="ficha-grid">
-                    <div class="ficha-item"><strong>Preço</strong>${res.preco}</div>
-                    <div class="ficha-item"><strong>Entrega</strong>${res.entrega}</div>
-                    <div class="ficha-item"><strong>Plantas</strong>${res.plantas}</div>
-                    <div class="ficha-item"><strong>Obra</strong>${res.obra}%</div>
-                </div>
-                <p style="font-size:12px; margin-bottom:10px;">📍 ${res.endereco}</p>
-                <button class="btn-link btn-copy-green" onclick="copiar('${res.book}')">Copiar Book do Cliente</button>
-                <button class="btn-link btn-copy-orange" onclick="copiar('${res.video}')">Copiar Vídeo</button>
-            `;
-            document.getElementById('sidebar-direita').appendChild(ficha);
-        }
-
-        function destacarBotaoEsquerda(id, bool) {
-            // Lógica para iluminar os botões da esquerda quando passa o mouse no mapa
-        }
-
-        function copiar(texto) {
-            navigator.clipboard.writeText(texto);
-            alert("Link copiado!");
-        }
-
-        window.onload = init;
-    </script>
-</body>
-</html>
