@@ -3,96 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP - Ajustado</title>
+    <title>Dashboard MRV SP - Ajuste Fino</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         
-        /* Impede qualquer rolagem na página toda */
         body, html { height: 100vh; overflow: hidden; background: #fff; }
         
-        header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; position: relative; }
-        .btn-sobre { position: absolute; right: 20px; background: none; border: 1px solid white; color: white; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+        header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; z-index: 10; }
 
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
-        .col-lateral-esq { width: calc(100% * 2 / 9); border-right: 1px solid #ccc; }
-        .col-lateral-dir { width: calc(100% * 3 / 9); border-left: 1px solid #ccc; }
+
+        /* --- AJUSTE DE LARGURA DAS COLUNAS --- */
+        /* Esquerda: -10% da largura original (era ~22%, agora ~20%) */
+        .col-lateral-esq { width: 20%; border-right: 1px solid #ccc; background: #f9f9f9; }
         
-        .col-central { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100%; 
-        }
+        /* Direita: -80% da largura original (era ~33%, agora ~6.5%) */
+        .col-lateral-dir { width: 6.5%; border-left: 1px solid #ccc; background: #f9f9f9; }
         
-        /* Caixa de Texto fixa em 50px */
+        /* Centro: Ganha o que as laterais perderam (ocupa ~73.5%) */
+        .col-central { flex: 1; display: flex; flex-direction: column; height: 100%; }
+        
         .centro-topo { 
-            height: 50px; 
+            height: 40px; 
             border-bottom: 1px solid #ccc; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             font-weight: bold; 
+            font-size: 0.9rem;
         }
 
-        /* Container que ocupa o que sobra da altura */
-        .container-mapas { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            height: calc(100% - 50px); /* Descontando a Caixa de Texto */
-        }
+        .container-mapas { flex: 1; display: flex; flex-direction: column; height: calc(100% - 40px); }
         
-        /* --- AJUSTE DE ALTURA DAS CAIXAS --- */
-        .caixa-troca { 
-            width: 100%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: hidden; 
-            padding: 10px;
-        }
+        /* --- AJUSTE DE ALTURA E TAMANHO DOS MAPAS --- */
+        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         
-        /* Caixa de Cima: 70% do espaço restante */
+        /* Cima: Aumentada (agora ocupa 82% do espaço central) */
         .pos-cima { 
-            height: 70%; 
+            height: 82%; 
             background: white; 
-            border-bottom: 1px solid #ccc;
+            padding: 5px; /* Menos respiro para o mapa crescer */
         }
         
-        /* Caixa de Baixo: 30% do espaço restante */
+        /* Baixo: Reduzida em 25% (agora ocupa 18% do espaço central) */
         .pos-baixo { 
-            height: 30%; 
+            height: 18%; 
             background: #ffff00; 
             cursor: pointer; 
+            padding: 20px; /* Mais respiro para o mapa parecer menor */
+            border-top: 2px solid #ccc;
         }
 
-        /* Mantém o SVG sempre dentro da caixa sem distorcer */
-        svg { 
+        /* Mapa de cima ganha escala de 15% via transform */
+        .pos-cima svg { 
             max-width: 100%; 
             max-height: 100%; 
-            display: block; 
+            transform: scale(1.15); /* Aumenta o mapa em 15% */
+            transition: transform 0.3s ease;
+        }
+
+        /* Mapa de baixo fica contido pelo padding maior */
+        .pos-baixo svg { 
+            max-width: 100%; 
+            max-height: 100%; 
         }
         
-        path { fill: #888; stroke: #fff; stroke-width: 0.5; }
-        
-        #erro-log { position: fixed; top: 0; left: 0; background: red; color: white; padding: 10px; z-index: 9999; display: none; width: 100%; }
+        path { fill: #888; stroke: #fff; stroke-width: 0.4; transition: fill 0.2s; }
+        path:hover { fill: #555; cursor: pointer; }
+
+        /* Classes de cores conforme seu dashboard anterior */
+        .semmrvZO { fill: #888; }
+        .commrvZL { fill: #006400; } /* Verde escuro */
     </style>
 </head>
 <body>
 
-    <div id="erro-log"></div>
-
-    <header>
-        <h1>Residenciais MRV em SP</h1>
-        <button class="btn-sobre">Sobre</button>
-    </header>
+    <header><h1>Residenciais MRV em SP</h1></header>
 
     <div class="main-wrapper">
         <aside class="col-lateral-esq"></aside>
         
         <main class="col-central">
             <div class="centro-topo" id="display-nome">MAPA DE SÃO PAULO</div>
-            
             <div class="container-mapas" id="container-mapas">
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
                 <div id="caixa-b" class="caixa-troca pos-baixo" onclick="solicitarTroca()"></div>
@@ -116,6 +108,7 @@
             const caixaA = document.getElementById('caixa-a');
             const caixaB = document.getElementById('caixa-b');
             const container = document.getElementById('container-mapas');
+            const titulo = document.getElementById('display-nome');
 
             if (caixaB.classList.contains('pos-baixo')) {
                 caixaB.classList.replace('pos-baixo', 'pos-cima');
@@ -123,22 +116,20 @@
                 container.insertBefore(caixaB, caixaA);
                 caixaB.onclick = null;
                 caixaA.onclick = solicitarTroca;
+                titulo.innerText = "MAPA DO INTERIOR";
             } else {
                 caixaA.classList.replace('pos-baixo', 'pos-cima');
                 caixaB.classList.replace('pos-cima', 'pos-baixo');
                 container.insertBefore(caixaA, caixaB);
                 caixaA.onclick = null;
                 caixaB.onclick = solicitarTroca;
+                titulo.innerText = "MAPA DA GRANDE SÃO PAULO";
             }
         }
 
         window.onload = () => {
-            try {
-                desenhar('caixa-a', MAPA_GSP);
-                desenhar('caixa-b', MAPA_INTERIOR);
-            } catch (e) {
-                console.error(e);
-            }
+            desenhar('caixa-a', MAPA_GSP);
+            desenhar('caixa-b', MAPA_INTERIOR);
         };
     </script>
 </body>
