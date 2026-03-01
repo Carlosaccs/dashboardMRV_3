@@ -3,104 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV 2.0 - Estrutura Instantânea</title>
+    <title>Dashboard MRV 2.0 - Interação de Mapas</title>
     <style>
-        /* --- RESET E BASE --- */
+        /* --- RESET E LAYOUT (Mantido) --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body, html { height: 100%; overflow: hidden; background-color: #f0f0f0; }
+        body, html { height: 100%; overflow: hidden; background-color: #fcfcfc; }
 
-        /* --- FAIXA SUPERIOR --- */
         header { 
-            background: rgb(6, 94, 3); 
-            height: 50px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            position: relative; 
-            color: white;
-            z-index: 10;
+            background: rgb(6, 94, 3); height: 50px; display: flex; 
+            align-items: center; justify-content: center; position: relative; color: white;
         }
         header h1 { font-size: 20px; font-weight: bold; }
-        .btn-sobre { 
-            position: absolute; 
-            right: 20px; 
-            background: rgba(255,255,255,0.2); 
-            border: 1px solid white; 
-            color: white; 
-            padding: 4px 15px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-weight: bold;
-        }
+        .btn-sobre { position: absolute; right: 20px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 4px 15px; border-radius: 4px; cursor: pointer; }
 
-        /* --- CONTAINER PRINCIPAL --- */
-        .main-wrapper { 
-            display: flex; 
-            height: calc(100% - 50px); 
-            width: 100%; 
-        }
-
-        /* CAIXA ESQUERDA (2/9) */
-        .col-esquerda { 
-            width: calc(100% * 2 / 9); 
-            background: white; 
-            border: 1px solid #ccc; 
-            height: 100%; 
-        }
-
-        /* CAIXA DIREITA (3/9) */
-        .col-direita { 
-            width: calc(100% * 3 / 9); 
-            background: white; 
-            border: 1px solid #ccc; 
-            height: 100%; 
-        }
-
-        /* COLUNA CENTRAL (4/9) */
-        .col-central { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100%; 
-        }
-
-        /* Caixa 1 (Altura fixa de 50px) */
+        .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
+        .col-esquerda { width: calc(100% * 2 / 9); border: 1px solid #ccc; background: white; }
+        .col-direita { width: calc(100% * 3 / 9); border: 1px solid #ccc; background: white; }
+        .col-central { flex: 1; display: flex; flex-direction: column; }
+        
+        /* Caixa de Texto Dinâmica - Altura fixa para não deslocar o mapa */
         .centro-topo { 
-            height: 50px; 
-            border: 1px solid #ccc; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            font-weight: bold;
-            background: white;
+            height: 50px; border: 1px solid #ccc; display: flex; 
+            align-items: center; justify-content: center; 
+            font-weight: bold; font-size: 20px; color: #333; background: white;
+            text-transform: uppercase;
         }
 
-        /* Container para as caixas 2 e 3 */
-        .container-mapas { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-        }
+        .container-mapas { flex: 1; display: flex; flex-direction: column; }
+        .caixa-troca { width: 100%; border: 1px solid #ccc; position: relative; overflow: hidden; }
 
-        /* Estilo das caixas de troca */
-        .caixa-troca { 
-            width: 100%; 
-            /* REMOVIDO: transition: all 0.4s ease-in-out; */
-            border: 1px solid #ccc; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            position: relative;
-        }
-
-        /* Estado: Caixa em CIMA (75%) */
         .pos-cima { height: 75%; background: white; cursor: default; }
-
-        /* Estado: Caixa em BAIXO (25%) */
         .pos-baixo { height: 25%; cursor: pointer; }
-
-        /* Cor amarela para a caixa específica */
         .caixa-amarela { background: #ffff00; }
+
+        /* --- ESTILIZAÇÃO DOS PATHS (O Coração do Mapa) --- */
+        svg { width: 100%; height: 100%; }
+        path { stroke: none !important; transition: fill 0.15s ease; }
+
+        /* Regra para todos os CINZAS (semmrv, semmrvZN, etc) */
+        path[class^="semmrv"] { fill: #d1d5db; cursor: default; }
+        path[class^="semmrv"]:hover { fill: #a1a1a1; }
+
+        /* Regra para todos os VERDES (commrv, commrvZN, etc) */
+        path[class^="commrv"] { fill: rgb(6, 94, 3); cursor: pointer; }
+        path[class^="commrv"]:hover { fill: #ff9900 !important; }
+
+        /* Regra para o Path SELECIONADO (Laranja Fixo) */
+        path.clicado { fill: #ff9900 !important; }
 
     </style>
 </head>
@@ -112,55 +61,122 @@
     </header>
 
     <div class="main-wrapper">
-        <aside class="col-esquerda"></aside>
+        <aside class="col-esquerda" id="sidebar-esquerda"></aside>
 
         <main class="col-central">
-            <div class="centro-topo">CAIXA DE TEXTO DINÂMICA</div>
+            <div class="centro-topo" id="display-nome"></div>
 
             <div class="container-mapas" id="container-mapas">
-                <div id="caixa-a" class="caixa-troca pos-cima">
-                    <span>CAIXA 2</span>
-                </div>
-                
-                <div id="caixa-b" class="caixa-troca pos-baixo caixa-amarela" onclick="executarTroca(this)">
-                    <span>CAIXA 3</span>
-                </div>
+                <div id="caixa-a" class="caixa-troca pos-cima"></div>
+                <div id="caixa-b" class="caixa-troca pos-baixo caixa-amarela" onclick="executarTroca(this)"></div>
             </div>
         </main>
 
-        <aside class="col-direita"></aside>
+        <aside class="col-direita" id="sidebar-direita"></aside>
     </div>
 
+    <script src="mrv-data.js"></script>
+
     <script>
+        let idPathSelecionado = null;
+
+        function desenharMapa(containerId, dadosMapa) {
+            const container = document.getElementById(containerId);
+            const htmlPaths = dadosMapa.paths.map(p => `
+                <path 
+                    id="${p.id}" 
+                    d="${p.d}" 
+                    class="${p.class}" 
+                    onmouseenter="tratarHover('${p.id}')" 
+                    onmouseleave="tratarSaida()" 
+                    onclick="tratarClique('${p.id}', event)">
+                </path>
+            `).join('');
+
+            container.innerHTML = `<svg viewBox="${dadosMapa.viewBox}"><g transform="${dadosMapa.transform}">${htmlPaths}</g></svg>`;
+        }
+
+        // --- LÓGICA DE TEXTO E CORES ---
+
+        function tratarHover(id) {
+            // Só muda o texto se não houver um path clicado OU se estiver passando o mouse em outro
+            const nome = NOMES_CIDADES[id] || id.replace(/-/g, ' ');
+            document.getElementById('display-nome').innerText = nome;
+        }
+
+        function tratarSaida() {
+            const display = document.getElementById('display-nome');
+            if (idPathSelecionado) {
+                // Se algo está clicado, volta o texto para o nome do clicado
+                display.innerText = NOMES_CIDADES[idPathSelecionado] || idPathSelecionado.replace(/-/g, ' ');
+            } else {
+                display.innerText = "";
+            }
+        }
+
+        function tratarClique(id, event) {
+            // Impede o clique se for no mapa de baixo (o mini)
+            if (event.currentTarget.closest('.pos-baixo')) return;
+
+            const elemento = document.getElementById(id);
+            // Só responde ao clique se for um path "commrv" (verde)
+            if (!elemento.classList.contains('commrv') && 
+                !Array.from(elemento.classList).some(c => c.startsWith('commrv'))) return;
+
+            // Se clicar no que já está selecionado, desmarca
+            if (idPathSelecionado === id) {
+                elemento.classList.remove('clicado');
+                idPathSelecionado = null;
+                document.getElementById('display-nome').innerText = "";
+            } else {
+                // Remove destaque do anterior
+                if (idPathSelecionado) {
+                    const anterior = document.getElementById(idPathSelecionado);
+                    if (anterior) anterior.classList.remove('clicado');
+                }
+                // Destaca o novo
+                idPathSelecionado = id;
+                elemento.classList.add('clicado');
+                document.getElementById('display-nome').innerText = NOMES_CIDADES[id] || id;
+            }
+        }
+
+        // --- LÓGICA DE TROCA ---
+
         function executarTroca(elementoClicado) {
-            // Se já estiver em cima, a função é ignorada
             if (elementoClicado.classList.contains('pos-cima')) return;
 
             const container = document.getElementById('container-mapas');
             const caixaA = document.getElementById('caixa-a');
             const caixaB = document.getElementById('caixa-b');
 
+            // Reset de seleção ao trocar de mapa para evitar bugs visuais
+            if (idPathSelecionado) {
+                const el = document.getElementById(idPathSelecionado);
+                if (el) el.classList.remove('clicado');
+                idPathSelecionado = null;
+                document.getElementById('display-nome').innerText = "";
+            }
+
             if (caixaB.classList.contains('pos-baixo')) {
-                // Caixa B sobe e perde clique
                 caixaB.classList.replace('pos-baixo', 'pos-cima');
                 caixaB.onclick = null;
-                
-                // Caixa A desce e ganha clique
                 caixaA.classList.replace('pos-cima', 'pos-baixo');
                 caixaA.onclick = function() { executarTroca(this); };
-                
                 container.insertBefore(caixaB, caixaA);
             } else {
-                // Caminho inverso (Caso clique na branca quando ela estiver embaixo)
                 caixaA.classList.replace('pos-baixo', 'pos-cima');
                 caixaA.onclick = null;
-                
                 caixaB.classList.replace('pos-cima', 'pos-baixo');
                 caixaB.onclick = function() { executarTroca(this); };
-                
                 container.insertBefore(caixaA, caixaB);
             }
         }
+
+        window.onload = () => {
+            desenharMapa('caixa-a', MAPA_GSP);
+            desenharMapa('caixa-b', MAPA_INTERIOR);
+        };
     </script>
 </body>
 </html>
