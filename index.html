@@ -3,104 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV - Diagnóstico</title>
+    <title>Dashboard MRV SP</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body, html { height: 100%; overflow: hidden; background: #f4f4f4; }
+        body, html { height: 100%; overflow: hidden; background: #fff; }
         
-        header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; }
-        
+        header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; position: relative; }
+        .btn-sobre { position: absolute; right: 20px; background: none; border: 1px solid white; color: white; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
-        .col-lateral { width: 25%; border: 1px solid #ccc; background: white; } /* Simplificado para teste */
+        .col-lateral-esq { width: calc(100% * 2 / 9); border: 1px solid #ccc; }
+        .col-lateral-dir { width: calc(100% * 3 / 9); border: 1px solid #ccc; }
         .col-central { flex: 1; display: flex; flex-direction: column; }
         
-        .centro-topo { height: 50px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-weight: bold; background: white; }
-        .container-mapas { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .centro-topo { height: 50px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-weight: bold; text-transform: uppercase; }
+        .container-mapas { flex: 1; display: flex; flex-direction: column; }
         
         /* Caixas de Troca */
-        .caixa-troca { width: 100%; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; overflow: hidden; background: white; }
+        .caixa-troca { width: 100%; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         
-        /* IMPORTANTE: Sem transição para troca direta */
-        .pos-cima { height: 75%; order: 1; }
-        .pos-baixo { height: 25%; order: 2; background: #ffff00 !important; cursor: pointer; }
+        .pos-cima { height: 75%; background: white; cursor: default; }
+        .pos-baixo { height: 25%; background: #ffff00; cursor: pointer; }
 
-        svg { width: 100%; height: 100%; display: block; pointer-events: all; }
+        svg { width: 100%; height: 100%; display: block; }
         path { fill: #888; stroke: #fff; stroke-width: 0.5; }
 
-        #aviso-erro { 
-            position: absolute; top: 10px; left: 10px; background: red; color: white; 
-            padding: 10px; display: none; z-index: 100; font-size: 12px;
-        }
+        /* Mensagem de Erro */
+        #erro-log { position: fixed; top: 0; left: 0; background: rgba(255,0,0,0.9); color: white; padding: 10px; z-index: 9999; display: none; width: 100%; font-family: monospace; }
     </style>
 </head>
 <body>
 
-    <div id="aviso-erro"></div>
+    <div id="erro-log"></div>
 
-    <header><h1>Residenciais MRV em SP</h1></header>
+    <header>
+        <h1>Residenciais MRV em SP</h1>
+        <button class="btn-sobre">Sobre</button>
+    </header>
 
     <div class="main-wrapper">
-        <aside class="col-lateral"></aside>
+        <aside class="col-lateral-esq"></aside>
         
         <main class="col-central">
-            <div class="centro-topo" id="display-nome">CAIXA DE TEXTO</div>
+            <div class="centro-topo" id="display-nome"></div>
             <div class="container-mapas" id="container-mapas">
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
-                <div id="caixa-b" class="caixa-troca pos-baixo" onclick="executarTroca()"></div>
+                <div id="caixa-b" class="caixa-troca pos-baixo" onclick="solicitarTroca()"></div>
             </div>
         </main>
 
-        <aside class="col-lateral"></aside>
+        <aside class="col-lateral-dir"></aside>
     </div>
 
     <script src="mrv-data.js"></script>
 
     <script>
-        // Verificação de erro de carregamento
-        window.addEventListener('error', function(e) {
-            const erroDiv = document.getElementById('aviso-erro');
-            erroDiv.style.display = 'block';
-            erroDiv.innerText = "Erro no arquivo mrv-data.js: " + e.message;
-        }, true);
-
-        function renderizar(idContainer, dados) {
-            const container = document.getElementById(idContainer);
-            if (!dados || !dados.paths) return;
-
-            const paths = dados.paths.map(p => `<path id="${p.id}" d="${p.d}"></path>`).join('');
-            container.innerHTML = `
-                <svg viewBox="${dados.viewBox}">
-                    <g transform="${dados.transform}">${paths}</g>
-                </svg>`;
+        // Sistema de aviso de erro
+        function avisarErro(msg) {
+            const log = document.getElementById('erro-log');
+            log.style.display = 'block';
+            log.innerHTML = "<b>Erro detectado:</b> " + msg;
         }
 
-        function executarTroca() {
+        // Tenta renderizar o mapa
+        function desenhar(idContainer, dados) {
+            const container = document.getElementById(idContainer);
+            if (!dados) {
+                avisarErro("Variável de mapa não encontrada no mrv-data.js");
+                return;
+            }
+            const paths = dados.paths.map(p => `<path id="${p.id}" d="${p.d}"></path>`).join('');
+            container.innerHTML = `<svg viewBox="${dados.viewBox}"><g transform="${dados.transform}">${paths}</g></svg>`;
+        }
+
+        // Lógica de Troca corrigida
+        function solicitarTroca() {
             const caixaA = document.getElementById('caixa-a');
             const caixaB = document.getElementById('caixa-b');
+            const container = document.getElementById('container-mapas');
 
-            // Troca as classes de posição/tamanho
             if (caixaB.classList.contains('pos-baixo')) {
+                // Troca visual
                 caixaB.classList.replace('pos-baixo', 'pos-cima');
                 caixaA.classList.replace('pos-cima', 'pos-baixo');
-                // Remove o clique da que subiu e coloca na que desceu
+                // Troca de ordem no HTML
+                container.insertBefore(caixaB, caixaA);
+                // Troca a função de clique
                 caixaB.onclick = null;
-                caixaA.onclick = executarTroca;
+                caixaA.onclick = solicitarTroca;
             } else {
                 caixaA.classList.replace('pos-baixo', 'pos-cima');
                 caixaB.classList.replace('pos-cima', 'pos-baixo');
+                container.insertBefore(caixaA, caixaB);
                 caixaA.onclick = null;
-                caixaB.onclick = executarTroca;
+                caixaB.onclick = solicitarTroca;
             }
         }
 
+        // Inicia após carregar tudo
         window.onload = () => {
-            // Verifica se as variáveis existem antes de tentar desenhar
-            if (typeof MAPA_GSP !== 'undefined' && typeof MAPA_INTERIOR !== 'undefined') {
-                renderizar('caixa-a', MAPA_GSP);
-                renderizar('caixa-b', MAPA_INTERIOR);
-            } else {
-                document.getElementById('aviso-erro').style.display = 'block';
-                document.getElementById('aviso-erro').innerText = "Erro: Variáveis MAPA_GSP ou MAPA_INTERIOR não encontradas. Verifique o arquivo mrv-data.js";
+            try {
+                desenhar('caixa-a', MAPA_GSP);
+                desenhar('caixa-b', MAPA_INTERIOR);
+            } catch (e) {
+                avisarErro(e.message);
             }
         };
     </script>
