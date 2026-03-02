@@ -5,62 +5,132 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body, html { height: 100vh; overflow: hidden; background: #fff; }
-        header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; position: relative; z-index: 10; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body, html { height: 100vh; overflow: hidden; background: #f0f2f5; }
+        
+        header { 
+            background: rgb(6, 94, 3); 
+            height: 50px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: relative; 
+            z-index: 100; 
+        }
+
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
 
-        .col-lateral-esq { width: 20%; border-right: 1px solid #ccc; background: #fdfdfd; overflow-y: auto; padding: 10px; }
-        .col-lateral-dir { width: 28%; border-left: 1px solid #ccc; background: #fdfdfd; padding: 15px; overflow-y: auto; }
-        .col-central { flex: 1; display: flex; flex-direction: column; height: 100%; }
+        /* Coluna Central com Mapa */
+        .col-central { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            position: relative; 
+            background: white;
+        }
         
-        .centro-topo { height: 45px; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-weight: bold; min-height: 45px; font-size: 1.1rem; }
-        .container-mapas { flex: 1; display: flex; flex-direction: column; height: calc(100% - 45px); }
+        .centro-topo { 
+            height: 45px; 
+            border-bottom: 1px solid #eee; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            background: #fff;
+        }
+
+        /* Container do Mapa */
+        .container-mapas { flex: 1; display: flex; flex-direction: column; position: relative; }
+        
+        /* BOTÕES DENTRO DO MAPA (Sua sugestão) */
+        #menu-flutuante {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 220px;
+            max-height: 80%;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            z-index: 50;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ddd;
+            backdrop-filter: blur(5px);
+        }
+
+        .btRes { 
+            width: 100%; 
+            padding: 10px; 
+            margin-bottom: 6px; 
+            background: #fff; 
+            border: 1px solid #eee; 
+            border-left: 4px solid rgb(6, 94, 3); 
+            text-align: left; 
+            cursor: pointer; 
+            font-size: 0.75rem; 
+            transition: 0.2s; 
+            display: block;
+            border-radius: 3px;
+        }
+        .btRes:hover { background: #f9f9f9; border-left-color: #ff8c00; transform: scale(1.02); }
+        .btRes strong { display: block; color: #222; }
+
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .pos-cima { height: 80%; background: white; padding: 5px; }
-        .pos-baixo { height: 20%; background: #ffffff; cursor: pointer; padding: 5px; border-top: 2px solid #ddd; }
+        .pos-cima { height: 80%; }
+        .pos-baixo { height: 20%; cursor: pointer; border-top: 2px solid #eee; background: #fafafa; }
+        .pos-baixo:hover { background: #f0f0f0; }
         
-        .pos-baixo svg, .pos-cima svg { max-width: 100%; max-height: 100%; transform: scale(1.15); }
+        svg { max-width: 95%; max-height: 95%; transform: scale(1.15); transition: 0.3s; }
 
-        /* Estilo dos Botões da Esquerda */
-        .btRes { width: 100%; padding: 12px; margin-bottom: 8px; background: #fff; border: 1px solid #ddd; border-left: 5px solid rgb(6, 94, 3); text-align: left; cursor: pointer; font-size: 0.8rem; transition: 0.2s; display: block; border-radius: 4px; }
-        .btRes:hover { background: #f0f0f0; border-left-color: #ff8c00; transform: translateX(3px); }
-        .btRes strong { display: block; color: #333; margin-bottom: 2px; text-transform: uppercase; font-size: 0.75rem; }
-        .btRes span { color: #666; font-size: 0.7rem; }
+        /* Coluna Detalhes (Direita) */
+        .col-lateral-dir { 
+            width: 300px; 
+            border-left: 1px solid #ddd; 
+            background: #fff; 
+            padding: 20px; 
+            overflow-y: auto; 
+            box-shadow: -2px 0 5px rgba(0,0,0,0.05);
+        }
 
-        /* Detalhes Direita */
-        .detalhe-card h2 { color: rgb(6, 94, 3); margin-bottom: 12px; font-size: 1.1rem; border-bottom: 2px solid #ff8c00; padding-bottom: 5px; }
-        .info-row { margin-bottom: 10px; font-size: 0.85rem; color: #444; }
-        .info-label { font-weight: bold; color: #777; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 2px; }
+        .detalhe-card h2 { color: rgb(6, 94, 3); font-size: 1.2rem; margin-bottom: 15px; border-bottom: 2px solid #ff8c00; padding-bottom: 5px; }
+        .info-row { margin-bottom: 12px; font-size: 0.85rem; }
+        .info-label { font-weight: bold; color: #666; display: block; text-transform: uppercase; font-size: 0.7rem; }
 
-        /* Paths */
-        path { stroke: #fff; stroke-width: 0.5; transition: 0.2s; fill: #8c8c8c; pointer-events: auto; }
+        /* Estilo dos MAPAS */
+        path { stroke: #fff; stroke-width: 0.6; fill: #8c8c8c; transition: 0.2s; cursor: default; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
-        .semmrv { fill: #8c8c8c; cursor: default; }
-        .pos-cima path.semmrv:hover { fill: #444 !important; }
         .pos-cima .commrv:hover, .pos-cima #grandesaopaulo:hover { fill: #ff8c00 !important; }
+        .pos-cima path.semmrv:hover { fill: #555 !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1px; }
         .pos-baixo path { pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <header><h1>Dashboard MRV - São Paulo</h1></header>
+    <header><h1>Dashboard de Vendas MRV</h1></header>
 
     <div class="main-wrapper">
-        <aside class="col-lateral-esq" id="menu-residenciais">Carregando dados...</aside>
-        
         <main class="col-central">
-            <div class="centro-topo" id="display-nome">Selecione uma região</div>
+            <div class="centro-topo" id="display-nome">Selecione uma cidade</div>
+            
             <div class="container-mapas" id="container-mapas">
+                <div id="menu-flutuante">
+                    <p style="font-size: 0.7rem; color: #888; margin-bottom: 8px; text-align: center;">Residenciais na região:</p>
+                    <div id="lista-botoes">Carregando dados...</div>
+                </div>
+
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
-                <div id="caixa-b" class="caixa-troca pos-baixo" onclick="solicitarTroca()"></div>
+                <div id="caixa-b" class="caixa-troca pos-baixo" onclick="solicitarTroca()" title="Clique para trocar de mapa"></div>
             </div>
         </main>
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
             <div style="text-align: center; color: #999; margin-top: 50px;">
-                <p>Clique em um residencial para ver as informações completas.</p>
+                <p>Selecione um residencial no menu ou no mapa para ver os detalhes.</p>
             </div>
         </aside>
     </div>
@@ -72,7 +142,7 @@
         let regiaoAtual = "gsp"; 
         let DADOS_PLANILHA = [];
 
-        // INSIRA SEU LINK CSV AQUI
+        // COLE SEU LINK CSV AQUI
         const LINK_CSV = "SUA_URL_DO_GOOGLE_SHEETS_AQUI";
 
         async function carregarPlanilha() {
@@ -82,9 +152,8 @@
                 const linhas = texto.split(/\r?\n/);
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
-                    // Tenta dividir por vírgula ou ponto-e-vírgula
-                    let col = linha.split(/[,;]/).map(c => c.trim().replace(/"/g, ''));
-                    
+                    // Limpeza radical: remove aspas e divide por qualquer coisa que pareça separador
+                    let col = linha.split(/[,;]/).map(c => c.trim().replace(/^"|"$/g, ''));
                     return {
                         id_path: col[0],
                         regiao: col[1] ? col[1].toLowerCase() : "",
@@ -99,40 +168,38 @@
                     };
                 }).filter(item => item.nome && item.nome.length > 2);
 
-                atualizarColunaEsquerda();
+                atualizarBotoesFlutuantes();
             } catch (e) {
-                document.getElementById('menu-residenciais').innerHTML = "<p style='color:red'>Erro ao carregar link.</p>";
+                document.getElementById('lista-botoes').innerHTML = "Erro ao conectar.";
             }
         }
 
-        function atualizarColunaEsquerda() {
-            const menu = document.getElementById('menu-residenciais');
-            menu.innerHTML = "";
+        function atualizarBotoesFlutuantes() {
+            const container = document.getElementById('lista-botoes');
+            container.innerHTML = "";
             
-            const filtrados = DADOS_PLANILHA.filter(item => item.regiao === regiaoAtual);
+            // Filtro por região (gsp/esp)
+            const filtrados = DADOS_PLANILHA.filter(item => item.regiao.includes(regiaoAtual));
 
             if(filtrados.length === 0) {
-                menu.innerHTML = `<div style="padding:10px; color:#666; font-size:0.8rem; border:1px dashed #ccc;">
-                    Nenhum residencial cadastrado para <strong>${regiaoAtual.toUpperCase()}</strong> nesta planilha.
-                </div>`;
+                container.innerHTML = "<p style='font-size:0.7rem; color:#999;'>Nenhum residencial nesta região.</p>";
                 return;
             }
 
             filtrados.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
-                btn.innerHTML = `<strong>${item.nome}</strong><span>${item.cidade || ''} - ${item.bairro || ''}</span>`;
+                btn.innerHTML = `<strong>${item.nome}</strong>${item.cidade}`;
                 
                 btn.onclick = () => {
                     const el = document.getElementById(item.id_path);
                     if(el) {
                         if(el.closest('.pos-baixo')) solicitarTroca();
-                        // Simula o clique no mapa
                         el.dispatchEvent(new Event('click'));
                     }
                     exibirDetalhes(item);
                 };
-                menu.appendChild(btn);
+                container.appendChild(btn);
             });
         }
 
@@ -141,10 +208,10 @@
             painel.innerHTML = `
                 <div class="detalhe-card">
                     <h2>${item.nome}</h2>
-                    <div class="info-row"><span class="info-label">📍 Localização</span>${item.endereco || ''}<br>${item.bairro || ''} - ${item.cidade || ''}</div>
-                    <div class="info-row"><span class="info-label">💰 Valor Sugerido</span>R$ ${item.preco || 'Sob consulta'}</div>
-                    <div class="info-row"><span class="info-label">🏗️ Status da Obra</span>${item.obra || 'Consulte o gestor'}</div>
-                    <div class="info-row"><span class="info-label">📅 Previsão</span>${item.entrega || 'A definir'}</div>
+                    <div class="info-row"><span class="info-label">📍 Endereço</span>${item.endereco || ''}<br>${item.bairro || ''} - ${item.cidade || ''}</div>
+                    <div class="info-row"><span class="info-label">💰 Menor Preço</span>R$ ${item.preco || 'Consulte'}</div>
+                    <div class="info-row"><span class="info-label">🏗️ Obra</span>${item.obra || '---'}</div>
+                    <div class="info-row"><span class="info-label">📅 Entrega</span>${item.entrega || '---'}</div>
                     <div class="info-row"><span class="info-label">📊 Estoque</span>${item.estoque || 'Disponível'}</div>
                 </div>`;
         }
@@ -158,16 +225,15 @@
         }
 
         function vincularEventos() {
-            const caixaCima = document.querySelector('.pos-cima');
+            const paths = document.querySelectorAll('.pos-cima path');
             const display = document.getElementById('display-nome');
-            const paths = caixaCima.querySelectorAll('path');
             
             paths.forEach(p => {
                 p.onmouseover = () => {
                     display.innerText = p.getAttribute('data-name');
                     display.style.color = (p.classList.contains('commrv') || p.id === "grandesaopaulo") ? "rgb(6, 94, 3)" : "#444";
                 };
-                p.onmouseout = () => { display.innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : "Selecione uma região"; };
+                p.onmouseout = () => { display.innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : "Selecione uma cidade"; };
                 
                 p.onclick = (e) => {
                     e.stopPropagation();
@@ -177,15 +243,12 @@
                         if (pathSelecionado === p) {
                             p.classList.remove('path-ativo');
                             pathSelecionado = null;
-                            display.innerText = "Selecione uma região";
                         } else {
                             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
                             p.classList.add('path-ativo');
                             pathSelecionado = p;
-                            display.innerText = p.getAttribute('data-name');
                             const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
                             if(item) exibirDetalhes(item);
-                            else document.getElementById('detalhes-residencial').innerHTML = '<p style="color:#999; text-align:center; margin-top:50px;">Cidade selecionada. Escolha o residencial no menu à esquerda.</p>';
                         }
                     }
                 };
@@ -200,23 +263,22 @@
             
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
             pathSelecionado = null;
-            document.getElementById('display-nome').innerText = "Selecione uma região";
 
             if (caixaB.classList.contains('pos-baixo')) {
                 caixaB.classList.replace('pos-baixo', 'pos-cima');
                 caixaA.classList.replace('pos-cima', 'pos-baixo');
-                container.insertBefore(caixaB, caixaA);
+                container.appendChild(caixaA); // Garante a ordem correta
                 caixaB.onclick = null;
                 caixaA.onclick = solicitarTroca;
             } else {
                 caixaA.classList.replace('pos-baixo', 'pos-cima');
                 caixaB.classList.replace('pos-cima', 'pos-baixo');
-                container.insertBefore(caixaA, caixaB);
+                container.appendChild(caixaB);
                 caixaA.onclick = null;
                 caixaB.onclick = solicitarTroca;
             }
             vincularEventos();
-            atualizarColunaEsquerda();
+            atualizarBotoesFlutuantes();
         }
 
         window.onload = () => {
