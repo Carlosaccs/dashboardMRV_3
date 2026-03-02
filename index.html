@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP - Visual Unificado</title>
+    <title>Dashboard MRV SP - Final</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
@@ -16,14 +16,14 @@
         
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; background: #fdfdfd; }
 
-        /* Colunas Laterais - COM CONTORNO E SOMBRA */
+        /* Colunas Laterais - COM CONTORNO */
         .col-lateral-esq { 
             width: 25%; 
             background: #fff; 
             overflow-y: auto; 
             padding: 10px; 
-            border-right: 1px solid #ddd;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.02);
+            border-right: 1px solid #ddd; /* Linha divisória clara */
+            box-shadow: 2px 0 5px rgba(0,0,0,0.02); /* Sombra suave para profundidade */
         }
         
         .col-lateral-dir { 
@@ -31,50 +31,67 @@
             background: #fff; 
             padding: 15px; 
             overflow-y: auto; 
-            border-left: 1px solid #ddd;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.02);
+            border-left: 1px solid #ddd; /* Linha divisória clara */
+            box-shadow: -2px 0 5px rgba(0,0,0,0.02); /* Sombra suave para profundidade */
         }
 
-        /* Botões Residenciais - SEM CONTORNO EXTERNO */
+        /* Botões Residenciais */
         .btRes { 
             width: 100%; padding: 8px 12px; margin-bottom: 4px; background: transparent; 
-            border: none; /* Remove todas as bordas padrão */
-            border-left: 5px solid rgb(6, 94, 3); /* Mantém o detalhe verde */
+            border: none; border-left: 5px solid rgb(6, 94, 3); 
             text-align: left; cursor: pointer; font-size: 0.72rem; 
             border-radius: 4px; display: flex; justify-content: space-between; align-items: center;
         }
         .btRes:hover { background: #ececec; border-left-color: #ff8c00; }
         .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%; text-transform: uppercase; }
-        .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; border-color: #ff8c00; }
+        .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; }
         
         .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; white-space: nowrap; }
         .estoque-baixo { color: #d93025 !important; }
         .estoque-vendido { text-decoration: line-through; color: #999 !important; }
 
-        /* Área Central e Mapas - SEM CONTORNO EXTERNO */
-        .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; border: none; }
-        .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; background: #fff; border-bottom: 1px solid #f0f0f0; color: #333; }
+        /* Área Central e Mapas - SEM CONTORNO */
+        .col-central { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            background: #fff; 
+            position: relative; 
+            overflow: hidden; 
+            border: none; /* Garante que não há borda externa */
+        }
+        
+        .centro-topo { 
+            height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            font-size: 0.9rem; 
+            background: #fff; 
+            border-bottom: 1px solid #f0f0f0; 
+            color: #333;
+        }
+        
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; border: none; }
+        
+        /* Caixas internas do mapa - SEM CONTORNO */
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; border: none; }
         
         .pos-cima { height: 78%; z-index: 1; border: none; }
-        
-        /* CORREÇÃO DO MAPA DE BAIXO: Preserva o tom escuro #838383 */
         .pos-baixo { height: 22%; z-index: 10; cursor: pointer; background: transparent; border: none !important; }
-        
-        /* Força a mesma cor e remove a opacidade que clareava */
-        .pos-baixo path { pointer-events: none; fill: #838383 !important; opacity: 1 !important; } 
 
         svg { width: 100%; height: 100%; max-height: 100%; display: block; padding: 10px; }
         
-        /* Cores base dos paths (Mapa de Cima) */
         path { stroke: #fff; stroke-width: 0.5; fill: #838383; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
         
-        /* Interações na caixa de cima */
         path.commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
         path:not(.commrv):hover { fill: #666; }
+
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
+        
+        .pos-baixo path { pointer-events: none; opacity: 0.35; fill: #838383 !important; }
 
         /* Ficha Direita */
         .titulo-vizinhos { font-size: 0.7rem; font-weight: bold; color: rgb(6, 94, 3); margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 3px; text-transform: uppercase; }
@@ -244,16 +261,7 @@
 
         function desenharIniciais() {
             desenhar('caixa-a', MAPA_GSP);
-            desenharIniciais Interior('caixa-b', MAPA_INTERIOR);
-        }
-
-        function desenharIniciaisInterior(idContainer, dados) {
-            desenhar(idContainer, dados);
-        }
-
-        function desenharIniciais() {
-            desenhar('caixa-a', MAPA_GSP);
-            desenharIniciaisInterior('caixa-b', MAPA_INTERIOR);
+            desenhar('caixa-b', MAPA_INTERIOR);
         }
 
         document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
