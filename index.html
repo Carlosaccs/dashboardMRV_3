@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
         header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; z-index: 10; position: relative; }
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
 
-        /* Colunas */
         .col-lateral-esq { width: 22%; border-right: 1px solid #ccc; background: #fdfdfd; overflow-y: auto; padding: 5px; }
         .col-lateral-dir { width: 28%; border-left: 1px solid #ccc; background: #fdfdfd; padding: 15px; overflow-y: auto; }
         .col-central { flex: 1; display: flex; flex-direction: column; position: relative; }
@@ -23,7 +22,7 @@
         
         svg { max-width: 95%; max-height: 95%; transform: scale(1.1); }
 
-        /* Botões Ultra Compactos */
+        /* Botões Compactos */
         .btRes { 
             width: 100%; 
             padding: 3px 8px; 
@@ -39,24 +38,14 @@
             transition: 0.1s;
         }
         .btRes:hover { background: #f9f9f9; border-left-color: #ff8c00; }
-        
-        /* Destaque do Botão Selecionado */
-        .btn-ativo { 
-            background: #fff5e6 !important; 
-            border-color: #ff8c00 !important; 
-            border-left-color: #ff8c00 !important; 
-            font-weight: bold;
-        }
-
+        .btn-ativo { background: #fff5e6 !important; border-color: #ff8c00 !important; border-left-color: #ff8c00 !important; font-weight: bold; }
         .btRes strong { display: block; color: #333; text-transform: uppercase; font-size: 0.62rem; line-height: 1; }
         .tag-regiao { font-size: 0.55rem; background: #eee; padding: 1px 3px; border-radius: 2px; float: right; color: #888; }
 
-        /* Detalhes */
         .detalhe-card h2 { color: rgb(6, 94, 3); margin-bottom: 10px; font-size: 1rem; border-bottom: 2px solid #ff8c00; padding-bottom: 3px; }
         .info-row { margin-bottom: 8px; font-size: 0.8rem; color: #444; }
         .info-label { font-weight: bold; color: #999; font-size: 0.65rem; text-transform: uppercase; display: block; }
 
-        /* Mapa */
         path { stroke: #fff; stroke-width: 0.5; fill: #8c8c8c; cursor: pointer; transition: 0.2s; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
         .pos-cima path:hover { fill: #ff8c00 !important; }
@@ -94,64 +83,77 @@
         let regiaoAtual = "gsp"; 
         let DADOS_PLANILHA = [];
 
-        // Adicionado cache para evitar erro de conexão em refresh rápido
-        const LINK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv&cache=" + new Date().getTime();
+        // LINK DA PLANILHA
+        const LINK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv";
 
         async function carregarPlanilha() {
             try {
+                // Tentativa direta
                 const response = await fetch(LINK_CSV);
-                if (!response.ok) throw new Error("Erro HTTP");
+                if (!response.ok) throw new Error("Falha no fetch");
                 
                 const texto = await response.text();
-                const linhas = texto.split(/\r?\n/);
-
-                DADOS_PLANILHA = linhas.map(linha => {
-                    let col = linha.split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
-                    
-                    // Filtro para garantir que pegamos apenas linhas com dados válidos
-                    // Coluna 0 deve ter o ID do path e Coluna 2 o nome do Residencial
-                    if (!col[0] || col[0].length < 3 || col[0].toLowerCase().includes('pdf') || col[0].toLowerCase().includes('id')) {
-                        return null;
-                    }
-
-                    return {
-                        id_path: col[0],
-                        regiao: col[1] ? col[1].toLowerCase() : "",
-                        nome: col[2],
-                        estoque: col[3],
-                        endereco: col[4],
-                        bairro: col[5],
-                        cidade: col[6],
-                        entrega: col[7],
-                        preco: col[8],
-                        obra: col[11]
-                    };
-                }).filter(item => item !== null);
-
-                // Ordem alfabética pelo nome
-                DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
-                gerarListaGeral();
+                processarDados(texto);
             } catch (e) {
-                console.error(e);
-                document.getElementById('menu-residenciais').innerHTML = 
-                    `<p style="color:red; font-size:0.7rem;">Erro ao carregar dados.<br>Verifique se a planilha está publicada.</p>`;
+                console.warn("Tentando método alternativo via Proxy...");
+                // Se falhar (CORS), tenta via proxy público para teste
+                try {
+                    const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(LINK_CSV);
+                    const responseProxy = await fetch(proxyUrl);
+                    const dataProxy = await responseProxy.json();
+                    processarDados(dataProxy.contents);
+                } catch (e2) {
+                    document.getElementById('menu-residenciais').innerHTML = 
+                        `<p style="color:red; font-size:0.7rem; padding:10px;">Erro crítico de conexão.<br>1. Verifique se está conectado à internet.<br>2. Tente abrir em outro navegador.</p>`;
+                }
             }
+        }
+
+        function processarDados(texto) {
+            const linhas = texto.split(/\r?\n/);
+            DADOS_PLANILHA = linhas.map(linha => {
+                let col = linha.split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
+                
+                // Filtro: Coluna 0 deve ter ID e Coluna 2 o Nome
+                if (!col[0] || col[0].length < 3 || col[0].toLowerCase().includes('pdf') || col[0].toLowerCase().includes('id')) {
+                    return null;
+                }
+
+                return {
+                    id_path: col[0],
+                    regiao: col[1] ? col[1].toLowerCase() : "",
+                    nome: col[2],
+                    estoque: col[3],
+                    endereco: col[4],
+                    bairro: col[5],
+                    cidade: col[6],
+                    entrega: col[7],
+                    preco: col[8],
+                    obra: col[11]
+                };
+            }).filter(item => item !== null);
+
+            DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
+            gerarListaGeral();
         }
 
         function gerarListaGeral() {
             const menu = document.getElementById('menu-residenciais');
             menu.innerHTML = "";
             
+            if (DADOS_PLANILHA.length === 0) {
+                menu.innerHTML = "<p style='font-size:0.7rem; padding:10px;'>Nenhum dado válido na planilha.</p>";
+                return;
+            }
+
             DADOS_PLANILHA.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
-                // Salvamos o ID no botão para busca reversa
                 btn.dataset.id = item.id_path;
                 btn.innerHTML = `<span class="tag-regiao">${item.regiao.toUpperCase()}</span><strong>${item.nome}</strong>${item.cidade || ''}`;
                 
                 btn.onclick = () => {
                     marcarBotao(btn);
-
                     if (item.regiao !== regiaoAtual) solicitarTroca();
                     
                     setTimeout(() => {
@@ -214,7 +216,6 @@
                     const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
                     if(item) {
                         exibirDetalhes(item);
-                        // Sincroniza destaque do botão quando clica no mapa
                         const btn = document.querySelector(`.btRes[data-id="${item.id_path}"]`);
                         if (btn) {
                             marcarBotao(btn);
@@ -230,7 +231,6 @@
             const cA = document.getElementById('caixa-a');
             const cB = document.getElementById('caixa-b');
             const container = document.getElementById('container-mapas');
-            
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
             pathSelecionado = null;
 
