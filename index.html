@@ -13,7 +13,6 @@
 
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
 
-        /* --- LARGURAS DAS COLUNAS --- */
         .col-lateral-esq { width: 20%; border-right: 1px solid #ccc; background: #fdfdfd; }
         .col-lateral-dir { width: 28%; border-left: 1px solid #ccc; background: #fdfdfd; }
         .col-central { flex: 1; display: flex; flex-direction: column; height: 100%; }
@@ -29,30 +28,32 @@
         }
 
         .container-mapas { flex: 1; display: flex; flex-direction: column; height: calc(100% - 45px); }
-        
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        
         .pos-cima { height: 80%; background: white; padding: 5px; }
         .pos-baixo { height: 20%; background: #ffffff; cursor: pointer; padding: 5px; border-top: 2px solid #ddd; }
 
         .pos-cima svg { max-width: 100%; max-height: 100%; transform: scale(1.15); }
-        .pos-baixo svg { max-width: 100%; max-height: 100%; transform: scale(1.15); }
+        .pos-baixo svg { max-width: 100%; max-height: 100%; transform: scale(1.4); }
 
-        /* --- ESTILO DOS PATHS --- */
-        path { stroke: #fff; stroke-width: 0.5; transition: 0.2s; }
-        
-        /* Hover apenas no mapa de cima */
-        .pos-cima path:hover { fill: #444 !important; cursor: pointer; }
-        
-        /* Desativa interação no mapa de baixo */
+        /* --- ESTILOS DOS PATHS --- */
+        path { stroke: #fff; stroke-width: 0.5; transition: 0.2s; fill: #8c8c8c; }
+        .commrv { fill: rgb(6, 94, 3) !important; cursor: pointer; }
+        .semmrv { fill: #8c8c8c; pointer-events: none; } /* Bloqueia interação em cidades cinzas */
+
+        /* --- HOVER E ATIVO (LARANJA) --- */
+        /* Só funciona em quem for .commrv e estiver na caixa de cima */
+        .pos-cima .commrv:hover { 
+            fill: #ff8c00 !important; /* Laranja */
+        }
+
+        /* Classe que será aplicada via JavaScript ao clicar */
+        .path-ativo { 
+            fill: #ff8c00 !important; 
+            stroke: #000; 
+            stroke-width: 1px;
+        }
+
         .pos-baixo path { pointer-events: none; }
-
-        /* --- AS DUAS CLASSES ÚNICAS --- */
-        .commrv { fill: rgb(6, 94, 3) !important; } /* Verde MRV */
-        .semmrv { fill: #8c8c8c; }               /* Cinza Padrão */
-        
-        /* Cor padrão caso esqueça de colocar classe em algum path */
-        path { fill: #8c8c8c; }
     </style>
 </head>
 <body>
@@ -76,6 +77,8 @@
     <script src="mrv-data.js"></script>
 
     <script>
+        let pathSelecionado = null; // Guarda qual cidade está clicada
+
         function desenhar(idContainer, dados) {
             const container = document.getElementById(idContainer);
             if (!dados) return;
@@ -91,15 +94,39 @@
         function vincularEventos() {
             const caixaCima = document.querySelector('.pos-cima');
             const display = document.getElementById('display-nome');
-            const paths = caixaCima.querySelectorAll('path');
+            const paths = caixaCima.querySelectorAll('.commrv'); // Apenas cidades verdes
             
             paths.forEach(p => {
+                // Evento de Hover (Passar o mouse)
                 p.onmouseover = () => {
                     display.innerText = p.getAttribute('data-name');
                     display.style.color = "rgb(6, 94, 3)";
                 };
+
+                // Evento de Sair (Mouse out)
                 p.onmouseout = () => {
-                    display.innerText = "";
+                    // Se houver alguém selecionado, mantém o nome dele, senão limpa
+                    display.innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : "";
+                };
+
+                // Evento de Clique (Selecionar)
+                p.onclick = (e) => {
+                    e.stopPropagation(); // Impede conflitos de clique
+
+                    // Se clicar na mesma que já está ativa, desativa
+                    if (pathSelecionado === p) {
+                        p.classList.remove('path-ativo');
+                        pathSelecionado = null;
+                        display.innerText = "";
+                    } else {
+                        // Remove ativo da anterior
+                        if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
+                        
+                        // Ativa a nova
+                        p.classList.add('path-ativo');
+                        pathSelecionado = p;
+                        display.innerText = p.getAttribute('data-name');
+                    }
                 };
             });
         }
@@ -110,6 +137,9 @@
             const container = document.getElementById('container-mapas');
             const display = document.getElementById('display-nome');
 
+            // Reseta a seleção ao trocar de mapa
+            if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
+            pathSelecionado = null;
             display.innerText = "";
 
             if (caixaB.classList.contains('pos-baixo')) {
