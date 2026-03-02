@@ -4,107 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body, html { height: 100vh; overflow: hidden; background: #f0f2f5; }
-        
-        header { 
-            background: rgb(6, 94, 3); 
-            height: 50px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: white; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            position: relative; 
-            z-index: 100; 
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body, html { height: 100vh; overflow: hidden; background: #fff; }
+        header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; z-index: 10; position: relative; }
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
 
-        /* Coluna Central com Mapa */
-        .col-central { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100%; 
-            position: relative; 
-            background: white;
-        }
+        /* Coluna Central */
+        .col-central { flex: 1; display: flex; flex-direction: column; position: relative; border-right: 1px solid #ccc; }
+        .centro-topo { height: 45px; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         
-        .centro-topo { 
-            height: 45px; 
-            border-bottom: 1px solid #eee; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: bold; 
-            background: #fff;
-        }
-
         /* Container do Mapa */
-        .container-mapas { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .container-mapas { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         
-        /* BOTÕES DENTRO DO MAPA (Sua sugestão) */
-        #menu-flutuante {
+        /* BOTÕES DENTRO DA CAIXA DO MAPA */
+        #caixa-botoes-mapa {
             position: absolute;
             top: 20px;
             left: 20px;
-            width: 220px;
-            max-height: 80%;
+            width: 200px;
+            max-height: 70%;
             background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ccc;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            z-index: 50;
-            overflow-y: auto;
+            z-index: 100;
             padding: 10px;
-            border: 1px solid #ddd;
-            backdrop-filter: blur(5px);
+            overflow-y: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         .btRes { 
-            width: 100%; 
-            padding: 10px; 
-            margin-bottom: 6px; 
-            background: #fff; 
-            border: 1px solid #eee; 
-            border-left: 4px solid rgb(6, 94, 3); 
-            text-align: left; 
-            cursor: pointer; 
-            font-size: 0.75rem; 
-            transition: 0.2s; 
-            display: block;
-            border-radius: 3px;
+            width: 100%; padding: 8px; margin-bottom: 5px; background: #fff; 
+            border: 1px solid #ddd; border-left: 4px solid rgb(6, 94, 3); 
+            text-align: left; cursor: pointer; font-size: 0.75rem; display: block;
         }
-        .btRes:hover { background: #f9f9f9; border-left-color: #ff8c00; transform: scale(1.02); }
-        .btRes strong { display: block; color: #222; }
+        .btRes:hover { background: #f0f0f0; border-left-color: #ff8c00; }
+        .btRes strong { display: block; color: #333; }
 
-        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .pos-cima { height: 80%; }
-        .pos-baixo { height: 20%; cursor: pointer; border-top: 2px solid #eee; background: #fafafa; }
-        .pos-baixo:hover { background: #f0f0f0; }
+        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; }
+        .pos-cima { height: 80%; background: white; }
+        .pos-baixo { height: 20%; background: #f9f9f9; cursor: pointer; border-top: 2px solid #ddd; }
         
-        svg { max-width: 95%; max-height: 95%; transform: scale(1.15); transition: 0.3s; }
+        svg { max-width: 100%; max-height: 100%; transform: scale(1.15); }
 
-        /* Coluna Detalhes (Direita) */
-        .col-lateral-dir { 
-            width: 300px; 
-            border-left: 1px solid #ddd; 
-            background: #fff; 
-            padding: 20px; 
-            overflow-y: auto; 
-            box-shadow: -2px 0 5px rgba(0,0,0,0.05);
-        }
+        /* Coluna Direita */
+        .col-lateral-dir { width: 25%; background: #fdfdfd; padding: 20px; overflow-y: auto; }
+        .detalhe-card h2 { color: rgb(6, 94, 3); margin-bottom: 10px; font-size: 1.1rem; border-bottom: 2px solid #ff8c00; padding-bottom: 5px; }
+        .info-row { margin-bottom: 10px; font-size: 0.85rem; }
+        .info-label { font-weight: bold; color: #666; display: block; font-size: 0.7rem; text-transform: uppercase; }
 
-        .detalhe-card h2 { color: rgb(6, 94, 3); font-size: 1.2rem; margin-bottom: 15px; border-bottom: 2px solid #ff8c00; padding-bottom: 5px; }
-        .info-row { margin-bottom: 12px; font-size: 0.85rem; }
-        .info-label { font-weight: bold; color: #666; display: block; text-transform: uppercase; font-size: 0.7rem; }
-
-        /* Estilo dos MAPAS */
-        path { stroke: #fff; stroke-width: 0.6; fill: #8c8c8c; transition: 0.2s; cursor: default; }
+        /* Estilos dos Paths */
+        path { stroke: #fff; stroke-width: 0.5; fill: #8c8c8c; transition: 0.2s; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
         .pos-cima .commrv:hover, .pos-cima #grandesaopaulo:hover { fill: #ff8c00 !important; }
-        .pos-cima path.semmrv:hover { fill: #555 !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1px; }
         .pos-baixo path { pointer-events: none; }
     </style>
@@ -115,23 +68,21 @@
 
     <div class="main-wrapper">
         <main class="col-central">
-            <div class="centro-topo" id="display-nome">Selecione uma cidade</div>
+            <div class="centro-topo" id="display-nome">Selecione uma região</div>
             
             <div class="container-mapas" id="container-mapas">
-                <div id="menu-flutuante">
-                    <p style="font-size: 0.7rem; color: #888; margin-bottom: 8px; text-align: center;">Residenciais na região:</p>
-                    <div id="lista-botoes">Carregando dados...</div>
+                <div id="caixa-botoes-mapa">
+                    <p style="font-size: 0.7rem; color: #999; margin-bottom: 5px; text-align: center;">Residenciais:</p>
+                    <div id="lista-interna">Carregando...</div>
                 </div>
 
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
-                <div id="caixa-b" class="caixa-troca pos-baixo" onclick="solicitarTroca()" title="Clique para trocar de mapa"></div>
+                <div id="caixa-b" class="caixa-troca pos-baixo" onclick="solicitarTroca()"></div>
             </div>
         </main>
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
-            <div style="text-align: center; color: #999; margin-top: 50px;">
-                <p>Selecione um residencial no menu ou no mapa para ver os detalhes.</p>
-            </div>
+            <p style="color: #999; text-align: center; margin-top: 20px;">Clique em um residencial para ver detalhes.</p>
         </aside>
     </div>
 
@@ -145,61 +96,51 @@
         // COLE SEU LINK CSV AQUI
         const LINK_CSV = "SUA_URL_DO_GOOGLE_SHEETS_AQUI";
 
-        async function carregarPlanilha() {
-            try {
-                const response = await fetch(LINK_CSV);
-                const texto = await response.text();
-                const linhas = texto.split(/\r?\n/);
-                
-                DADOS_PLANILHA = linhas.slice(1).map(linha => {
-                    // Limpeza radical: remove aspas e divide por qualquer coisa que pareça separador
-                    let col = linha.split(/[,;]/).map(c => c.trim().replace(/^"|"$/g, ''));
-                    return {
-                        id_path: col[0],
-                        regiao: col[1] ? col[1].toLowerCase() : "",
-                        nome: col[2],
-                        estoque: col[3],
-                        endereco: col[4],
-                        bairro: col[5],
-                        cidade: col[6],
-                        entrega: col[7],
-                        preco: col[8],
-                        obra: col[11]
-                    };
-                }).filter(item => item.nome && item.nome.length > 2);
-
-                atualizarBotoesFlutuantes();
-            } catch (e) {
-                document.getElementById('lista-botoes').innerHTML = "Erro ao conectar.";
-            }
+        function carregarPlanilha() {
+            Papa.parse(LINK_CSV, {
+                download: true,
+                header: true, // Usa a primeira linha da planilha como nome dos campos
+                complete: function(results) {
+                    DADOS_PLANILHA = results.data;
+                    console.log("Planilha carregada:", DADOS_PLANILHA);
+                    atualizarBotoes();
+                },
+                error: function() {
+                    document.getElementById('lista-interna').innerText = "Erro ao ler CSV.";
+                }
+            });
         }
 
-        function atualizarBotoesFlutuantes() {
-            const container = document.getElementById('lista-botoes');
-            container.innerHTML = "";
+        function atualizarBotoes() {
+            const lista = document.getElementById('lista-interna');
+            lista.innerHTML = "";
             
-            // Filtro por região (gsp/esp)
-            const filtrados = DADOS_PLANILHA.filter(item => item.regiao.includes(regiaoAtual));
+            // Filtra pela coluna "Regiao" (tem que ser igual ao nome na sua planilha)
+            const filtrados = DADOS_PLANILHA.filter(item => {
+                const r = item.Regiao || item.regiao || "";
+                return r.toLowerCase().trim() === regiaoAtual;
+            });
 
-            if(filtrados.length === 0) {
-                container.innerHTML = "<p style='font-size:0.7rem; color:#999;'>Nenhum residencial nesta região.</p>";
+            if (filtrados.length === 0) {
+                lista.innerHTML = "<p style='font-size:0.7rem;'>Nenhum registro.</p>";
                 return;
             }
 
             filtrados.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
-                btn.innerHTML = `<strong>${item.nome}</strong>${item.cidade}`;
+                // Usa os nomes exatos das suas colunas: btRes e Cidade
+                btn.innerHTML = `<strong>${item.btRes || 'Sem nome'}</strong>${item.Cidade || ''}`;
                 
                 btn.onclick = () => {
-                    const el = document.getElementById(item.id_path);
+                    const el = document.getElementById(item.IDsDosPaths);
                     if(el) {
                         if(el.closest('.pos-baixo')) solicitarTroca();
                         el.dispatchEvent(new Event('click'));
                     }
                     exibirDetalhes(item);
                 };
-                container.appendChild(btn);
+                lista.appendChild(btn);
             });
         }
 
@@ -207,12 +148,11 @@
             const painel = document.getElementById('detalhes-residencial');
             painel.innerHTML = `
                 <div class="detalhe-card">
-                    <h2>${item.nome}</h2>
-                    <div class="info-row"><span class="info-label">📍 Endereço</span>${item.endereco || ''}<br>${item.bairro || ''} - ${item.cidade || ''}</div>
-                    <div class="info-row"><span class="info-label">💰 Menor Preço</span>R$ ${item.preco || 'Consulte'}</div>
-                    <div class="info-row"><span class="info-label">🏗️ Obra</span>${item.obra || '---'}</div>
-                    <div class="info-row"><span class="info-label">📅 Entrega</span>${item.entrega || '---'}</div>
-                    <div class="info-row"><span class="info-label">📊 Estoque</span>${item.estoque || 'Disponível'}</div>
+                    <h2>${item.btRes}</h2>
+                    <div class="info-row"><span class="info-label">📍 Endereço</span>${item.Endereco || ''}, ${item.Bairro || ''} - ${item.Cidade || ''}</div>
+                    <div class="info-row"><span class="info-label">💰 Valor</span>R$ ${item.MenorPreco || item.Preco || 'Sob consulta'}</div>
+                    <div class="info-row"><span class="info-label">🏗️ Status</span>${item.Obra || ''}</div>
+                    <div class="info-row"><span class="info-label">📅 Entrega</span>${item.PrevisaoDeEntrega || ''}</div>
                 </div>`;
         }
 
@@ -231,25 +171,21 @@
             paths.forEach(p => {
                 p.onmouseover = () => {
                     display.innerText = p.getAttribute('data-name');
-                    display.style.color = (p.classList.contains('commrv') || p.id === "grandesaopaulo") ? "rgb(6, 94, 3)" : "#444";
                 };
-                p.onmouseout = () => { display.innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : "Selecione uma cidade"; };
+                p.onmouseout = () => { display.innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : "Selecione uma região"; };
                 
                 p.onclick = (e) => {
                     e.stopPropagation();
                     if (p.id === "grandesaopaulo") { solicitarTroca(); return; }
                     
                     if (p.classList.contains('commrv')) {
-                        if (pathSelecionado === p) {
-                            p.classList.remove('path-ativo');
-                            pathSelecionado = null;
-                        } else {
-                            if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
-                            p.classList.add('path-ativo');
-                            pathSelecionado = p;
-                            const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
-                            if(item) exibirDetalhes(item);
-                        }
+                        if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
+                        p.classList.add('path-ativo');
+                        pathSelecionado = p;
+                        
+                        // Busca na planilha pelo ID do path
+                        const item = DADOS_PLANILHA.find(d => d.IDsDosPaths === p.id);
+                        if(item) exibirDetalhes(item);
                     }
                 };
             });
@@ -267,7 +203,7 @@
             if (caixaB.classList.contains('pos-baixo')) {
                 caixaB.classList.replace('pos-baixo', 'pos-cima');
                 caixaA.classList.replace('pos-cima', 'pos-baixo');
-                container.appendChild(caixaA); // Garante a ordem correta
+                container.appendChild(caixaA); 
                 caixaB.onclick = null;
                 caixaA.onclick = solicitarTroca;
             } else {
@@ -278,7 +214,7 @@
                 caixaB.onclick = solicitarTroca;
             }
             vincularEventos();
-            atualizarBotoesFlutuantes();
+            atualizarBotoes();
         }
 
         window.onload = () => {
