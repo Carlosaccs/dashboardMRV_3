@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP - Final Fix</title>
+    <title>Dashboard MRV SP - Mapa Ajustado</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
@@ -11,7 +11,7 @@
         header { 
             background: rgb(6, 94, 3); height: 50px; display: flex; 
             align-items: center; justify-content: center; color: white; 
-            z-index: 100; position: relative; font-size: 0.9rem;
+            z-index: 100; position: relative;
         }
         
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
@@ -21,70 +21,69 @@
         .col-central { width: 47%; display: flex; flex-direction: column; background: #fff; position: relative; }
         .col-lateral-dir { width: 33%; border-left: 1px solid #ccc; background: #fdfdfd; padding: 15px; overflow-y: auto; }
 
-        /* Botões Laterais */
-        .btRes { 
-            width: 100%; padding: 8px 10px; margin-bottom: 4px; background: #fff; border: 1px solid #ddd; 
-            border-left: 5px solid rgb(6, 94, 3); text-align: left; cursor: pointer; font-size: 0.72rem; 
-            border-radius: 4px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .btRes:hover { background: #f0f0f0; border-left-color: #ff8c00; }
-        .btRes.ativo { background: #fff5e6 !important; border-color: #ff8c00 !important; border-left-color: #ff8c00 !important; font-weight: bold; }
-        
-        .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; margin-left: 8px; }
-
         /* Centro e Mapas */
         .centro-topo { 
             height: 40px; border-bottom: 1px solid #ccc; display: flex; 
             align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;
         }
         
-        .container-mapas { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+        .container-mapas { flex: 1; display: flex; flex-direction: column; position: relative; }
         
         .caixa-troca { 
-            width: 100%; display: flex; align-items: center; justify-content: center; 
-            background: white; overflow: hidden; position: relative;
+            width: 100%; position: relative; overflow: hidden; background: white;
+            display: flex; align-items: center; justify-content: center;
         }
         
-        .pos-cima { height: 75%; padding: 10px; }
-        
-        /* Caixa de baixo agora aceita clique em qualquer lugar */
-        .pos-baixo { 
-            height: 25%; cursor: pointer; border-top: 2px solid #ddd; 
-            background: #fafafa; padding: 5px; transition: 0.3s;
-        }
+        /* Forçando os mapas a ficarem dentro das caixas */
+        .pos-cima { height: 75%; z-index: 5; border-bottom: 1px solid #eee; }
+        .pos-baixo { height: 25%; z-index: 10; cursor: pointer; background: #f9f9f9; }
         .pos-baixo:hover { background: #f0f0f0; }
-        
-        /* Ajuste do SVG para caber 100% na moldura */
-        svg { 
-            width: 100%; height: 100%; max-width: 100%; max-height: 100%; 
-            display: block; pointer-events: none; 
+        .pos-baixo::after { 
+            content: "CLIQUE PARA TROCAR O MAPA"; position: absolute; bottom: 5px; right: 10px; 
+            font-size: 0.6rem; color: #999; font-weight: bold; 
+        }
+
+        /* SVG Reset para não estourar */
+        svg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            padding: 10px;
+            pointer-events: none; /* Deixa o clique passar para os paths */
         }
         
-        path { stroke: #fff; stroke-width: 0.5; fill: #8c8c8c; transition: 0.2s; cursor: pointer; pointer-events: all; }
+        path { stroke: #fff; stroke-width: 0.6; fill: #8c8c8c; transition: 0.2s; cursor: pointer; pointer-events: all; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
-        .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
+        .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.5px; }
 
-        /* Ficha Técnica Direita */
+        /* Botões e Ficha Técnica */
+        .btRes { 
+            width: 100%; padding: 8px 10px; margin-bottom: 4px; background: #fff; border: 1px solid #ddd; 
+            border-left: 5px solid rgb(6, 94, 3); text-align: left; cursor: pointer; font-size: 0.72rem; 
+            border-radius: 4px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .btRes:hover { background: #f0f0f0; }
+        .btRes.ativo { background: #fff5e6 !important; border-color: #ff8c00 !important; border-left-color: #ff8c00 !important; font-weight: bold; }
+        
+        .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; }
         .titulo-vizinhos { font-size: 0.75rem; font-weight: bold; color: rgb(6, 94, 3); margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
         
         .box-dica { 
-            background: #f1f9f1; border-left: 5px solid #388e3c; padding: 8px 12px; 
-            font-size: 0.8rem; margin-bottom: 15px; border-radius: 4px; color: #1b5e20;
+            background: #f1f9f1; border-left: 5px solid #388e3c; padding: 10px; 
+            font-size: 0.8rem; margin-bottom: 12px; border-radius: 4px; color: #1b5e20;
             display: flex; align-items: center; gap: 8px;
         }
 
         .ficha-card { 
             border: 1px solid #eee; border-left: 5px solid #ff8c00; padding: 15px; 
-            border-radius: 4px; background: white; margin-bottom: 10px;
+            border-radius: 4px; background: white; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .ficha-nome { font-size: 1rem; color: #065e03; font-weight: bold; margin-bottom: 12px; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .ficha-nome { font-size: 1rem; color: #065e03; font-weight: bold; margin-bottom: 10px; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         
-        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
-        .item-info { font-size: 0.8rem; color: #333; line-height: 1.3; }
-        .item-info strong { display: block; font-size: 0.65rem; color: #999; text-transform: uppercase; margin-bottom: 1px; }
-
-        .obs-area { margin-top: 10px; padding-top: 8px; border-top: 1px solid #eee; font-size: 0.8rem; color: #444; }
+        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+        .item-info { font-size: 0.8rem; color: #333; }
+        .item-info strong { display: block; font-size: 0.65rem; color: #999; text-transform: uppercase; }
 
         .btn-acao { 
             width: 100%; padding: 10px; margin-top: 6px; border: none; border-radius: 5px; 
@@ -111,8 +110,8 @@
         </main>
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
-            <div style="text-align: center; color: #999; margin-top: 50px; font-size: 0.8rem;">
-                <p>Aguardando seleção...</p>
+            <div style="text-align: center; color: #999; margin-top: 50px;">
+                <p>Selecione um residencial.</p>
             </div>
         </aside>
     </div>
@@ -148,7 +147,7 @@
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaGeral();
             } catch (e) {
-                document.getElementById('menu-residenciais').innerText = "Erro ao conectar.";
+                document.getElementById('menu-residenciais').innerText = "Erro ao carregar.";
             }
         }
 
@@ -198,7 +197,7 @@
                          </button>`;
             });
 
-            html += `<div style="margin-top:15px;">`;
+            html += `<div style="margin-top:10px;">`;
             if (item.dica && item.dica !== "---") {
                 html += `<div class="box-dica">💡 <strong>Dica:</strong> ${item.dica}</div>`;
             }
@@ -214,11 +213,10 @@
                         <div class="item-info">📐 <strong>Plantas</strong> ${item.plantas || '---'}</div>
                         <div class="item-info">🏗️ <strong>Obra</strong> ${item.obra || '0%'}</div>
                     </div>
-
-                    ${item.obs && item.obs !== "---" ? `<div class="obs-area">📝 <strong>Diferenciais/Obs:</strong><br>${item.obs}</div>` : ''}
+                    ${item.obs && item.obs !== "---" ? `<div style="margin-top:10px; padding-top:8px; border-top:1px solid #eee; font-size:0.8rem;">📝 <strong>Obs:</strong> ${item.obs}</div>` : ''}
                 </div>`;
 
-            if (item.book) html += `<button class="btn-acao btn-book" onclick="window.open('${item.book}')">📄 Copiar Book do Cliente</button>`;
+            if (item.book) html += `<button class="btn-acao btn-book" onclick="window.open('${item.book}')">📄 Copiar Book</button>`;
             if (item.video1) html += `<button class="btn-acao btn-video" onclick="window.open('${item.video1}')">🎬 Copiar Vídeo 1</button>`;
             if (item.video2) html += `<button class="btn-acao btn-video" onclick="window.open('${item.video2}')">🎬 Copiar Vídeo 2</button>`;
 
@@ -237,7 +235,6 @@
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
             const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b');
             
-            // Troca as classes e o onclick para garantir que a caixa de baixo sempre tenha o evento
             if (cA.classList.contains('pos-cima')) {
                 cA.classList.replace('pos-cima', 'pos-baixo');
                 cA.onclick = trocarMapas;
@@ -261,11 +258,9 @@
             container.innerHTML = `<svg viewBox="${dados.viewBox}">${paths}</svg>`;
         }
 
-        // Delegador de cliques (apenas para o mapa de cima)
         document.getElementById('container-mapas').addEventListener('click', (e) => {
             const p = e.target;
-            if (p.tagName !== 'path') return;
-            if (p.closest('.pos-baixo')) return; // A DIV já cuida disso agora
+            if (p.tagName !== 'path' || p.closest('.pos-baixo')) return;
             
             if (p.id === "grandesaopaulo") {
                 trocarMapas();
