@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP - Navegação Travada</title>
+    <title>Dashboard MRV SP</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
@@ -64,7 +64,7 @@
 </head>
 <body>
 
-    <header><h1>Dashboard MRV - São Paulo</h1></header>
+    <header><h1>Residenciais MRV em São Paulo</h1></header>
 
     <div class="main-wrapper">
         <aside class="col-lateral-esq" id="menu-residenciais">Carregando...</aside>
@@ -153,9 +153,10 @@
 
         function exibirPainelDireito(item, nomeCidade) {
             const painel = document.getElementById('detalhes-residencial');
-            let html = `<div style="font-size:0.7rem; font-weight:bold; color:#065e03; margin-bottom:8px; text-transform:uppercase;">Também em ${nomeCidade}:</div>`;
-            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
+            // Título atualizado conforme solicitação: MRV em [Nome da Cidade]
+            let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
             
+            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
             vizinhos.forEach(v => {
                 html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v)}, null)'>
                             <strong>${v.nome}</strong> ${formatarEstoque(v.estoque)}
@@ -171,12 +172,11 @@
                     <div class="item-info"><strong>🏗️ Obra</strong>${item.obra || '0%'}</div>
                     <div class="item-info"><strong>📊 Estoque</strong>${item.estoque} unidades</div>
                     <button class="btn-acao btn-book" onclick="window.open('${item.link_book}', '_blank')">📄 Abrir Book</button>
-                    <button class="btn-acao btn-video" onclick="alert('Copiado!')">🎥 Copiar Vídeo</button>
+                    <button class="btn-acao btn-video" onclick="alert('Link em breve!')">🎥 Copiar Vídeo</button>
                 </div>`;
             painel.innerHTML = html;
         }
 
-        // Função ajustada: Só destaca se houver residencial
         function destacarNoMapa(el) {
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
             el.classList.add('path-ativo');
@@ -235,12 +235,8 @@
             if (e.target.tagName === 'path' && e.target.closest('.pos-cima')) {
                 const p = e.target;
                 if (p.id === "grandesaopaulo") { solicitarTroca(); return; }
-                
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
-                // CORREÇÃO: Só executa a ação se a cidade tiver MRV (for verde)
-                if(item) {
-                    selecionarResidencial(item, null);
-                }
+                if(item) selecionarResidencial(item, null);
             }
         });
 
