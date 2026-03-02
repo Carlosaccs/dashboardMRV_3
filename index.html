@@ -46,14 +46,14 @@
         .info-row { margin-bottom: 10px; font-size: 0.85rem; color: #444; }
         .info-label { font-weight: bold; color: #888; font-size: 0.7rem; text-transform: uppercase; display: block; }
 
-        /* Configuração dos Paths (Mapas) */
-        path { stroke: #fff; stroke-width: 0.5; fill: #d1d1d1; transition: 0.2s; cursor: default; } /* Cursor padrão para tudo */
+        /* Mapas */
+        path { stroke: #fff; stroke-width: 0.5; fill: #8c8c8c; transition: 0.2s; cursor: default; } /* Cinza original restaurado */
         
-        /* Apenas quem tem MRV ou o botão de troca tem interatividade */
+        /* Cidades com MRV */
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer !important; }
         .pos-cima .commrv:hover, .pos-cima #grandesaopaulo:hover { fill: #ff8c00 !important; }
         
-        /* Destaque Ativo */
+        /* Destaque Ativo (Laranja Fixo) */
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1px; }
         .pos-baixo path { pointer-events: none; }
     </style>
@@ -139,9 +139,7 @@
                     
                     setTimeout(() => {
                         const el = document.getElementById(item.id_path);
-                        if(el && el.classList.contains('commrv')) {
-                            destacarNoMapa(el);
-                        }
+                        if(el) destacarNoMapa(el);
                         exibirDetalhes(item);
                     }, 150);
                 };
@@ -180,12 +178,11 @@
             const display = document.getElementById('display-nome');
             
             paths.forEach(p => {
-                // Hover apenas para cidades MRV ou botão de troca
+                // HOVER UNIVERSAL: Funciona para todas as cidades
                 p.onmouseover = () => { 
-                    if(p.classList.contains('commrv') || p.id === "grandesaopaulo") {
-                        display.innerText = p.getAttribute('data-name');
-                    }
+                    display.innerText = p.getAttribute('data-name');
                 };
+                
                 p.onmouseout = () => { 
                     display.innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : "Selecione uma região"; 
                 };
@@ -196,7 +193,7 @@
                     // Se for o botão de troca
                     if (p.id === "grandesaopaulo") { solicitarTroca(); return; }
                     
-                    // BLOQUEIO: Se não tiver a classe 'commrv', não faz nada
+                    // BLOQUEIO: Se não tiver a classe 'commrv', não deixa fixar laranja nem abrir detalhes
                     if (!p.classList.contains('commrv')) return;
 
                     destacarNoMapa(p);
