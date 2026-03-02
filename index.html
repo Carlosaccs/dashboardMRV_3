@@ -31,7 +31,7 @@
         
         .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; }
         .estoque-baixo { color: #d93025 !important; }
-        .estoque-vendido { text-decoration: line-through; color: #999 !important; }
+        .estoque-vendido { text-decoration: line-through; color: #999 !important; background: #f0f0f0; padding: 2px 4px; border-radius: 2px; }
 
         .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
         .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; }
@@ -53,7 +53,11 @@
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
-        .ficha-nome { font-size: 0.9rem; color: #ff8c00; font-weight: bold; margin-bottom: 10px; display: block; text-transform: uppercase; }
+        
+        /* Título laranja que agora espelha o botão */
+        .ficha-nome-wrapper { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; width: 100%; }
+        .ficha-nome { font-size: 0.85rem; color: #ff8c00; font-weight: bold; text-transform: uppercase; }
+        
         .item-info { font-size: 0.75rem; color: #333; margin-bottom: 8px; line-height: 1.2; }
         .item-info strong { font-size: 0.65rem; color: #999; text-transform: uppercase; display: block; margin-bottom: 2px; }
 
@@ -153,7 +157,6 @@
 
         function exibirPainelDireito(item, nomeCidade) {
             const painel = document.getElementById('detalhes-residencial');
-            // Título atualizado conforme solicitação: MRV em [Nome da Cidade]
             let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
             
             const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
@@ -163,16 +166,20 @@
                          </button>`;
             });
 
+            // Título laranja agora contém o mesmo HTML do botão (Nome + Estoque)
             html += `
                 <div class="ficha-card">
-                    <span class="ficha-nome">${item.nome}</span>
+                    <div class="ficha-nome-wrapper">
+                        <span class="ficha-nome">${item.nome}</span>
+                        ${formatarEstoque(item.estoque)}
+                    </div>
                     <div class="item-info"><strong>📍 Localização</strong>${item.endereco}<br>${item.bairro} - ${item.cidade}</div>
                     <div class="item-info"><strong>💰 Valor Sugerido</strong>R$ ${item.preco || 'Sob consulta'}</div>
                     <div class="item-info"><strong>📅 Entrega</strong>${item.entrega}</div>
                     <div class="item-info"><strong>🏗️ Obra</strong>${item.obra || '0%'}</div>
                     <div class="item-info"><strong>📊 Estoque</strong>${item.estoque} unidades</div>
                     <button class="btn-acao btn-book" onclick="window.open('${item.link_book}', '_blank')">📄 Abrir Book</button>
-                    <button class="btn-acao btn-video" onclick="alert('Link em breve!')">🎥 Copiar Vídeo</button>
+                    <button class="btn-acao btn-video" onclick="alert('Copiado!')">🎥 Copiar Vídeo</button>
                 </div>`;
             painel.innerHTML = html;
         }
