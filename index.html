@@ -32,30 +32,31 @@
         
         .pos-cima { height: 80%; background: white; padding: 5px; }
         
-        /* Caixa de baixo com o scale(1.15) que você ajustou */
+        /* Mantendo o scale(1.15) solicitado */
         .pos-baixo { height: 20%; background: #ffffff; cursor: pointer; padding: 5px; border-top: 2px solid #ddd; }
         .pos-baixo svg { max-width: 100%; max-height: 100%; transform: scale(1.15); }
 
         .pos-cima svg { max-width: 100%; max-height: 100%; transform: scale(1.15); }
 
         /* --- ESTILOS DOS PATHS --- */
-        path { stroke: #fff; stroke-width: 0.5; transition: 0.2s; fill: #8c8c8c; }
+        path { stroke: #fff; stroke-width: 0.5; transition: 0.2s; fill: #8c8c8c; pointer-events: auto; }
         
-        /* Cidades com MRV e o atalho da Grande SP */
+        /* Cores base */
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
-        
-        .semmrv { fill: #8c8c8c; pointer-events: none; }
+        .semmrv { fill: #8c8c8c; cursor: default; }
 
-        .pos-cima .commrv:hover, .pos-cima #grandesaopaulo:hover { 
-            fill: #ff8c00 !important; 
-        }
+        /* Hover: Cinzas ficam escuros, Verdes ficam Laranja */
+        .pos-cima .semmrv:hover { fill: #444 !important; }
+        .pos-cima .commrv:hover, .pos-cima #grandesaopaulo:hover { fill: #ff8c00 !important; }
 
+        /* Classe de seleção (Apenas para Verdes) */
         .path-ativo { 
             fill: #ff8c00 !important; 
             stroke: #000; 
             stroke-width: 1px;
         }
 
+        /* Impede qualquer hover no mapa de baixo para não confundir */
         .pos-baixo path { pointer-events: none; }
     </style>
 </head>
@@ -98,38 +99,48 @@
             const caixaCima = document.querySelector('.pos-cima');
             const display = document.getElementById('display-nome');
             
-            // Agora incluímos o ID 'grandesaopaulo' na lista de interativos
-            const paths = caixaCima.querySelectorAll('.commrv, #grandesaopaulo');
+            // Agora pegamos TODOS os paths para o hover funcionar em todos
+            const paths = caixaCima.querySelectorAll('path');
             
             paths.forEach(p => {
+                // HOVER: Funciona para todos (cinzas e verdes)
                 p.onmouseover = () => {
                     display.innerText = p.getAttribute('data-name');
-                    display.style.color = "rgb(6, 94, 3)";
+                    // Se for verde ou atalho, usa cor destaque no texto
+                    if(p.classList.contains('commrv') || p.id === "grandesaopaulo") {
+                        display.style.color = "rgb(6, 94, 3)";
+                    } else {
+                        display.style.color = "#444";
+                    }
                 };
 
                 p.onmouseout = () => {
                     display.innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : "";
+                    display.style.color = pathSelecionado ? "rgb(6, 94, 3)" : "black";
                 };
 
+                // CLIQUE: Comportamento diferenciado
                 p.onclick = (e) => {
                     e.stopPropagation();
 
-                    // FUNÇÃO ESPECIAL: Se clicar no ID grandesaopaulo, troca o mapa
+                    // 1. Atalho de Troca
                     if (p.id === "grandesaopaulo") {
                         solicitarTroca();
-                        return; // Para a execução aqui
+                        return;
                     }
 
-                    // Lógica normal de seleção para as outras cidades
-                    if (pathSelecionado === p) {
-                        p.classList.remove('path-ativo');
-                        pathSelecionado = null;
-                        display.innerText = "";
-                    } else {
-                        if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
-                        p.classList.add('path-ativo');
-                        pathSelecionado = p;
-                        display.innerText = p.getAttribute('data-name');
+                    // 2. Apenas cidades commrv podem ser selecionadas (ficar laranja)
+                    if (p.classList.contains('commrv')) {
+                        if (pathSelecionado === p) {
+                            p.classList.remove('path-ativo');
+                            pathSelecionado = null;
+                            display.innerText = "";
+                        } else {
+                            if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
+                            p.classList.add('path-ativo');
+                            pathSelecionado = p;
+                            display.innerText = p.getAttribute('data-name');
+                        }
                     }
                 };
             });
