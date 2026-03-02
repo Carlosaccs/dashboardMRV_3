@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP - Interativo</title>
+    <title>Dashboard MRV SP</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         
@@ -25,8 +25,8 @@
             align-items: center; 
             justify-content: center; 
             font-weight: bold; 
-            /*text-transform: uppercase; ---- ESSE COMANDO TRANSFORMA O TEXTO ACIMA DOS MAPAS EM MAIÚSCULAS ---*/
             transition: color 0.3s;
+            min-height: 45px; /* Garante que a caixa não suma se estiver vazia */
         }
 
         .container-mapas { flex: 1; display: flex; flex-direction: column; height: calc(100% - 45px); }
@@ -46,7 +46,6 @@
         .pos-cima svg { max-width: 100%; max-height: 100%; transform: scale(1.15); }
         .pos-baixo svg { max-width: 100%; max-height: 100%; transform: scale(1.15); }
 
-        /* --- ESTILO DOS PATHS E HOVER --- */
         path { fill: #888; stroke: #fff; stroke-width: 0.5; transition: 0.2s; }
 
         /* Hover apenas no mapa de cima */
@@ -68,7 +67,7 @@
         <aside class="col-lateral-esq"></aside>
         
         <main class="col-central">
-            <div class="centro-topo" id="display-nome">MAPA DA GRANDE SÃO PAULO</div>
+            <div class="centro-topo" id="display-nome"></div>
             
             <div class="container-mapas" id="container-mapas">
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
@@ -82,7 +81,6 @@
     <script src="mrv-data.js"></script>
 
     <script>
-        // Função para desenhar e agora inclui o atributo data-name
         function desenhar(idContainer, dados) {
             const container = document.getElementById(idContainer);
             if (!dados) return;
@@ -93,25 +91,25 @@
             
             container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform}">${paths}</g></svg>`;
 
-            // Adiciona interação apenas se for a caixa principal (de cima)
             vincularEventos();
         }
 
         function vincularEventos() {
             const caixaCima = document.querySelector('.pos-cima');
             const display = document.getElementById('display-nome');
-            const tituloPadrao = caixaCima.innerHTML.includes('adamantina') ? "MAPA DO INTERIOR" : "MAPA DA GRANDE SÃO PAULO";
+            
+            // Alterado: O título padrão agora é vazio
+            const tituloPadrao = ""; 
 
             const paths = caixaCima.querySelectorAll('path');
             
             paths.forEach(p => {
                 p.onmouseover = () => {
                     display.innerText = p.getAttribute('data-name');
-                    display.style.color = "rgb(6, 94, 3)"; // Muda cor do texto no hover
+                    display.style.color = "rgb(6, 94, 3)";
                 };
                 p.onmouseout = () => {
                     display.innerText = tituloPadrao;
-                    display.style.color = "black";
                 };
             });
         }
@@ -120,6 +118,10 @@
             const caixaA = document.getElementById('caixa-a');
             const caixaB = document.getElementById('caixa-b');
             const container = document.getElementById('container-mapas');
+            const display = document.getElementById('display-nome');
+
+            // Limpa o texto ao trocar de mapa
+            display.innerText = "";
 
             if (caixaB.classList.contains('pos-baixo')) {
                 caixaB.classList.replace('pos-baixo', 'pos-cima');
@@ -134,7 +136,7 @@
                 caixaA.onclick = null;
                 caixaB.onclick = solicitarTroca;
             }
-            vincularEventos(); // Revincula os nomes ao trocar
+            vincularEventos();
         }
 
         window.onload = () => {
