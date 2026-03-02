@@ -26,8 +26,8 @@
         /* Botões Ultra Compactos */
         .btRes { 
             width: 100%; 
-            padding: 4px 8px; /* Reduzido respiro interno */
-            margin-bottom: 3px; /* Reduzido espaço entre botões */
+            padding: 3px 8px; 
+            margin-bottom: 2px; 
             background: #fff; 
             border: 1px solid #eee; 
             border-left: 4px solid rgb(6, 94, 3); 
@@ -35,21 +35,20 @@
             cursor: pointer; 
             font-size: 0.7rem; 
             border-radius: 2px; 
-            transition: 0.1s;
             display: block;
+            transition: 0.1s;
         }
         .btRes:hover { background: #f9f9f9; border-left-color: #ff8c00; }
         
-        /* Estado ATIVO do botão */
+        /* Destaque do Botão Selecionado */
         .btn-ativo { 
             background: #fff5e6 !important; 
             border-color: #ff8c00 !important; 
             border-left-color: #ff8c00 !important; 
             font-weight: bold;
-            box-shadow: inset 0 0 5px rgba(255,140,0,0.1);
         }
 
-        .btRes strong { display: block; color: #333; text-transform: uppercase; font-size: 0.65rem; line-height: 1; }
+        .btRes strong { display: block; color: #333; text-transform: uppercase; font-size: 0.62rem; line-height: 1; }
         .tag-regiao { font-size: 0.55rem; background: #eee; padding: 1px 3px; border-radius: 2px; float: right; color: #888; }
 
         /* Detalhes */
@@ -91,23 +90,27 @@
 
     <script>
         let pathSelecionado = null;
-        let botaoSelecionado = null; // Para controlar o destaque do botão
+        let botaoSelecionado = null;
         let regiaoAtual = "gsp"; 
         let DADOS_PLANILHA = [];
 
-        const LINK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv";
+        // Adicionado cache para evitar erro de conexão em refresh rápido
+        const LINK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv&cache=" + new Date().getTime();
 
         async function carregarPlanilha() {
             try {
                 const response = await fetch(LINK_CSV);
+                if (!response.ok) throw new Error("Erro HTTP");
+                
                 const texto = await response.text();
                 const linhas = texto.split(/\r?\n/);
 
-                DADOS_PLANILHA = linhas.slice(1).map(linha => {
+                DADOS_PLANILHA = linhas.map(linha => {
                     let col = linha.split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
                     
-                    // FILTRO FLEXÍVEL: Ignora se for link, pdf ou se a coluna de nome for muito curta
-                    if (!col[0] || col[0].length < 3 || col[0].includes('http') || col[2].includes('.pdf') || col[2].length < 3) {
+                    // Filtro para garantir que pegamos apenas linhas com dados válidos
+                    // Coluna 0 deve ter o ID do path e Coluna 2 o nome do Residencial
+                    if (!col[0] || col[0].length < 3 || col[0].toLowerCase().includes('pdf') || col[0].toLowerCase().includes('id')) {
                         return null;
                     }
 
@@ -125,10 +128,13 @@
                     };
                 }).filter(item => item !== null);
 
+                // Ordem alfabética pelo nome
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaGeral();
             } catch (e) {
-                document.getElementById('menu-residenciais').innerText = "Erro na conexão.";
+                console.error(e);
+                document.getElementById('menu-residenciais').innerHTML = 
+                    `<p style="color:red; font-size:0.7rem;">Erro ao carregar dados.<br>Verifique se a planilha está publicada.</p>`;
             }
         }
 
@@ -139,24 +145,34 @@
             DADOS_PLANILHA.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
+                // Salvamos o ID no botão para busca reversa
+                btn.dataset.id = item.id_path;
                 btn.innerHTML = `<span class="tag-regiao">${item.regiao.toUpperCase()}</span><strong>${item.nome}</strong>${item.cidade || ''}`;
                 
                 btn.onclick = () => {
-                    // Gerenciar destaque do botão
-                    if (botaoSelecionado) botaoSelecionado.classList.remove('btn-ativo');
-                    btn.classList.add('btn-ativo');
-                    botaoSelecionado = btn;
+                    marcarBotao(btn);
 
                     if (item.regiao !== regiaoAtual) solicitarTroca();
                     
                     setTimeout(() => {
                         const el = document.getElementById(item.id_path);
-                        if(el) el.dispatchEvent(new Event('click'));
+                        if(el) {
+                            if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
+                            el.classList.add('path-ativo');
+                            pathSelecionado = el;
+                            document.getElementById('display-nome').innerText = el.getAttribute('data-name');
+                        }
                         exibirDetalhes(item);
                     }, 150);
                 };
                 menu.appendChild(btn);
             });
+        }
+
+        function marcarBotao(btn) {
+            if (botaoSelecionado) botaoSelecionado.classList.remove('btn-ativo');
+            btn.classList.add('btn-ativo');
+            botaoSelecionado = btn;
         }
 
         function exibirDetalhes(item) {
@@ -198,16 +214,12 @@
                     const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
                     if(item) {
                         exibirDetalhes(item);
-                        // Sincronizar o botão da esquerda se o clique foi no mapa
-                        const bts = document.querySelectorAll('.btRes');
-                        bts.forEach(b => {
-                            if (b.innerText.includes(item.nome.toUpperCase())) {
-                                if (botaoSelecionado) botaoSelecionado.classList.remove('btn-ativo');
-                                b.classList.add('btn-ativo');
-                                b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                                botaoSelecionado = b;
-                            }
-                        });
+                        // Sincroniza destaque do botão quando clica no mapa
+                        const btn = document.querySelector(`.btRes[data-id="${item.id_path}"]`);
+                        if (btn) {
+                            marcarBotao(btn);
+                            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
                     }
                 };
             });
