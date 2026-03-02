@@ -25,8 +25,7 @@
             align-items: center; 
             justify-content: center; 
             font-weight: bold; 
-            transition: color 0.3s;
-            min-height: 45px; /* Garante que a caixa não suma se estiver vazia */
+            min-height: 45px;
         }
 
         .container-mapas { flex: 1; display: flex; flex-direction: column; height: calc(100% - 45px); }
@@ -34,29 +33,26 @@
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         
         .pos-cima { height: 80%; background: white; padding: 5px; }
-        
-        .pos-baixo { 
-            height: 20%; 
-            background: #ffffff; 
-            cursor: pointer; 
-            padding: 5px; 
-            border-top: 2px solid #ddd;
-        }
+        .pos-baixo { height: 20%; background: #ffffff; cursor: pointer; padding: 5px; border-top: 2px solid #ddd; }
 
         .pos-cima svg { max-width: 100%; max-height: 100%; transform: scale(1.15); }
         .pos-baixo svg { max-width: 100%; max-height: 100%; transform: scale(1.15); }
 
-        path { fill: #888; stroke: #fff; stroke-width: 0.5; transition: 0.2s; }
-
+        /* --- ESTILO DOS PATHS --- */
+        path { stroke: #fff; stroke-width: 0.5; transition: 0.2s; }
+        
         /* Hover apenas no mapa de cima */
         .pos-cima path:hover { fill: #444 !important; cursor: pointer; }
-
-        /* Desativa interação no mapa de baixo para permitir o clique de troca */
+        
+        /* Desativa interação no mapa de baixo */
         .pos-baixo path { pointer-events: none; }
 
-        .semmrvZO { fill: #8c8c8c; }
-        .commrvZL { fill: #006400; }
-        .semmrv { fill: #8c8c8c; }
+        /* --- AS DUAS CLASSES ÚNICAS --- */
+        .commrv { fill: rgb(6, 94, 3) !important; } /* Verde MRV */
+        .semmrv { fill: #8c8c8c; }               /* Cinza Padrão */
+        
+        /* Cor padrão caso esqueça de colocar classe em algum path */
+        path { fill: #8c8c8c; }
     </style>
 </head>
 <body>
@@ -68,7 +64,6 @@
         
         <main class="col-central">
             <div class="centro-topo" id="display-nome"></div>
-            
             <div class="container-mapas" id="container-mapas">
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
                 <div id="caixa-b" class="caixa-troca pos-baixo" onclick="solicitarTroca()"></div>
@@ -90,17 +85,12 @@
             ).join('');
             
             container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform}">${paths}</g></svg>`;
-
             vincularEventos();
         }
 
         function vincularEventos() {
             const caixaCima = document.querySelector('.pos-cima');
             const display = document.getElementById('display-nome');
-            
-            // Alterado: O título padrão agora é vazio
-            const tituloPadrao = ""; 
-
             const paths = caixaCima.querySelectorAll('path');
             
             paths.forEach(p => {
@@ -109,7 +99,7 @@
                     display.style.color = "rgb(6, 94, 3)";
                 };
                 p.onmouseout = () => {
-                    display.innerText = tituloPadrao;
+                    display.innerText = "";
                 };
             });
         }
@@ -120,7 +110,6 @@
             const container = document.getElementById('container-mapas');
             const display = document.getElementById('display-nome');
 
-            // Limpa o texto ao trocar de mapa
             display.innerText = "";
 
             if (caixaB.classList.contains('pos-baixo')) {
