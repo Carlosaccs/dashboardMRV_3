@@ -24,7 +24,7 @@
             cursor: pointer; 
             font-size: 0.75rem; 
             border-radius: 4px; 
-            transition: 0.2s; 
+            transition: 0.1s; 
         }
         .btRes:hover { background: #f0f0f0; border-left-color: #ff8c00; }
         .btRes.ativo { background: #fff5e6 !important; border-color: #ff8c00 !important; border-left-color: #ff8c00 !important; font-weight: bold; }
@@ -41,13 +41,29 @@
         
         svg { max-width: 95%; max-height: 95%; transform: scale(1.1); }
 
-        /* Coluna Direita (Ajustada para novos botões) */
+        /* Coluna Direita */
         .col-lateral-dir { width: 28%; border-left: 1px solid #ccc; background: #fdfdfd; padding: 15px; overflow-y: auto; }
-        .detalhe-card h2 { color: rgb(6, 94, 3); margin-bottom: 12px; font-size: 1.1rem; border-bottom: 2px solid #ff8c00; padding-bottom: 5px; }
-        .info-row { margin-bottom: 10px; font-size: 0.85rem; color: #444; }
-        .info-label { font-weight: bold; color: #888; font-size: 0.7rem; text-transform: uppercase; display: block; }
         
-        .titulo-vizinhos { font-size: 0.8rem; font-weight: bold; color: #666; margin: 20px 0 10px 0; border-top: 1px solid #eee; padding-top: 15px; text-transform: uppercase; }
+        /* Título da Região no Topo da Direita */
+        .titulo-vizinhos { 
+            font-size: 0.85rem; 
+            font-weight: bold; 
+            color: rgb(6, 94, 3); 
+            margin-bottom: 12px; 
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+            text-transform: uppercase; 
+        }
+
+        /* Ficha Técnica Embaixo */
+        .detalhe-card {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 2px dashed #eee;
+        }
+        .detalhe-card h2 { color: #ff8c00; margin-bottom: 12px; font-size: 1.1rem; text-transform: uppercase; }
+        .info-row { margin-bottom: 10px; font-size: 0.85rem; color: #444; }
+        .info-label { font-weight: bold; color: #999; font-size: 0.7rem; text-transform: uppercase; display: block; }
 
         /* Mapas */
         path { stroke: #fff; stroke-width: 0.5; fill: #8c8c8c; transition: 0.2s; cursor: default; }
@@ -74,7 +90,7 @@
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
             <div style="text-align: center; color: #999; margin-top: 50px;">
-                <p>Selecione um residencial.</p>
+                <p>Selecione um residencial na lista lateral ou no mapa.</p>
             </div>
         </aside>
     </div>
@@ -139,8 +155,8 @@
                     setTimeout(() => {
                         const el = document.getElementById(item.id_path);
                         if(el) destacarNoMapa(el);
-                        exibirDetalhesComVizinhos(item);
-                    }, 150);
+                        exibirPainelDireito(item, el ? el.getAttribute('data-name') : item.cidade);
+                    }, 100);
                 };
                 menu.appendChild(btn);
             });
@@ -153,11 +169,29 @@
             document.getElementById('display-nome').innerText = el.getAttribute('data-name');
         }
 
-        function exibirDetalhesComVizinhos(itemSelecionado) {
+        function exibirPainelDireito(itemSelecionado, nomeCidade) {
             const painel = document.getElementById('detalhes-residencial');
             
-            // 1. Dados do Residencial Clicado
-            let html = `
+            // 1. Título da Região/Cidade
+            let html = `<div class="titulo-vizinhos">Também em ${nomeCidade || 'esta região'}:</div>`;
+
+            // 2. Lista de Vizinhos (EXCLUI o selecionado)
+            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === itemSelecionado.id_path && d.nome !== itemSelecionado.nome);
+
+            if (vizinhos.length > 0) {
+                vizinhos.forEach(v => {
+                    html += `
+                        <button class="btRes" onclick="processarCliqueExterno('${v.nome}')">
+                            <strong>${v.nome}</strong>
+                            <span style="font-size:0.6rem; color:#888;">${v.bairro || ''}</span>
+                        </button>`;
+                });
+            } else {
+                html += `<p style="font-size:0.7rem; color:#999; margin-bottom:10px;">Único empreendimento nesta cidade.</p>`;
+            }
+
+            // 3. Ficha Técnica do Selecionado (ABAIXO)
+            html += `
                 <div class="detalhe-card">
                     <h2>${itemSelecionado.nome}</h2>
                     <div class="info-row"><span class="info-label">📍 Localização</span>${itemSelecionado.endereco || ''}<br>${itemSelecionado.bairro || ''} - ${itemSelecionado.cidade || ''}</div>
@@ -167,29 +201,14 @@
                     <div class="info-row"><span class="info-label">📊 Estoque</span>${itemSelecionado.estoque || '---'}</div>
                 </div>`;
 
-            // 2. Buscar "Vizinhos" (mesmo ID de Path/Cidade)
-            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === itemSelecionado.id_path && d.nome !== itemSelecionado.nome);
-
-            if (vizinhos.length > 0) {
-                html += `<div class="titulo-vizinhos">Também em ${itemSelecionado.cidade || 'esta região'}:</div>`;
-                vizinhos.forEach(v => {
-                    html += `
-                        <button class="btRes" onclick="processarCliqueExterno('${v.nome}')">
-                            <strong>${v.nome}</strong>
-                            <span style="font-size:0.6rem; color:#888;">${v.bairro || ''}</span>
-                        </button>`;
-                });
-            }
-
             painel.innerHTML = html;
         }
 
-        // Função para quando clica em um vizinho na coluna da direita
         function processarCliqueExterno(nomeResidencial) {
             const bts = document.querySelectorAll('.col-lateral-esq .btRes');
             bts.forEach(b => {
                 if (b.innerText.includes(nomeResidencial.toUpperCase())) {
-                    b.click(); // Dispara o clique no botão principal da esquerda
+                    b.click();
                     b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
             });
@@ -218,8 +237,8 @@
                     destacarNoMapa(p);
                     const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
                     if(item) {
-                        exibirDetalhesComVizinhos(item);
-                        // Sincroniza botão da esquerda
+                        exibirPainelDireito(item, p.getAttribute('data-name'));
+                        // Sincroniza botão esquerda
                         const bts = document.querySelectorAll('.col-lateral-esq .btRes');
                         bts.forEach(b => {
                             if (b.innerText.includes(item.nome.toUpperCase())) {
