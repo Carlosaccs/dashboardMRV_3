@@ -28,40 +28,41 @@
         }
         .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
         .btRes:hover { background: #f0f0f0; }
-        .btRes.ativo { border-left-color: #ff8c00; background: #fff5e6; border-color: #ff8c00; font-weight: bold; }
+        .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; border-color: #ff8c00; font-weight: bold; }
         
         .estoque-status { font-size: 0.6rem; color: #666; font-weight: bold; }
         .estoque-baixo { color: #d93025; }
 
         /* Área Central e Mapas */
         .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; }
-        .centro-topo { height: 35px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; background: #f9f9f9; }
+        .centro-topo { height: 35px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; background: #f9f9f9; color: #333; }
         
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         
-        .caixa-troca { width: 100%; position: relative; transition: all 0.4s ease; display: flex; align-items: center; justify-content: center; }
+        .caixa-troca { width: 100%; position: relative; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; }
         
-        /* Ajuste de profundidade para permitir cliques */
-        .pos-cima { height: 75%; z-index: 5; pointer-events: auto; }
+        /* Posicionamento */
+        .pos-cima { height: 75%; z-index: 5; }
         .pos-baixo { 
-            height: 25%; z-index: 10; cursor: pointer; background: #fcfcfc; 
-            border-top: 2px solid #eee; pointer-events: auto; 
+            height: 25%; z-index: 10; cursor: pointer; background: #f4f4f4; 
+            border-top: 2px solid #ddd; position: relative;
         }
-        .pos-baixo:hover { background: #f0f0f0; }
+        .pos-baixo:hover { background: #ebebeb; }
+        .pos-baixo::after { content: "CLIQUE PARA TROCAR O MAPA"; position: absolute; bottom: 5px; font-size: 0.6rem; color: #999; font-weight: bold; }
 
-        svg { 
-            width: 100%; height: 95%; max-height: 100%; 
-            display: block; pointer-events: auto;
-        }
+        svg { width: 100%; height: 90%; display: block; }
         
-        path { stroke: #fff; stroke-width: 0.6; fill: #d1d1d1; transition: 0.2s; pointer-events: auto; }
-        path:hover { fill: #bbb !important; stroke: #666; cursor: pointer; }
+        /* Cores dos Paths */
+        path { stroke: #fff; stroke-width: 0.6; fill: #bbb; transition: 0.2s; cursor: pointer; }
+        
+        /* HOVER: Agora forçando o laranja */
+        path:hover { fill: #ff8c00 !important; stroke: #333; stroke-width: 1px; }
         
         .commrv { fill: rgb(6, 94, 3) !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.5px; }
         
-        /* Bloqueia interação no mapa que está "embaixo" para não bugar o hover do de cima */
-        .pos-baixo svg { pointer-events: none; opacity: 0.6; }
+        /* Desativa interação no mapa de baixo para o clique cair na DIV */
+        .pos-baixo svg, .pos-baixo path { pointer-events: none !important; opacity: 0.5; }
 
         /* Ficha Técnica */
         .ficha-card { border: 1px solid #ddd; border-top: 4px solid #ff8c00; padding: 12px; border-radius: 4px; background: white; margin-top: 15px; }
@@ -121,7 +122,7 @@
 
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaLateral();
-            } catch (e) { console.error("Erro ao carregar dados:", e); }
+            } catch (e) { console.error(e); }
         }
 
         function gerarListaLateral() {
@@ -138,7 +139,6 @@
         }
 
         function selecionarResidencial(item, btn) {
-            // Sincroniza visual do botão na esquerda
             if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
             
             const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/\s+/g, '-')}`);
@@ -148,23 +148,17 @@
                 botaoSelecionado = btnEsq;
             }
 
-            // Troca de mapa se o residencial for de outra região
-            if (item.regiao && item.regiao !== regiaoAtual) {
-                solicitarTroca();
-            }
+            if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca();
             
-            // Destaca no mapa
             setTimeout(() => {
                 const el = document.getElementById(item.id_path);
                 if(el) destacarNoMapa(el);
                 exibirFichaDireita(item);
-            }, 150);
+            }, 100);
         }
 
         function exibirFichaDireita(item) {
             const painel = document.getElementById('detalhes-residencial');
-            
-            // Filtra outros residenciais na mesma cidade/id_path
             const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
             
             let html = `<div style="font-size:0.7rem; font-weight:bold; color:rgb(6, 94, 3); margin-bottom:10px; border-bottom:1px solid #ddd; padding-bottom:5px;">TAMBÉM EM ${item.cidade.toUpperCase()}:</div>`;
@@ -183,9 +177,9 @@
                     <div class="item-info"><strong>📅 Entrega / Obra</strong>${item.entrega} (${item.obra || '0%'} obra)</div>
                     <div class="item-info"><strong>📊 Estoque Atual</strong>${item.estoque} unidades</div>
                     
-                    <button class="btn-acao btn-book">📄 Copiar Book do Cliente</button>
-                    <button class="btn-acao btn-video">🎥 Copiar Vídeo 1</button>
-                    <button class="btn-acao btn-video">🎥 Copiar Vídeo 2</button>
+                    <button class="btn-acao btn-book" onclick="alert('Link copiado!')">📄 Copiar Book do Cliente</button>
+                    <button class="btn-acao btn-video" onclick="alert('Vídeo 1 copiado!')">🎥 Copiar Vídeo 1</button>
+                    <button class="btn-acao btn-video" onclick="alert('Vídeo 2 copiado!')">🎥 Copiar Vídeo 2</button>
                 </div>`;
             painel.innerHTML = html;
         }
@@ -204,11 +198,15 @@
             
             if (cA.classList.contains('pos-cima')) {
                 cA.classList.replace('pos-cima', 'pos-baixo');
+                cA.onclick = solicitarTroca; // Atribui o clique à caixa que desceu
                 cB.classList.replace('pos-baixo', 'pos-cima');
+                cB.onclick = null; // Remove o clique da caixa que subiu
                 container.appendChild(cA); 
             } else {
                 cB.classList.replace('pos-cima', 'pos-baixo');
+                cB.onclick = solicitarTroca;
                 cA.classList.replace('pos-baixo', 'pos-cima');
+                cA.onclick = null;
                 container.appendChild(cB); 
             }
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
@@ -223,18 +221,33 @@
                 return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class} ${temMRV ? 'commrv' : ''}"></path>`;
             }).join('');
             
-            container.innerHTML = `
-                <svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet">
-                    <g transform="${dados.transform}">${paths}</g>
-                </svg>`;
+            container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform}">${paths}</g></svg>`;
         }
 
-        // Delegação de evento para o mapa
-        document.getElementById('container-mapas').addEventListener('click', (e) => {
+        // --- EVENTOS DE MOUSE NO MAPA ---
+        const containerMapas = document.getElementById('container-mapas');
+
+        // Atualiza nome no HOVER
+        containerMapas.addEventListener('mouseover', (e) => {
             const p = e.target;
             if (p.tagName === 'path' && p.closest('.pos-cima')) {
-                if (p.id === "grandesaopaulo") { solicitarTroca(); return; }
-                
+                document.getElementById('display-nome').innerText = p.getAttribute('data-name');
+            }
+        });
+
+        // Limpa nome ao sair do mapa (se não houver seleção)
+        containerMapas.addEventListener('mouseleave', () => {
+            if (!pathSelecionado) {
+                document.getElementById('display-nome').innerText = "Selecione uma região";
+            } else {
+                document.getElementById('display-nome').innerText = pathSelecionado.getAttribute('data-name');
+            }
+        });
+
+        // Seleção no CLIQUE
+        containerMapas.addEventListener('click', (e) => {
+            const p = e.target;
+            if (p.tagName === 'path' && p.closest('.pos-cima')) {
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
                 if(item) selecionarResidencial(item, null);
                 else destacarNoMapa(p);
@@ -242,7 +255,7 @@
         });
 
         window.onload = async () => {
-            await carregarPlanilha(); // Carrega dados primeiro para saber quais cidades pintar de verde
+            await carregarPlanilha();
             desenhar('caixa-a', MAPA_GSP);
             desenhar('caixa-b', MAPA_INTERIOR);
         };
