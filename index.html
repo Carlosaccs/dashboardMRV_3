@@ -3,74 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP</title>
+    <title>Dashboard MRV SP - Versão Estável</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
-        header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; z-index: 10; position: relative; }
+        
+        header { 
+            background: rgb(6, 94, 3); height: 50px; display: flex; 
+            align-items: center; justify-content: center; color: white; 
+            z-index: 100; position: relative; font-size: 0.9rem;
+        }
+        
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
 
-        /* Coluna Esquerda */
-        .col-lateral-esq { width: 22%; border-right: 1px solid #ccc; background: #fdfdfd; overflow-y: auto; padding: 5px; }
+        /* Colunas */
+        .col-lateral-esq { width: 20%; border-right: 1px solid #ccc; background: #fdfdfd; overflow-y: auto; padding: 5px; }
+        .col-central { width: 47%; display: flex; flex-direction: column; background: #fff; overflow: hidden; }
+        .col-lateral-dir { width: 33%; border-left: 1px solid #ccc; background: #fdfdfd; padding: 15px; overflow-y: auto; }
+
+        /* Centro e Mapas */
+        .centro-topo { 
+            height: 40px; border-bottom: 1px solid #ccc; display: flex; 
+            align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;
+        }
         
+        .container-mapas { flex: 1; display: flex; flex-direction: column; background: #fff; overflow: hidden; }
+        
+        /* Ajuste Crucial para os Mapas não estourarem */
+        .caixa-troca { 
+            width: 100%; display: flex; align-items: center; justify-content: center; 
+            position: relative; overflow: hidden; padding: 10px;
+        }
+        
+        .pos-cima { height: 70%; border-bottom: 1px solid #eee; }
+        .pos-baixo { height: 30%; cursor: pointer; background: #f9f9f9; border-top: 1px solid #ddd; }
+        .pos-baixo:hover { background: #f0f0f0; }
+
+        /* SVG que se auto-ajusta */
+        svg { 
+            max-width: 100%; 
+            max-height: 100%; 
+            width: auto; 
+            height: auto; 
+            pointer-events: none; 
+        }
+        
+        path { stroke: #fff; stroke-width: 0.5; fill: #8c8c8c; transition: 0.2s; cursor: pointer; pointer-events: all; }
+        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
+        .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.5px; }
+
+        /* Botões da Esquerda */
         .btRes { 
-            width: 100%; 
-            padding: 4px 8px; 
-            margin-bottom: 3px; 
-            background: #fff; 
-            border: 1px solid #ddd; 
-            border-left: 5px solid rgb(6, 94, 3); 
-            text-align: left; 
-            cursor: pointer; 
-            font-size: 0.75rem; 
-            border-radius: 4px; 
-            transition: 0.1s; 
+            width: 100%; padding: 8px 10px; margin-bottom: 4px; background: #fff; border: 1px solid #ddd; 
+            border-left: 5px solid rgb(6, 94, 3); text-align: left; cursor: pointer; font-size: 0.72rem; 
+            border-radius: 4px; display: flex; justify-content: space-between; align-items: center;
         }
-        .btRes:hover { background: #f0f0f0; border-left-color: #ff8c00; }
+        .btRes:hover { background: #f0f0f0; }
         .btRes.ativo { background: #fff5e6 !important; border-color: #ff8c00 !important; border-left-color: #ff8c00 !important; font-weight: bold; }
-        .btRes strong { display: block; color: #333; text-transform: uppercase; font-size: 0.7rem; margin-bottom: 2px; }
-        .tag-regiao { font-size: 0.6rem; background: #eee; padding: 2px 4px; border-radius: 3px; float: right; color: #777; font-weight: bold; }
-
-        /* Coluna Central */
-        .col-central { flex: 1; display: flex; flex-direction: column; position: relative; }
-        .centro-topo { height: 45px; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; }
-        .container-mapas { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .pos-cima { height: 80%; background: white; }
-        .pos-baixo { height: 20%; background: #fff; cursor: pointer; border-top: 2px solid #ddd; opacity: 0.8; }
         
-        svg { max-width: 95%; max-height: 95%; transform: scale(1.1); }
+        .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; }
 
-        /* Coluna Direita */
-        .col-lateral-dir { width: 28%; border-left: 1px solid #ccc; background: #fdfdfd; padding: 15px; overflow-y: auto; }
+        /* Painel Direito (Ficha Técnica) */
+        .titulo-vizinhos { font-size: 0.75rem; font-weight: bold; color: rgb(6, 94, 3); margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+        .box-dica { background: #f1f9f1; border-left: 5px solid #388e3c; padding: 10px; font-size: 0.8rem; margin-bottom: 12px; border-radius: 4px; color: #1b5e20; }
+        .ficha-card { border: 1px solid #eee; border-left: 5px solid #ff8c00; padding: 15px; border-radius: 4px; background: white; margin-bottom: 10px; }
+        .ficha-nome { font-size: 1rem; color: #065e03; font-weight: bold; margin-bottom: 10px; display: block; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         
-        /* Título da Região no Topo da Direita */
-        .titulo-vizinhos { 
-            font-size: 0.85rem; 
-            font-weight: bold; 
-            color: rgb(6, 94, 3); 
-            margin-bottom: 12px; 
-            padding-bottom: 5px;
-            border-bottom: 1px solid #ddd;
-            text-transform: uppercase; 
-        }
+        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+        .item-info { font-size: 0.8rem; color: #333; }
+        .item-info strong { display: block; font-size: 0.6rem; color: #999; text-transform: uppercase; }
 
-        /* Ficha Técnica Embaixo */
-        .detalhe-card {
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 2px dashed #eee;
-        }
-        .detalhe-card h2 { color: #ff8c00; margin-bottom: 12px; font-size: 1.1rem; text-transform: uppercase; }
-        .info-row { margin-bottom: 10px; font-size: 0.85rem; color: #444; }
-        .info-label { font-weight: bold; color: #999; font-size: 0.7rem; text-transform: uppercase; display: block; }
-
-        /* Mapas */
-        path { stroke: #fff; stroke-width: 0.5; fill: #8c8c8c; transition: 0.2s; cursor: default; }
-        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer !important; }
-        .pos-cima .commrv:hover, .pos-cima #grandesaopaulo:hover { fill: #ff8c00 !important; }
-        .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1px; }
-        .pos-baixo path { pointer-events: none; }
+        .btn-acao { width: 100%; padding: 10px; margin-top: 5px; border: none; border-radius: 5px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.8rem; }
+        .btn-book { background: #065e03; }
+        .btn-video { background: #ff8c00; }
     </style>
 </head>
 <body>
@@ -78,20 +83,18 @@
     <header><h1>Dashboard MRV - São Paulo</h1></header>
 
     <div class="main-wrapper">
-        <aside class="col-lateral-esq" id="menu-residenciais">Carregando...</aside>
+        <aside class="col-lateral-esq" id="menu-residenciais">Sincronizando dados...</aside>
         
         <main class="col-central">
             <div class="centro-topo" id="display-nome">Selecione uma região</div>
             <div class="container-mapas" id="container-mapas">
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
-                <div id="caixa-b" class="caixa-troca pos-baixo" onclick="solicitarTroca()"></div>
+                <div id="caixa-b" class="caixa-troca pos-baixo" onclick="trocarMapas()"></div>
             </div>
         </main>
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
-            <div style="text-align: center; color: #999; margin-top: 50px;">
-                <p>Selecione um residencial na lista lateral ou no mapa.</p>
-            </div>
+            <div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial para ver os detalhes.</div>
         </aside>
     </div>
 
@@ -103,38 +106,32 @@
         let regiaoAtual = "gsp"; 
         let DADOS_PLANILHA = [];
 
-        const LINK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv";
-
         async function carregarPlanilha() {
             try {
-                const response = await fetch(LINK_CSV);
+                const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv");
                 const texto = await response.text();
                 const linhas = texto.split(/\r?\n/);
-
+                
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     let col = linha.split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
-                    if (col.length < 3 || col[0].includes('http') || col[2].toLowerCase().includes('pdf') || col[2].toLowerCase().includes('lazer')) {
-                        return null;
-                    }
+                    
+                    // FILTRO DE LIXO: Ignora cabeçalhos e linhas sem nome real
+                    if (col.length < 5 || col[0].includes("IDs") || col[2] === "btRes" || col[2].includes(".pdf") || col[2] === "Lazer equipado") return null;
+
                     return {
-                        id_path: col[0],
-                        regiao: col[1] ? col[1].toLowerCase() : "",
+                        id_path: col[0], 
+                        regiao: col[1] ? col[1].toLowerCase() : "", 
                         nome: col[2],
-                        estoque: col[3],
-                        endereco: col[4],
-                        bairro: col[5],
-                        cidade: col[6],
-                        entrega: col[7],
-                        preco: col[8],
-                        obra: col[11]
+                        estoque: col[3] || "0",
+                        endereco: col[4], bairro: col[5], cidade: col[6],
+                        entrega: col[7], preco: col[8], plantas: col[9], obra: col[11],
+                        obs: col[12], book: col[13], dica: col[14], video1: col[15], video2: col[16]
                     };
                 }).filter(item => item !== null);
 
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaGeral();
-            } catch (e) {
-                document.getElementById('menu-residenciais').innerText = "Erro ao carregar dados.";
-            }
+            } catch (e) { console.error("Erro na carga:", e); }
         }
 
         function gerarListaGeral() {
@@ -143,23 +140,58 @@
             DADOS_PLANILHA.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
-                btn.innerHTML = `<span class="tag-regiao">${item.regiao.toUpperCase()}</span><strong>${item.nome}</strong>${item.cidade || ''}`;
-                
-                btn.onclick = () => {
-                    if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
-                    btn.classList.add('ativo');
-                    botaoSelecionado = btn;
-
-                    if (item.regiao !== regiaoAtual) solicitarTroca();
-                    
-                    setTimeout(() => {
-                        const el = document.getElementById(item.id_path);
-                        if(el) destacarNoMapa(el);
-                        exibirPainelDireito(item, el ? el.getAttribute('data-name') : item.cidade);
-                    }, 100);
-                };
+                btn.innerHTML = `<strong>${item.nome}</strong> <span class="estoque-status">${item.estoque} un.</span>`;
+                btn.onclick = () => selecionarResidencial(item, btn);
                 menu.appendChild(btn);
             });
+        }
+
+        function selecionarResidencial(item, btn) {
+            if (!btn) {
+                const bts = document.querySelectorAll('.col-lateral-esq .btRes');
+                btn = Array.from(bts).find(b => b.innerText.includes(item.nome.toUpperCase()));
+            }
+            if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
+            if (btn) { btn.classList.add('ativo'); btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); botaoSelecionado = btn; }
+
+            if (item.regiao !== regiaoAtual) trocarMapas();
+            
+            setTimeout(() => {
+                const containerAtivo = document.querySelector('.pos-cima');
+                const el = containerAtivo.querySelector('#' + item.id_path);
+                if(el) destacarNoMapa(el);
+                exibirPainelDireito(item, el ? el.getAttribute('data-name') : item.cidade);
+            }, 100);
+        }
+
+        function exibirPainelDireito(item, nomeCidade) {
+            const painel = document.getElementById('detalhes-residencial');
+            let html = `<div class="titulo-vizinhos">TAMBÉM EM ${nomeCidade ? nomeCidade.toUpperCase() : 'ESTA REGIÃO'}:</div>`;
+            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
+            vizinhos.forEach(v => {
+                html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v)}, null)'>
+                            <strong>${v.nome}</strong> <span class="estoque-status">${v.estoque} un.</span>
+                         </button>`;
+            });
+
+            html += `<div style="margin-top:15px;">
+                ${(item.dica && item.dica !== "---") ? `<div class="box-dica">💡 <strong>Dica:</strong> ${item.dica}</div>` : ''}
+                <div class="ficha-card">
+                    <span class="ficha-nome">${item.nome}</span>
+                    <div class="item-info">📍 <strong>Localização</strong> ${item.endereco || ''}</div>
+                    <div class="grid-info">
+                        <div class="item-info">💰 <strong>Preço</strong> R$ ${item.preco || '---'}</div>
+                        <div class="item-info">🔑 <strong>Entrega</strong> ${item.entrega || '---'}</div>
+                        <div class="item-info">📐 <strong>Plantas</strong> ${item.plantas || '---'}</div>
+                        <div class="item-info">🏗️ <strong>Obra</strong> ${item.obra || '0%'}</div>
+                    </div>
+                    ${item.obs && item.obs !== "---" ? `<div style="border-top:1px solid #eee; padding-top:8px; font-size:0.8rem">📝 <strong>Diferenciais/Obs:</strong> ${item.obs}</div>` : ''}
+                </div>
+                ${item.book ? `<button class="btn-acao btn-book" onclick="window.open('${item.book}')">📄 Copiar Book</button>` : ''}
+                ${item.video1 ? `<button class="btn-acao btn-video" onclick="window.open('${item.video1}')">🎬 Copiar Vídeo 1</button>` : ''}
+                ${item.video2 ? `<button class="btn-acao btn-video" onclick="window.open('${item.video2}')">🎬 Copiar Vídeo 2</button>` : ''}
+            </div>`;
+            painel.innerHTML = html;
         }
 
         function destacarNoMapa(el) {
@@ -169,114 +201,49 @@
             document.getElementById('display-nome').innerText = el.getAttribute('data-name');
         }
 
-        function exibirPainelDireito(itemSelecionado, nomeCidade) {
-            const painel = document.getElementById('detalhes-residencial');
+        function trocarMapas() {
+            regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
+            const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b');
             
-            // 1. Título da Região/Cidade
-            let html = `<div class="titulo-vizinhos">Também em ${nomeCidade || 'esta região'}:</div>`;
-
-            // 2. Lista de Vizinhos (EXCLUI o selecionado)
-            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === itemSelecionado.id_path && d.nome !== itemSelecionado.nome);
-
-            if (vizinhos.length > 0) {
-                vizinhos.forEach(v => {
-                    html += `
-                        <button class="btRes" onclick="processarCliqueExterno('${v.nome}')">
-                            <strong>${v.nome}</strong>
-                            <span style="font-size:0.6rem; color:#888;">${v.bairro || ''}</span>
-                        </button>`;
-                });
+            if (cA.classList.contains('pos-cima')) {
+                cA.classList.replace('pos-cima', 'pos-baixo'); cA.onclick = trocarMapas;
+                cB.classList.replace('pos-baixo', 'pos-cima'); cB.onclick = null;
+                document.getElementById('container-mapas').appendChild(cA);
             } else {
-                html += `<p style="font-size:0.7rem; color:#999; margin-bottom:10px;">Único empreendimento nesta cidade.</p>`;
+                cB.classList.replace('pos-cima', 'pos-baixo'); cB.onclick = trocarMapas;
+                cA.classList.replace('pos-baixo', 'pos-cima'); cA.onclick = null;
+                document.getElementById('container-mapas').appendChild(cB);
             }
-
-            // 3. Ficha Técnica do Selecionado (ABAIXO)
-            html += `
-                <div class="detalhe-card">
-                    <h2>${itemSelecionado.nome}</h2>
-                    <div class="info-row"><span class="info-label">📍 Localização</span>${itemSelecionado.endereco || ''}<br>${itemSelecionado.bairro || ''} - ${itemSelecionado.cidade || ''}</div>
-                    <div class="info-row"><span class="info-label">💰 Valor Sugerido</span>R$ ${itemSelecionado.preco || 'Sob consulta'}</div>
-                    <div class="info-row"><span class="info-label">🏗️ Status</span>${itemSelecionado.obra || '---'}</div>
-                    <div class="info-row"><span class="info-label">📅 Entrega</span>${itemSelecionado.entrega || '---'}</div>
-                    <div class="info-row"><span class="info-label">📊 Estoque</span>${itemSelecionado.estoque || '---'}</div>
-                </div>`;
-
-            painel.innerHTML = html;
-        }
-
-        function processarCliqueExterno(nomeResidencial) {
-            const bts = document.querySelectorAll('.col-lateral-esq .btRes');
-            bts.forEach(b => {
-                if (b.innerText.includes(nomeResidencial.toUpperCase())) {
-                    b.click();
-                    b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            });
+            if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
+            pathSelecionado = null;
         }
 
         function desenhar(idContainer, dados) {
             const container = document.getElementById(idContainer);
             const paths = dados.paths.map(p => `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class}"></path>`).join('');
-            container.innerHTML = `<svg viewBox="${dados.viewBox}"><g transform="${dados.transform}">${paths}</g></svg>`;
-            vincularEventos();
+            container.innerHTML = `<svg viewBox="${dados.viewBox}">${paths}</svg>`;
         }
 
-        function vincularEventos() {
-            const paths = document.querySelectorAll('.pos-cima path');
-            const display = document.getElementById('display-nome');
-            
-            paths.forEach(p => {
-                p.onmouseover = () => { display.innerText = p.getAttribute('data-name'); };
-                p.onmouseout = () => { display.innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : "Selecione uma região"; };
-
-                p.onclick = (e) => {
-                    e.stopPropagation();
-                    if (p.id === "grandesaopaulo") { solicitarTroca(); return; }
-                    if (!p.classList.contains('commrv')) return;
-
-                    destacarNoMapa(p);
-                    const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
-                    if(item) {
-                        exibirPainelDireito(item, p.getAttribute('data-name'));
-                        // Sincroniza botão esquerda
-                        const bts = document.querySelectorAll('.col-lateral-esq .btRes');
-                        bts.forEach(b => {
-                            if (b.innerText.includes(item.nome.toUpperCase())) {
-                                if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
-                                b.classList.add('ativo');
-                                b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                                botaoSelecionado = b;
-                            }
-                        });
-                    }
-                };
-            });
-        }
-
-        function solicitarTroca() {
-            regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
-            const cA = document.getElementById('caixa-a');
-            const cB = document.getElementById('caixa-b');
-            const container = document.getElementById('container-mapas');
-            if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
-            pathSelecionado = null;
-
-            if (cB.classList.contains('pos-baixo')) {
-                cB.classList.replace('pos-baixo', 'pos-cima');
-                cA.classList.replace('pos-cima', 'pos-baixo');
-                container.insertBefore(cB, cA);
-            } else {
-                cA.classList.replace('pos-baixo', 'pos-cima');
-                cB.classList.replace('pos-cima', 'pos-baixo');
-                container.insertBefore(cA, cB);
+        document.getElementById('container-mapas').addEventListener('click', (e) => {
+            const p = e.target;
+            if (p.tagName !== 'path' || p.closest('.pos-baixo')) return;
+            if (p.id === "grandesaopaulo") { trocarMapas(); } 
+            else if (p.classList.contains('commrv')) {
+                const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
+                if(item) selecionarResidencial(item, null);
             }
-            vincularEventos();
-        }
+        });
 
-        window.onload = () => {
-            desenhar('caixa-a', MAPA_GSP);
-            desenhar('caixa-b', MAPA_INTERIOR);
-            carregarPlanilha();
+        document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
+            if (e.target.tagName === 'path' && e.target.closest('.pos-cima')) {
+                document.getElementById('display-nome').innerText = e.target.getAttribute('data-name');
+            }
+        });
+
+        window.onload = () => { 
+            desenhar('caixa-a', MAPA_GSP); 
+            desenhar('caixa-b', MAPA_INTERIOR); 
+            carregarPlanilha(); 
         };
     </script>
 </body>
