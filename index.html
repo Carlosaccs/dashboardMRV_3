@@ -25,6 +25,7 @@
             width: 100%; padding: 8px 10px; margin-bottom: 5px; background: #fff; border: 1px solid #eee; 
             border-left: 4px solid rgb(6, 94, 3); text-align: left; cursor: pointer; font-size: 0.7rem; 
             display: flex; justify-content: space-between; align-items: center; border-radius: 3px;
+            transition: 0.2s;
         }
         .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
         .btRes:hover { background: #f0f0f0; }
@@ -48,20 +49,19 @@
             border-top: 2px solid #ddd; position: relative;
         }
         .pos-baixo:hover { background: #ebebeb; }
-        .pos-baixo::after { content: "CLIQUE PARA TROCAR O MAPA"; position: absolute; bottom: 5px; font-size: 0.6rem; color: #999; font-weight: bold; }
 
         svg { width: 100%; height: 90%; display: block; }
         
         /* Cores dos Paths */
         path { stroke: #fff; stroke-width: 0.6; fill: #bbb; transition: 0.2s; cursor: pointer; }
         
-        /* HOVER: Agora forçando o laranja */
+        /* HOVER: Destaque Laranja para todos */
         path:hover { fill: #ff8c00 !important; stroke: #333; stroke-width: 1px; }
         
         .commrv { fill: rgb(6, 94, 3) !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.5px; }
         
-        /* Desativa interação no mapa de baixo para o clique cair na DIV */
+        /* Desativa interação no mapa de baixo para o clique cair na DIV de troca */
         .pos-baixo svg, .pos-baixo path { pointer-events: none !important; opacity: 0.5; }
 
         /* Ficha Técnica */
@@ -111,18 +111,33 @@
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     let col = linha.split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
-                    if (col.length < 4 || !col[2] || col[2].toLowerCase().includes("lazer")) return null;
+                    
+                    // FILTRO DE INTRUSOS REFORÇADO
+                    if (col.length < 4 || !col[2]) return null;
+                    const nomeLower = col[2].toLowerCase();
+                    if (nomeLower.includes("lazer") || 
+                        nomeLower.includes(".pdf") || 
+                        nomeLower.includes("book") || 
+                        nomeLower.includes("ids") || 
+                        nomeLower === "btres") return null;
+
                     return {
-                        id_path: col[0], regiao: col[1] ? col[1].toLowerCase() : "", 
-                        nome: col[2], estoque: parseInt(col[3]) || 0,
-                        endereco: col[4], bairro: col[5], cidade: col[6],
-                        entrega: col[7], preco: col[8], obra: col[11]
+                        id_path: col[0], 
+                        regiao: col[1] ? col[1].toLowerCase() : "", 
+                        nome: col[2], 
+                        estoque: parseInt(col[3]) || 0,
+                        endereco: col[4], 
+                        bairro: col[5], 
+                        cidade: col[6],
+                        entrega: col[7], 
+                        preco: col[8], 
+                        obra: col[11]
                     };
                 }).filter(item => item !== null);
 
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaLateral();
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Erro na planilha:", e); }
         }
 
         function gerarListaLateral() {
@@ -132,7 +147,8 @@
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
                 btn.id = `btn-esq-${item.nome.replace(/\s+/g, '-')}`;
-                btn.innerHTML = `<strong>${item.nome}</strong> <span class="estoque-status ${item.estoque <= 5 ? 'estoque-baixo' : ''}">${item.estoque} un.</span>`;
+                const statusEstoque = item.estoque === 0 ? "Vendido" : `${item.estoque} un.`;
+                btn.innerHTML = `<strong>${item.nome}</strong> <span class="estoque-status ${item.estoque <= 5 ? 'estoque-baixo' : ''}">${statusEstoque}</span>`;
                 btn.onclick = () => selecionarResidencial(item, btn);
                 menu.appendChild(btn);
             });
@@ -177,7 +193,7 @@
                     <div class="item-info"><strong>📅 Entrega / Obra</strong>${item.entrega} (${item.obra || '0%'} obra)</div>
                     <div class="item-info"><strong>📊 Estoque Atual</strong>${item.estoque} unidades</div>
                     
-                    <button class="btn-acao btn-book" onclick="alert('Link copiado!')">📄 Copiar Book do Cliente</button>
+                    <button class="btn-acao btn-book" onclick="alert('Link do Book copiado!')">📄 Copiar Book do Cliente</button>
                     <button class="btn-acao btn-video" onclick="alert('Vídeo 1 copiado!')">🎥 Copiar Vídeo 1</button>
                     <button class="btn-acao btn-video" onclick="alert('Vídeo 2 copiado!')">🎥 Copiar Vídeo 2</button>
                 </div>`;
@@ -198,9 +214,9 @@
             
             if (cA.classList.contains('pos-cima')) {
                 cA.classList.replace('pos-cima', 'pos-baixo');
-                cA.onclick = solicitarTroca; // Atribui o clique à caixa que desceu
+                cA.onclick = solicitarTroca;
                 cB.classList.replace('pos-baixo', 'pos-cima');
-                cB.onclick = null; // Remove o clique da caixa que subiu
+                cB.onclick = null;
                 container.appendChild(cA); 
             } else {
                 cB.classList.replace('pos-cima', 'pos-baixo');
@@ -224,10 +240,8 @@
             container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform}">${paths}</g></svg>`;
         }
 
-        // --- EVENTOS DE MOUSE NO MAPA ---
         const containerMapas = document.getElementById('container-mapas');
 
-        // Atualiza nome no HOVER
         containerMapas.addEventListener('mouseover', (e) => {
             const p = e.target;
             if (p.tagName === 'path' && p.closest('.pos-cima')) {
@@ -235,16 +249,10 @@
             }
         });
 
-        // Limpa nome ao sair do mapa (se não houver seleção)
         containerMapas.addEventListener('mouseleave', () => {
-            if (!pathSelecionado) {
-                document.getElementById('display-nome').innerText = "Selecione uma região";
-            } else {
-                document.getElementById('display-nome').innerText = pathSelecionado.getAttribute('data-name');
-            }
+            document.getElementById('display-nome').innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : "Selecione uma região";
         });
 
-        // Seleção no CLIQUE
         containerMapas.addEventListener('click', (e) => {
             const p = e.target;
             if (p.tagName === 'path' && p.closest('.pos-cima')) {
