@@ -10,14 +10,12 @@
         header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; z-index: 10; position: relative; }
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
 
-        /* Colunas */
         .col-lateral-esq { width: 22%; border-right: 1px solid #ccc; background: #fdfdfd; overflow-y: auto; padding: 10px; }
         .col-lateral-dir { width: 28%; border-left: 1px solid #ccc; background: #fdfdfd; padding: 15px; overflow-y: auto; }
         .col-central { flex: 1; display: flex; flex-direction: column; position: relative; }
         
         .centro-topo { height: 45px; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; }
         
-        /* Container do Mapa */
         .container-mapas { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .pos-cima { height: 80%; background: white; }
@@ -26,18 +24,15 @@
         
         svg { max-width: 95%; max-height: 95%; transform: scale(1.1); }
 
-        /* Botões da Esquerda */
-        .btRes { width: 100%; padding: 10px; margin-bottom: 8px; background: #fff; border: 1px solid #ddd; border-left: 5px solid rgb(6, 94, 3); text-align: left; cursor: pointer; font-size: 0.75rem; border-radius: 4px; transition: 0.2s; }
+        .btRes { width: 100%; padding: 10px; margin-bottom: 8px; background: #fff; border: 1px solid #ddd; border-left: 5px solid rgb(6, 94, 3); text-align: left; cursor: pointer; font-size: 0.75rem; border-radius: 4px; transition: 0.2s; position: relative; }
         .btRes:hover { background: #f0f0f0; border-left-color: #ff8c00; transform: translateX(5px); }
-        .btRes strong { display: block; color: #333; text-transform: uppercase; font-size: 0.7rem; margin-bottom: 2px; }
+        .btRes strong { display: block; color: #333; text-transform: uppercase; font-size: 0.7rem; margin-bottom: 2px; line-height: 1.1; }
         .tag-regiao { font-size: 0.6rem; background: #eee; padding: 2px 4px; border-radius: 3px; float: right; color: #777; font-weight: bold; }
 
-        /* Detalhes Direita */
         .detalhe-card h2 { color: rgb(6, 94, 3); margin-bottom: 12px; font-size: 1.1rem; border-bottom: 2px solid #ff8c00; padding-bottom: 5px; }
         .info-row { margin-bottom: 10px; font-size: 0.85rem; color: #444; }
         .info-label { font-weight: bold; color: #888; font-size: 0.7rem; text-transform: uppercase; display: block; }
 
-        /* Interatividade do Mapa */
         path { stroke: #fff; stroke-width: 0.5; fill: #8c8c8c; cursor: pointer; transition: 0.2s; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
         .pos-cima path:hover { fill: #ff8c00 !important; }
@@ -62,7 +57,7 @@
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
             <div style="text-align: center; color: #999; margin-top: 50px;">
-                <p>Selecione um residencial na lista ou clique no mapa para ver os detalhes.</p>
+                <p>Selecione um residencial na lista ou clique no mapa.</p>
             </div>
         </aside>
     </div>
@@ -74,7 +69,6 @@
         let regiaoAtual = "gsp"; 
         let DADOS_PLANILHA = [];
 
-        // LINK DA PLANILHA JÁ INTEGRADO
         const LINK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv";
 
         async function carregarPlanilha() {
@@ -82,12 +76,17 @@
                 const response = await fetch(LINK_CSV);
                 const texto = await response.text();
                 
-                // Divide por linhas e filtra apenas o que parece dado real
-                const linhas = texto.split(/\r?\n/).filter(l => l.trim().length > 10 && !l.includes('{'));
+                const linhas = texto.split(/\r?\n/);
 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     let col = linha.split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
-                    if (col.length < 3) return null;
+                    
+                    // FILTRO DE SEGURANÇA: 
+                    // Só aceita se a coluna 0 (ID) não for link/pdf e se a coluna 2 (Nome) existir
+                    if (!col[0] || col[0].includes('http') || col[0].includes('.pdf') || col[2] === "" || col[2] === "Residencial") {
+                        return null;
+                    }
+
                     return {
                         id_path: col[0],
                         regiao: col[1] ? col[1].toLowerCase() : "",
@@ -102,53 +101,46 @@
                     };
                 }).filter(item => item !== null);
 
+                // ORDENAÇÃO ALFABÉTICA PELO NOME
+                DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
+
                 gerarListaGeral();
             } catch (e) {
-                document.getElementById('menu-residenciais').innerText = "Erro ao carregar dados da planilha.";
+                document.getElementById('menu-residenciais').innerText = "Erro ao carregar dados.";
             }
         }
 
         function gerarListaGeral() {
             const menu = document.getElementById('menu-residenciais');
-            menu.innerHTML = "<p style='font-size:0.65rem; color:#999; margin-bottom:10px; text-align:center;'>LISTA GERAL</p>";
+            menu.innerHTML = "<p style='font-size:0.6rem; color:#999; margin-bottom:10px; text-align:center;'>LISTA ALFABÉTICA</p>";
             
-            // Ordenar por nome para facilitar
-            DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
-
             DADOS_PLANILHA.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
                 btn.innerHTML = `<span class="tag-regiao">${item.regiao.toUpperCase()}</span><strong>${item.nome}</strong>${item.cidade || ''}`;
                 
                 btn.onclick = () => {
-                    // Troca o mapa automaticamente se clicar em um prédio da outra região
-                    if (item.regiao !== regiaoAtual) {
-                        solicitarTroca();
-                    }
+                    if (item.regiao !== regiaoAtual) solicitarTroca();
                     
-                    // Delay para o mapa carregar antes de simular o clique
                     setTimeout(() => {
                         const el = document.getElementById(item.id_path);
-                        if(el) {
-                            el.dispatchEvent(new Event('click'));
-                        }
+                        if(el) el.dispatchEvent(new Event('click'));
                         exibirDetalhes(item);
-                    }, 100);
+                    }, 150);
                 };
                 menu.appendChild(btn);
             });
         }
 
         function exibirDetalhes(item) {
-            const painel = document.getElementById('detalhes-residencial');
-            painel.innerHTML = `
+            document.getElementById('detalhes-residencial').innerHTML = `
                 <div class="detalhe-card">
                     <h2>${item.nome}</h2>
-                    <div class="info-row"><span class="info-label">📍 Endereço</span>${item.endereco || ''}<br>${item.bairro || ''} - ${item.cidade || ''}</div>
-                    <div class="info-row"><span class="info-label">💰 Valor</span>R$ ${item.preco || 'Consulte'}</div>
-                    <div class="info-row"><span class="info-label">🏗️ Status</span>${item.obra || '---'}</div>
-                    <div class="info-row"><span class="info-label">📅 Entrega</span>${item.entrega || '---'}</div>
-                    <div class="info-row"><span class="info-label">📊 Estoque</span>${item.estoque || '---'}</div>
+                    <div class="info-row"><span class="info-label">📍 Localização</span>${item.endereco || ''}<br>${item.bairro || ''} - ${item.cidade || ''}</div>
+                    <div class="info-row"><span class="info-label">💰 Valor Sugerido</span>R$ ${item.preco || 'Sob consulta'}</div>
+                    <div class="info-row"><span class="info-label">🏗️ Obra</span>${item.obra || '---'}</div>
+                    <div class="info-row"><span class="info-label">📅 Previsão Entrega</span>${item.entrega || '---'}</div>
+                    <div class="info-row"><span class="info-label">📊 Unidades em Estoque</span>${item.estoque || '---'}</div>
                 </div>`;
         }
 
@@ -156,7 +148,7 @@
             const container = document.getElementById(idContainer);
             if (!dados) return;
             const paths = dados.paths.map(p => `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class}"></path>`).join('');
-            container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform}">${paths}</g></svg>`;
+            container.innerHTML = `<svg viewBox="${dados.viewBox}"><g transform="${dados.transform}">${paths}</g></svg>`;
             vincularEventos();
         }
 
@@ -165,9 +157,7 @@
             const display = document.getElementById('display-nome');
             
             paths.forEach(p => {
-                p.onmouseover = () => {
-                    display.innerText = p.getAttribute('data-name');
-                };
+                p.onmouseover = () => { display.innerText = p.getAttribute('data-name'); };
                 p.onmouseout = () => { display.innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : "Selecione uma região"; };
 
                 p.onclick = (e) => {
