@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP - Estabilizado</title>
+    <title>Dashboard MRV SP - Instantâneo</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
@@ -22,7 +22,6 @@
             width: 100%; padding: 8px 12px; margin-bottom: 4px; background: #fff; border: 1px solid #ddd; 
             border-left: 5px solid rgb(6, 94, 3); text-align: left; cursor: pointer; font-size: 0.72rem; 
             border-radius: 4px; display: flex; justify-content: space-between; align-items: center;
-            transition: 0.2s;
         }
         .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; text-transform: uppercase; }
         .btRes:hover { background: #f9f9f9; border-left-color: #ff8c00; }
@@ -36,18 +35,21 @@
         .centro-topo { height: 40px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; background: #fafafa; }
         
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: height 0.3s ease; position: relative; }
+        
+        /* REMOVIDO: transition: height 0.3s ease; */
+        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         
         .pos-cima { height: 78%; z-index: 1; }
         .pos-baixo { 
             height: 22%; z-index: 10; cursor: pointer; 
-            background: rgba(0,0,0,0.02) !important; /* Leve destaque para indicar clique */
+            background: rgba(0,0,0,0.02); 
             border: none !important;
         }
 
         svg { width: 100%; height: 100%; max-height: 100%; display: block; padding: 10px; }
         
-        path { stroke: #fff; stroke-width: 0.5; fill: #ccc; transition: 0.2s; }
+        /* Removida transição dos paths para clique imediato */
+        path { stroke: #fff; stroke-width: 0.5; fill: #ccc; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
         
         path.commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
@@ -56,7 +58,6 @@
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
         
         .pos-baixo path { pointer-events: none; opacity: 0.35; }
-        .pos-baixo:hover path { opacity: 0.6; }
 
         .col-lateral-dir { width: 25%; border-left: 1px solid #ccc; background: #fdfdfd; padding: 15px; overflow-y: auto; }
         .titulo-vizinhos { font-size: 0.7rem; font-weight: bold; color: rgb(6, 94, 3); margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 3px; text-transform: uppercase; }
@@ -150,15 +151,15 @@
             const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
             if (btnEsq) {
                 btnEsq.classList.add('ativo');
-                btnEsq.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                // Alterado para 'auto' para evitar o smooth scroll que causa lentidão
+                btnEsq.scrollIntoView({ behavior: 'auto', block: 'nearest' });
                 botaoSelecionado = btnEsq;
             }
             if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca();
-            setTimeout(() => {
-                const el = document.getElementById(item.id_path);
-                if(el) destacarNoMapa(el);
-                exibirPainelDireito(item, el ? el.getAttribute('data-name') : item.cidade);
-            }, 150);
+            
+            const el = document.getElementById(item.id_path);
+            if(el) destacarNoMapa(el);
+            exibirPainelDireito(item, el ? el.getAttribute('data-name') : item.cidade);
         }
 
         function exibirPainelDireito(item, nomeCidade) {
@@ -197,13 +198,14 @@
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
             const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b');
             const container = document.getElementById('container-mapas');
+            
             if (cA.classList.contains('pos-cima')) {
-                cA.classList.replace('pos-cima', 'pos-baixo');
-                cB.classList.replace('pos-baixo', 'pos-cima');
+                cA.className = 'caixa-troca pos-baixo';
+                cB.className = 'caixa-troca pos-cima';
                 container.appendChild(cA); 
             } else {
-                cB.classList.replace('pos-cima', 'pos-baixo');
-                cA.classList.replace('pos-baixo', 'pos-cima');
+                cB.className = 'caixa-troca pos-baixo';
+                cA.className = 'caixa-troca pos-cima';
                 container.appendChild(cB); 
             }
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
@@ -226,27 +228,15 @@
             desenhar('caixa-b', MAPA_INTERIOR);
         }
 
-        // NOVO LISTENER DE CLIQUE UNIFICADO
         document.getElementById('container-mapas').addEventListener('click', (e) => {
             const caixaBaixo = e.target.closest('.pos-baixo');
-            
-            // 1. Se clicar em qualquer lugar da caixa de baixo, troca.
             if (caixaBaixo) {
                 solicitarTroca();
                 return;
             }
-
-            // 2. Lógica para a caixa de cima (pos-cima)
             if (e.target.tagName === 'path' && e.target.closest('.pos-cima')) {
                 const p = e.target;
-                
-                // Se clicar no path da Grande São Paulo na caixa de cima, troca.
-                if (p.id === "grandesaopaulo") { 
-                    solicitarTroca(); 
-                    return; 
-                }
-                
-                // Se clicar em um residencial
+                if (p.id === "grandesaopaulo") { solicitarTroca(); return; }
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
                 if(item) selecionarResidencial(item, null);
                 else destacarNoMapa(p);
