@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP - Estabilizado</title>
+    <title>Dashboard MRV SP - Final</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
@@ -11,59 +11,64 @@
         header { 
             background: rgb(6, 94, 3); height: 50px; display: flex; 
             align-items: center; justify-content: center; color: white; 
-            z-index: 100; position: relative; 
+            z-index: 100; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
 
         /* Coluna Esquerda */
-        .col-lateral-esq { width: 25%; border-right: 1px solid #ccc; background: #fdfdfd; overflow-y: auto; padding: 8px; }
+        .col-lateral-esq { width: 25%; border-right: 1px solid #ccc; background: #fdfdfd; overflow-y: auto; padding: 10px; }
 
-        /* Botões btRes - REGRA DE LINHA ÚNICA */
+        /* Estilo btRes */
         .btRes { 
-            width: 100%; padding: 8px 12px; margin-bottom: 5px; background: #fff; border: 1px solid #ddd; 
-            border-left: 5px solid rgb(6, 94, 3); text-align: left; cursor: pointer; font-size: 0.75rem; 
+            width: 100%; padding: 8px 12px; margin-bottom: 4px; background: #fff; border: 1px solid #ddd; 
+            border-left: 5px solid rgb(6, 94, 3); text-align: left; cursor: pointer; font-size: 0.72rem; 
             border-radius: 4px; display: flex; justify-content: space-between; align-items: center;
             transition: 0.2s;
         }
-        .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%; text-transform: uppercase; }
-        .btRes:hover { background: #f0f0f0; border-left-color: #ff8c00; }
+        .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
+        .btRes:hover { background: #f9f9f9; border-left-color: #ff8c00; }
         .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; border-color: #ff8c00; }
         
-        /* Status de Estoque */
-        .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; white-space: nowrap; margin-left: 5px; }
+        .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; white-space: nowrap; }
         .estoque-baixo { color: #d93025 !important; }
-        .estoque-vendido { text-decoration: line-through; color: #999 !important; text-transform: uppercase; }
+        .estoque-vendido { text-decoration: line-through; color: #999 !important; }
 
-        /* Coluna Central e Mapas */
-        .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; overflow: hidden; border-right: 1px solid #ccc; }
-        .centro-topo { height: 45px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        /* Coluna Central e Mapas - AJUSTE PARA NÃO ESTOURAR */
+        .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
+        .centro-topo { height: 40px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; background: #fafafa; }
         
-        .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* FIX DO MAPA: O segredo para não vazar é o container relativo e o svg absoluto */
-        .caixa-troca { width: 100%; position: relative; overflow: hidden; transition: 0.3s; background: white; }
-        .pos-cima { height: 75%; z-index: 2; }
-        .pos-baixo { height: 25%; z-index: 5; cursor: pointer; background: #f9f9f9; border-top: 2px solid #ddd; }
-        .pos-baixo:hover { background: #eee; }
-        .pos-baixo svg { opacity: 0.6; pointer-events: none; }
+        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: height 0.3s ease; position: relative; }
+        .pos-cima { height: 78%; z-index: 1; }
+        .pos-baixo { height: 22%; z-index: 10; cursor: pointer; background: #f0f0f0; border-top: 2px solid #ddd; }
+        .pos-baixo:hover { background: #e8e8e8; }
 
         svg { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 90%; height: 90%; max-width: 100%; max-height: 100%; display: block;
+            width: 100%; height: 100%; max-height: 100%; 
+            display: block; padding: 10px;
         }
         
-        path { stroke: #fff; stroke-width: 0.5; fill: #ccc; transition: 0.2s; cursor: pointer; }
-        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
-        .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.5px; }
+        path { stroke: #fff; stroke-width: 0.5; fill: #ccc; transition: 0.2s; }
+        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
+        .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
+        .pos-baixo path { pointer-events: none; opacity: 0.5; }
 
         /* Coluna Direita */
-        .col-lateral-dir { width: 25%; background: #fdfdfd; padding: 15px; overflow-y: auto; }
-        .titulo-vizinhos { font-size: 0.75rem; font-weight: bold; color: rgb(6, 94, 3); margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 3px; text-transform: uppercase; }
-        .ficha-card { border: 1px solid #eee; border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: white; margin-top: 15px; }
-        .ficha-nome { font-size: 0.95rem; color: #065e03; font-weight: bold; margin-bottom: 8px; display: block; }
-        .item-info { font-size: 0.75rem; color: #333; margin-bottom: 5px; }
-        .item-info strong { font-size: 0.65rem; color: #999; text-transform: uppercase; display: block; }
+        .col-lateral-dir { width: 25%; border-left: 1px solid #ccc; background: #fdfdfd; padding: 15px; overflow-y: auto; }
+        .titulo-vizinhos { font-size: 0.7rem; font-weight: bold; color: rgb(6, 94, 3); margin-bottom: 8px; border-bottom: 1px solid #ddd; padding-bottom: 3px; text-transform: uppercase; }
+        
+        .ficha-card { border: 1px solid #eee; border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: white; margin-top: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .ficha-nome { font-size: 0.9rem; color: #ff8c00; font-weight: bold; margin-bottom: 10px; display: block; text-transform: uppercase; }
+        .item-info { font-size: 0.75rem; color: #333; margin-bottom: 8px; line-height: 1.2; }
+        .item-info strong { font-size: 0.65rem; color: #999; text-transform: uppercase; display: block; margin-bottom: 2px; }
+
+        /* Botões de Ação */
+        .btn-acao { width: 100%; padding: 10px; margin-top: 8px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-book { background: #065e03; }
+        .btn-video { background: #ff8c00; }
+        .btn-acao:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -71,18 +76,18 @@
     <header><h1>Dashboard MRV - São Paulo</h1></header>
 
     <div class="main-wrapper">
-        <aside class="col-lateral-esq" id="menu-residenciais">Carregando lista...</aside>
+        <aside class="col-lateral-esq" id="menu-residenciais">Carregando...</aside>
         
         <main class="col-central">
             <div class="centro-topo" id="display-nome">Selecione uma região</div>
             <div class="container-mapas" id="container-mapas">
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
-                <div id="caixa-b" class="caixa-troca pos-baixo" onclick="trocarMapas()"></div>
+                <div id="caixa-b" class="caixa-troca pos-baixo" onclick="solicitarTroca()"></div>
             </div>
         </main>
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
-            <div style="text-align: center; color: #999; margin-top: 50px;">Aguardando seleção...</div>
+            <div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial para ver detalhes.</div>
         </aside>
     </div>
 
@@ -101,16 +106,11 @@
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     let col = linha.split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
-                    
-                    // FILTRO DE INTRUSOS: Ignora cabeçalhos, pdfs, lazer e linhas vazias
-                    if (col.length < 4 || !col[2] || col[2].toLowerCase().includes("pdf") || 
-                        col[2].toLowerCase().includes("lazer") || col[0].includes("IDs") || col[2] === "btRes") return null;
-
+                    // FILTRO DE INTRUSOS MELHORADO
+                    if (col.length < 4 || !col[2] || col[2].toLowerCase().includes("lazer") || col[2].toLowerCase().includes("book") || col[0].includes("IDs")) return null;
                     return {
-                        id_path: col[0], 
-                        regiao: col[1] ? col[1].toLowerCase() : "", 
-                        nome: col[2],
-                        estoque: parseInt(col[3]) || 0,
+                        id_path: col[0], regiao: col[1] ? col[1].toLowerCase() : "", 
+                        nome: col[2], estoque: parseInt(col[3]) || 0,
                         endereco: col[4], bairro: col[5], cidade: col[6],
                         entrega: col[7], preco: col[8], obra: col[11]
                     };
@@ -118,12 +118,12 @@
 
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaGeral();
-            } catch (e) { console.error("Erro ao carregar:", e); }
+            } catch (e) { console.error(e); }
         }
 
-        function formatarEstoqueHTML(qtd) {
-            if (qtd === 0) return `<span class="estoque-status estoque-vendido">Vendido</span>`;
-            if (qtd <= 5) return `<span class="estoque-status estoque-baixo">restam ${qtd} un.</span>`;
+        function formatarEstoque(qtd) {
+            if (qtd === 0) return `<span class="estoque-status estoque-vendido">VENDIDO</span>`;
+            if (qtd <= 5) return `<span class="estoque-status estoque-baixo">restam ${qtd} unidades</span>`;
             return `<span class="estoque-status">${qtd} unidades</span>`;
         }
 
@@ -133,34 +133,33 @@
             DADOS_PLANILHA.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
-                btn.innerHTML = `<strong>${item.nome}</strong> ${formatarEstoqueHTML(item.estoque)}`;
+                btn.innerHTML = `<strong>${item.nome}</strong> ${formatarEstoque(item.estoque)}`;
                 btn.onclick = () => selecionarResidencial(item, btn);
                 menu.appendChild(btn);
             });
         }
 
         function selecionarResidencial(item, btn) {
-            // Sincronizar botão da esquerda
+            // Sincroniza botão da esquerda
             if (!btn) {
                 const bts = document.querySelectorAll('.col-lateral-esq .btRes');
                 btn = Array.from(bts).find(b => b.innerText.includes(item.nome.toUpperCase()));
             }
             if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
-            if (btn) { 
-                btn.classList.add('ativo'); 
-                btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); 
-                botaoSelecionado = btn; 
+            if (btn) {
+                btn.classList.add('ativo');
+                btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                botaoSelecionado = btn;
             }
 
-            // Troca de mapa se necessário
-            if (item.regiao !== regiaoAtual) trocarMapas();
+            // Troca de região se necessário
+            if (item.regiao !== regiaoAtual) solicitarTroca();
             
-            // Destacar no mapa e exibir painel
             setTimeout(() => {
-                const el = document.querySelector('.pos-cima #' + item.id_path);
+                const el = document.getElementById(item.id_path);
                 if(el) destacarNoMapa(el);
                 exibirPainelDireito(item, el ? el.getAttribute('data-name') : item.cidade);
-            }, 150);
+            }, 100);
         }
 
         function exibirPainelDireito(item, nomeCidade) {
@@ -170,18 +169,22 @@
             const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
             vizinhos.forEach(v => {
                 html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v)}, null)'>
-                            <strong>${v.nome}</strong> ${formatarEstoqueHTML(v.estoque)}
+                            <strong>${v.nome}</strong> ${formatarEstoque(v.estoque)}
                          </button>`;
             });
 
             html += `
                 <div class="ficha-card">
                     <span class="ficha-nome">${item.nome}</span>
-                    <div class="item-info"><strong>Localização</strong> ${item.endereco || ''} - ${item.bairro || ''}</div>
-                    <div class="item-info"><strong>Preço Sugerido</strong> R$ ${item.preco || 'Sob consulta'}</div>
-                    <div class="item-info"><strong>Entrega</strong> ${item.entrega || '---'}</div>
-                    <div class="item-info"><strong>Obra</strong> ${item.obra || '0%'}</div>
-                    <div class="item-info"><strong>Estoque</strong> ${item.estoque} unidades</div>
+                    <div class="item-info"><strong>📍 Localização</strong>${item.endereco}<br>${item.bairro} - ${item.cidade}</div>
+                    <div class="item-info"><strong>💰 Valor Sugerido</strong>R$ ${item.preco || 'Sob consulta'}</div>
+                    <div class="item-info"><strong>📅 Entrega</strong>${item.entrega}</div>
+                    <div class="item-info"><strong>🏗️ Obra</strong>${item.obra || '0%'}</div>
+                    <div class="item-info"><strong>📊 Estoque</strong>${item.estoque} unidades</div>
+                    
+                    <button class="btn-acao btn-book">📄 Copiar Book do Cliente</button>
+                    <button class="btn-acao btn-video">🎥 Copiar Vídeo 1</button>
+                    <button class="btn-acao btn-video">🎥 Copiar Vídeo 2</button>
                 </div>`;
             painel.innerHTML = html;
         }
@@ -193,47 +196,48 @@
             document.getElementById('display-nome').innerText = el.getAttribute('data-name');
         }
 
-        function trocarMapas() {
+        function solicitarTroca() {
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
             const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b');
             const container = document.getElementById('container-mapas');
-
-            if (cA.classList.contains('pos-cima')) {
-                cA.classList.replace('pos-cima', 'pos-baixo'); cA.onclick = trocarMapas;
-                cB.classList.replace('pos-baixo', 'pos-cima'); cB.onclick = null;
-                container.appendChild(cA); // Manda A para baixo
-            } else {
-                cB.classList.replace('pos-cima', 'pos-baixo'); cB.onclick = trocarMapas;
-                cA.classList.replace('pos-baixo', 'pos-cima'); cA.onclick = null;
-                container.appendChild(cB); // Manda B para baixo
-            }
+            
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
             pathSelecionado = null;
-            document.getElementById('display-nome').innerText = "Selecione uma região";
+
+            if (cA.classList.contains('pos-cima')) {
+                cA.classList.replace('pos-cima', 'pos-baixo');
+                cB.classList.replace('pos-baixo', 'pos-cima');
+                container.appendChild(cA); // Move caixa A para o final (baixo no DOM)
+            } else {
+                cB.classList.replace('pos-cima', 'pos-baixo');
+                cA.classList.replace('pos-baixo', 'pos-cima');
+                container.appendChild(cB); // Move caixa B para o final
+            }
         }
 
         function desenhar(idContainer, dados) {
             const container = document.getElementById(idContainer);
             const paths = dados.paths.map(p => `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class}"></path>`).join('');
-            container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet">${paths}</svg>`;
+            // Adicionado preserveAspectRatio para evitar o estouro
+            container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform}">${paths}</g></svg>`;
         }
 
-        // Delegação de evento para cliques nos caminhos do mapa
+        // Eventos de clique no mapa (apenas na caixa de cima)
         document.getElementById('container-mapas').addEventListener('click', (e) => {
-            const p = e.target;
-            if (p.tagName !== 'path' || p.closest('.pos-baixo')) return;
-            
-            if (p.id === "grandesaopaulo") { trocarMapas(); } 
-            else if (p.classList.contains('commrv')) {
+            if (e.target.tagName === 'path' && e.target.closest('.pos-cima')) {
+                const p = e.target;
+                if (p.id === "grandesaopaulo") { solicitarTroca(); return; }
+                if (!p.classList.contains('commrv')) return;
+
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
                 if(item) selecionarResidencial(item, null);
             }
         });
 
-        window.onload = () => { 
-            desenhar('caixa-a', MAPA_GSP); 
-            desenhar('caixa-b', MAPA_INTERIOR); 
-            carregarPlanilha(); 
+        window.onload = () => {
+            desenhar('caixa-a', MAPA_GSP);
+            desenhar('caixa-b', MAPA_INTERIOR);
+            carregarPlanilha();
         };
     </script>
 </body>
