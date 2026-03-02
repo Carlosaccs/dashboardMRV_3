@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard MRV SP - Estabilizado</title>
+    <title>Dashboard MRV SP - Navegação Travada</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
@@ -16,18 +16,9 @@
         
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; background: #fff; }
 
-        /* Colunas Laterais com contorno */
-        .col-lateral-esq { 
-            width: 25%; background: #fff; overflow-y: auto; padding: 10px; 
-            border-right: 1px solid #ddd;
-        }
-        
-        .col-lateral-dir { 
-            width: 25%; background: #fff; padding: 15px; overflow-y: auto; 
-            border-left: 1px solid #ddd;
-        }
+        .col-lateral-esq { width: 25%; background: #fff; overflow-y: auto; padding: 10px; border-right: 1px solid #ddd; }
+        .col-lateral-dir { width: 25%; background: #fff; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
 
-        /* Botões sem contorno externo */
         .btRes { 
             width: 100%; padding: 8px 12px; margin-bottom: 4px; background: transparent; 
             border: none; border-left: 5px solid rgb(6, 94, 3); 
@@ -42,7 +33,6 @@
         .estoque-baixo { color: #d93025 !important; }
         .estoque-vendido { text-decoration: line-through; color: #999 !important; }
 
-        /* Centro sem contorno */
         .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
         .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; }
         
@@ -50,14 +40,11 @@
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         
         .pos-cima { height: 78%; z-index: 1; }
-        
-        /* Mapa de baixo escuro #838383 */
         .pos-baixo { height: 22%; z-index: 10; cursor: pointer; background: transparent; border: none !important; }
         .pos-baixo path { pointer-events: none; fill: #838383 !important; opacity: 1 !important; }
 
         svg { width: 100%; height: 100%; max-height: 100%; display: block; padding: 10px; }
         
-        /* Cores dos Paths */
         path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.1s; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
         
@@ -65,7 +52,6 @@
         path:not(.commrv):hover { fill: #666; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
-        /* Ficha técnica */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-nome { font-size: 0.9rem; color: #ff8c00; font-weight: bold; margin-bottom: 10px; display: block; text-transform: uppercase; }
         .item-info { font-size: 0.75rem; color: #333; margin-bottom: 8px; line-height: 1.2; }
@@ -113,7 +99,6 @@
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     let col = linha.split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
                     if (col.length < 4 || !col[2]) return null;
-                    
                     const n = col[2].toUpperCase();
                     if (n.includes("LAZER") || n.includes(".PDF") || n.includes("BOOK") || 
                         n.includes("CORRETOR") || n.includes("EQUIPADO") || col[0].includes("IDs")) return null;
@@ -129,7 +114,7 @@
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaGeral();
                 desenharIniciais();
-            } catch (e) { console.error("Erro ao carregar planilha:", e); }
+            } catch (e) { console.error(e); }
         }
 
         function formatarEstoque(qtd) {
@@ -162,7 +147,7 @@
             if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca();
             
             const el = document.getElementById(item.id_path);
-            if(el) destacarNoMapa(el, true);
+            if(el) destacarNoMapa(el);
             exibirPainelDireito(item, el ? el.getAttribute('data-name') : item.cidade);
         }
 
@@ -191,14 +176,11 @@
             painel.innerHTML = html;
         }
 
-        function destacarNoMapa(el, ehResidencial) {
+        // Função ajustada: Só destaca se houver residencial
+        function destacarNoMapa(el) {
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
-            if (ehResidencial) {
-                el.classList.add('path-ativo');
-                pathSelecionado = el;
-            } else {
-                pathSelecionado = null;
-            }
+            el.classList.add('path-ativo');
+            pathSelecionado = el;
             document.getElementById('display-nome').innerText = el.getAttribute('data-name');
         }
 
@@ -223,7 +205,6 @@
 
         function desenhar(idContainer, dados) {
             const container = document.getElementById(idContainer);
-            if (!container) return;
             const paths = dados.paths.map(p => {
                 const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id);
                 const isGSP = p.id === "grandesaopaulo";
@@ -250,12 +231,16 @@
         document.getElementById('container-mapas').addEventListener('click', (e) => {
             const caixaBaixo = e.target.closest('.pos-baixo');
             if (caixaBaixo) { solicitarTroca(); return; }
+            
             if (e.target.tagName === 'path' && e.target.closest('.pos-cima')) {
                 const p = e.target;
                 if (p.id === "grandesaopaulo") { solicitarTroca(); return; }
+                
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
-                if(item) selecionarResidencial(item, null);
-                else destacarNoMapa(p, false);
+                // CORREÇÃO: Só executa a ação se a cidade tiver MRV (for verde)
+                if(item) {
+                    selecionarResidencial(item, null);
+                }
             }
         });
 
