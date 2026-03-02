@@ -5,67 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
         header { background: rgb(6, 94, 3); height: 50px; display: flex; align-items: center; justify-content: center; color: white; z-index: 10; position: relative; }
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; }
 
-        /* Coluna Esquerda - Mais estreita */
+        /* Colunas */
         .col-lateral-esq { width: 20%; border-right: 1px solid #ccc; background: #fdfdfd; overflow-y: auto; padding: 5px; }
-        
+        .col-central { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .col-lateral-dir { width: 33%; border-left: 1px solid #ccc; background: #fdfdfd; padding: 15px; overflow-y: auto; }
+
+        /* Botões da Esquerda */
         .btRes { 
-            width: 100%; 
-            padding: 6px 10px; 
-            margin-bottom: 3px; 
-            background: #fff; 
-            border: 1px solid #ddd; 
-            border-left: 5px solid rgb(6, 94, 3); 
-            text-align: left; 
-            cursor: pointer; 
-            font-size: 0.7rem; 
-            border-radius: 4px; 
-            transition: 0.1s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            width: 100%; padding: 8px 10px; margin-bottom: 3px; background: #fff; border: 1px solid #ddd; 
+            border-left: 5px solid rgb(6, 94, 3); text-align: left; cursor: pointer; font-size: 0.7rem; 
+            border-radius: 4px; display: flex; justify-content: space-between; align-items: center;
         }
         .btRes:hover { background: #f0f0f0; border-left-color: #ff8c00; }
         .btRes.ativo { background: #fff5e6 !important; border-color: #ff8c00 !important; border-left-color: #ff8c00 !important; font-weight: bold; }
         
         /* Status de Estoque */
-        .estoque-status { font-size: 0.62rem; font-weight: bold; color: #666; margin-left: 5px; white-space: nowrap; }
+        .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; white-space: nowrap; }
         .estoque-baixo { color: #d93025 !important; } 
         .estoque-vendido { text-decoration: line-through; color: #999 !important; }
 
-        /* Coluna Central - Ajustada */
-        .col-central { flex: 1; display: flex; flex-direction: column; position: relative; }
-        .centro-topo { height: 45px; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; }
+        /* Título Vizinhos */
+        .titulo-vizinhos { font-size: 0.8rem; font-weight: bold; color: rgb(6, 94, 3); margin-bottom: 12px; padding-bottom: 5px; border-bottom: 1px solid #ddd; text-transform: uppercase; }
+
+        /* --- Ficha Técnica Estilo Dashboard Vendas --- */
+        .detalhe-card { margin-top: 25px; }
+        
+        .box-dica { 
+            background: #f1f9f1; border-left: 4px solid #388e3c; padding: 10px; 
+            font-size: 0.8rem; margin-bottom: 15px; border-radius: 0 4px 4px 0; color: #2e7d32;
+        }
+
+        .ficha-conteudo { 
+            border: 1px solid #eee; border-left: 4px solid #ff8c00; padding: 15px; 
+            border-radius: 4px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .titulo-ficha-principal { font-size: 1.1rem; color: #004d00; font-weight: bold; margin-bottom: 10px; display: block; }
+        
+        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
+        
+        .item-info { font-size: 0.82rem; color: #444; line-height: 1.4; }
+        .item-info strong { display: block; font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 2px; }
+
+        .full-info { margin-top: 12px; font-size: 0.82rem; color: #444; border-top: 1px solid #eee; padding-top: 10px; }
+
+        /* Botões de Ação */
+        .btn-acao { 
+            width: 100%; padding: 10px; margin-top: 8px; border: none; border-radius: 5px; 
+            color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.85rem;
+        }
+        .btn-book { background: #065e03; }
+        .btn-video { background: #ff8c00; }
+        .btn-acao:hover { opacity: 0.9; }
+
+        /* Mapa e Layout Central */
+        .centro-topo { height: 45px; border-bottom: 1px solid #ccc; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .container-mapas { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .pos-cima { height: 80%; background: white; }
         .pos-baixo { height: 20%; background: #fff; cursor: pointer; border-top: 2px solid #ddd; opacity: 0.8; }
-        
         svg { max-width: 95%; max-height: 95%; transform: scale(1.1); }
-
-        /* Coluna Direita - Mais larga */
-        .col-lateral-dir { width: 33%; border-left: 1px solid #ccc; background: #fdfdfd; padding: 15px; overflow-y: auto; }
-        .titulo-vizinhos { font-size: 0.8rem; font-weight: bold; color: rgb(6, 94, 3); margin-bottom: 12px; padding-bottom: 5px; border-bottom: 1px solid #ddd; text-transform: uppercase; }
-        
-        /* Ficha Técnica */
-        .detalhe-card { margin-top: 25px; padding-top: 15px; border-top: 2px dashed #eee; }
-        .titulo-ficha { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 15px; border-bottom: 2px solid #ff8c00; padding-bottom: 5px; }
-        .titulo-ficha h2 { color: #333; font-size: 1rem; text-transform: uppercase; }
-        .titulo-ficha .estoque-status { font-size: 0.8rem; } /* Estoque um pouco maior na ficha */
-
-        .info-row { margin-bottom: 10px; font-size: 0.85rem; color: #444; }
-        .info-label { font-weight: bold; color: #999; font-size: 0.7rem; text-transform: uppercase; display: block; }
-
-        /* Mapas */
-        path { stroke: #fff; stroke-width: 0.5; fill: #8c8c8c; transition: 0.2s; cursor: default; }
+        path { stroke: #fff; stroke-width: 0.5; fill: #8c8c8c; transition: 0.2s; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer !important; }
-        .pos-cima .commrv:hover, .pos-cima #grandesaopaulo:hover { fill: #ff8c00 !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1px; }
-        .pos-baixo path { pointer-events: none; }
     </style>
 </head>
 <body>
@@ -85,7 +92,7 @@
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
             <div style="text-align: center; color: #999; margin-top: 50px;">
-                <p>Selecione um residencial.</p>
+                <p>Selecione um residencial para ver os detalhes.</p>
             </div>
         </aside>
     </div>
@@ -108,9 +115,7 @@
 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     let col = linha.split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
-                    if (col.length < 3 || col[0].includes('http') || col[2].toLowerCase().includes('pdf') || col[2].toLowerCase().includes('lazer')) {
-                        return null;
-                    }
+                    if (col.length < 3 || col[0].includes('http')) return null;
                     return {
                         id_path: col[0],
                         regiao: col[1] ? col[1].toLowerCase() : "",
@@ -121,7 +126,13 @@
                         cidade: col[6],
                         entrega: col[7],
                         preco: col[8],
-                        obra: col[11]
+                        plantas: col[9], // Coluna J (ajustado conforme padrão comum)
+                        obra: col[11],
+                        book: col[13],   // Coluna N
+                        dica: col[14],   // Coluna O
+                        video1: col[15], // Coluna P
+                        video2: col[16], // Coluna Q
+                        obs: col[12]     // Coluna M
                     };
                 }).filter(item => item !== null);
 
@@ -145,21 +156,71 @@
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
                 btn.innerHTML = `<strong>${item.nome}</strong> ${formatarEstoqueBotao(item.estoque)}`;
-                
-                btn.onclick = () => {
-                    if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
-                    btn.classList.add('ativo');
-                    botaoSelecionado = btn;
-
-                    if (item.regiao !== regiaoAtual) solicitarTroca();
-                    
-                    setTimeout(() => {
-                        const el = document.getElementById(item.id_path);
-                        if(el) destacarNoMapa(el);
-                        exibirPainelDireito(item, el ? el.getAttribute('data-name') : item.cidade);
-                    }, 100);
-                };
+                btn.onclick = () => clicarNoBotao(btn, item);
                 menu.appendChild(btn);
+            });
+        }
+
+        function clicarNoBotao(btn, item) {
+            if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
+            btn.classList.add('ativo');
+            botaoSelecionado = btn;
+            if (item.regiao !== regiaoAtual) solicitarTroca();
+            setTimeout(() => {
+                const el = document.getElementById(item.id_path);
+                if(el) destacarNoMapa(el);
+                exibirPainelDireito(item, el ? el.getAttribute('data-name') : item.cidade);
+            }, 100);
+        }
+
+        function exibirPainelDireito(item, nomeCidade) {
+            const painel = document.getElementById('detalhes-residencial');
+            let html = `<div class="titulo-vizinhos">Também em ${nomeCidade || 'esta região'}:</div>`;
+
+            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
+            vizinhos.forEach(v => {
+                html += `<button class="btRes" onclick="processarCliqueExterno('${v.nome}')">
+                            <strong>${v.nome}</strong> ${formatarEstoqueBotao(v.estoque)}
+                         </button>`;
+            });
+
+            // Card Principal
+            html += `<div class="detalhe-card">`;
+
+            // Dica (se houver)
+            if (item.dica && item.dica !== "---") {
+                html += `<div class="box-dica">💡 <strong>Dica:</strong> ${item.dica}</div>`;
+            }
+
+            // Ficha Técnica Estilizada
+            html += `
+                <div class="ficha-conteudo">
+                    <span class="titulo-ficha-principal">${item.nome} - ${formatarEstoqueBotao(item.estoque)}</span>
+                    <div class="item-info">📍 <strong>Localização</strong> ${item.endereco || ''}, ${item.bairro || ''}</div>
+                    
+                    <div class="grid-info">
+                        <div class="item-info">💰 <strong>Preço</strong> R$ ${item.preco || 'Sob consulta'}</div>
+                        <div class="item-info">🔑 <strong>Entrega</strong> ${item.entrega || '---'}</div>
+                        <div class="item-info">📐 <strong>Plantas</strong> ${item.plantas || 'Consulte'}</div>
+                        <div class="item-info">🏗️ <strong>Obra</strong> ${item.obra || '0%'}</div>
+                    </div>
+
+                    ${item.obs && item.obs !== "---" ? `<div class="full-info">📝 <strong>Obs</strong> ${item.obs}</div>` : ''}
+                </div>`;
+
+            // Botões de Ação (Apenas se houver links)
+            if (item.book) html += `<button class="btn-acao btn-book" onclick="window.open('${item.book}')">📄 Copiar Book do Cliente</button>`;
+            if (item.video1) html += `<button class="btn-acao btn-video" onclick="window.open('${item.video1}')">🎬 Copiar Vídeo 1</button>`;
+            if (item.video2) html += `<button class="btn-acao btn-video" onclick="window.open('${item.video2}')">🎬 Copiar Vídeo 2</button>`;
+
+            html += `</div>`;
+            painel.innerHTML = html;
+        }
+
+        function processarCliqueExterno(nomeResidencial) {
+            const bts = document.querySelectorAll('.col-lateral-esq .btRes');
+            bts.forEach(b => {
+                if (b.innerText.includes(nomeResidencial.toUpperCase())) { b.click(); b.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
             });
         }
 
@@ -168,50 +229,6 @@
             el.classList.add('path-ativo');
             pathSelecionado = el;
             document.getElementById('display-nome').innerText = el.getAttribute('data-name');
-        }
-
-        function exibirPainelDireito(itemSelecionado, nomeCidade) {
-            const painel = document.getElementById('detalhes-residencial');
-            let html = `<div class="titulo-vizinhos">Também em ${nomeCidade || 'esta região'}:</div>`;
-
-            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === itemSelecionado.id_path && d.nome !== itemSelecionado.nome);
-
-            if (vizinhos.length > 0) {
-                vizinhos.forEach(v => {
-                    html += `
-                        <button class="btRes" onclick="processarCliqueExterno('${v.nome}')">
-                            <strong>${v.nome}</strong>
-                            ${formatarEstoqueBotao(v.estoque)}
-                        </button>`;
-                });
-            } else {
-                html += `<p style="font-size:0.7rem; color:#999; margin-bottom:10px;">Único empreendimento nesta cidade.</p>`;
-            }
-
-            // Ficha técnica com título idêntico ao botão
-            html += `
-                <div class="detalhe-card">
-                    <div class="titulo-ficha">
-                        <h2>${itemSelecionado.nome}</h2>
-                        ${formatarEstoqueBotao(itemSelecionado.estoque)}
-                    </div>
-                    <div class="info-row"><span class="info-label">📍 Localização</span>${itemSelecionado.endereco || ''}<br>${itemSelecionado.bairro || ''} - ${itemSelecionado.cidade || ''}</div>
-                    <div class="info-row"><span class="info-label">💰 Valor Sugerido</span>R$ ${itemSelecionado.preco || 'Sob consulta'}</div>
-                    <div class="info-row"><span class="info-label">🏗️ Status</span>${itemSelecionado.obra || '---'}</div>
-                    <div class="info-row"><span class="info-label">📅 Entrega</span>${itemSelecionado.entrega || '---'}</div>
-                </div>`;
-
-            painel.innerHTML = html;
-        }
-
-        function processarCliqueExterno(nomeResidencial) {
-            const bts = document.querySelectorAll('.col-lateral-esq .btRes');
-            bts.forEach(b => {
-                if (b.innerText.includes(nomeResidencial.toUpperCase())) {
-                    b.click();
-                    b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            });
         }
 
         function desenhar(idContainer, dados) {
@@ -223,60 +240,28 @@
 
         function vincularEventos() {
             const paths = document.querySelectorAll('.pos-cima path');
-            const display = document.getElementById('display-nome');
-            
             paths.forEach(p => {
-                p.onmouseover = () => { display.innerText = p.getAttribute('data-name'); };
-                p.onmouseout = () => { display.innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : "Selecione uma região"; };
-
                 p.onclick = (e) => {
                     e.stopPropagation();
                     if (p.id === "grandesaopaulo") { solicitarTroca(); return; }
                     if (!p.classList.contains('commrv')) return;
-
-                    destacarNoMapa(p);
                     const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
-                    if(item) {
-                        exibirPainelDireito(item, p.getAttribute('data-name'));
-                        const bts = document.querySelectorAll('.col-lateral-esq .btRes');
-                        bts.forEach(b => {
-                            if (b.innerText.includes(item.nome.toUpperCase())) {
-                                if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
-                                b.classList.add('ativo');
-                                b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                                botaoSelecionado = b;
-                            }
-                        });
-                    }
+                    if(item) processarCliqueExterno(item.nome);
                 };
             });
         }
 
         function solicitarTroca() {
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
-            const cA = document.getElementById('caixa-a');
-            const cB = document.getElementById('caixa-b');
-            const container = document.getElementById('container-mapas');
+            const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b'), container = document.getElementById('container-mapas');
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
             pathSelecionado = null;
-
-            if (cB.classList.contains('pos-baixo')) {
-                cB.classList.replace('pos-baixo', 'pos-cima');
-                cA.classList.replace('pos-cima', 'pos-baixo');
-                container.insertBefore(cB, cA);
-            } else {
-                cA.classList.replace('pos-baixo', 'pos-cima');
-                cB.classList.replace('pos-cima', 'pos-baixo');
-                container.insertBefore(cA, cB);
-            }
+            if (cB.classList.contains('pos-baixo')) { cB.classList.replace('pos-baixo', 'pos-cima'); cA.classList.replace('pos-cima', 'pos-baixo'); container.insertBefore(cB, cA); }
+            else { cA.classList.replace('pos-baixo', 'pos-cima'); cB.classList.replace('pos-cima', 'pos-baixo'); container.insertBefore(cA, cB); }
             vincularEventos();
         }
 
-        window.onload = () => {
-            desenhar('caixa-a', MAPA_GSP);
-            desenhar('caixa-b', MAPA_INTERIOR);
-            carregarPlanilha();
-        };
+        window.onload = () => { desenhar('caixa-a', MAPA_GSP); desenhar('caixa-b', MAPA_INTERIOR); carregarPlanilha(); };
     </script>
 </body>
 </html>
