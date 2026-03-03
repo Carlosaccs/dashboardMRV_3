@@ -168,9 +168,9 @@
                 html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'><strong>${v.nome}</strong> <span class="estoque-status">${v.estoque == '0' || v.estoque == 'VENDIDO' ? 'VENDIDO' : 'restam ' + v.estoque + ' un.'}</span></button>`;
             });
 
-            // LOGICA PARA OS TEXTOS (DICA E OBS)
-            let blocoDica = item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 Dica do Especialista</span>${item.dica}</div>` : "";
-            let blocoObs = item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 Observações</span>${item.obs}</div>` : "";
+            // LOGICA PARA OS TEXTOS (DICA E OBS) COM TÍTULOS SIMPLIFICADOS
+            let blocoDica = item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 Dica:</span>${item.dica}</div>` : "";
+            let blocoObs = item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 Observações:</span>${item.obs}</div>` : "";
 
             html += `
                 <div class="ficha-card">
