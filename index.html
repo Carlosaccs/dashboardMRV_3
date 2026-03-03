@@ -110,10 +110,7 @@
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                     
-                    // FILTRO ANTI-INVASOR: O nome (coluna C/index 2) deve existir e ter pelo menos 3 caracteres
-                    // Isso remove fragmentos como "3m²", "35" ou células vazias que quebram o layout
-                    const nomeValido = col[2] && col[2].length > 3;
-                    if (!nomeValido) return null;
+                    if (!col[2] || col[2].length < 3) return null;
 
                     return {
                         id_path: (col[0] || "").toLowerCase().trim(), 
@@ -123,7 +120,15 @@
                         rua: col[4] || "", num: col[5] || "", cidade: col[6] || "", entrega: col[7] || "", menor_preco: col[8] || "",
                         plantas: `de ${col[9] || ""} até ${col[10] || ""}`, obra: col[11] || "0",
                         localizacao: col[12] || "", mobilidade: col[13] || "", cultura_lazer: col[14] || "", comercio: col[15] || "", saude_educacao: col[16] || "",
-                        dica: col[17] || "", obs: col[18] || "", book_cli: col[19] || "", book_corr: col[20] || "", video1: col[21] || "", video2: col[22] || ""
+                        dica: col[17] || "", obs: col[18] || "", 
+                        book_cli: col[19] || "", book_corr: col[20] || "", 
+                        video1: col[21] || "", video2: col[22] || "",
+                        // NOVOS CAMPOS: APARTAMENTOS (Colunas 23 a 27)
+                        aptVaranda: col[23] || "", 
+                        aptSemVaranda: col[24] || "", 
+                        aptGarden: col[25] || "", 
+                        outroApt1: col[26] || "", 
+                        outroApt2: col[27] || ""
                     };
                 }).filter(item => item !== null);
 
@@ -162,7 +167,7 @@
         }
 
         function renderLinkRow(label, link, ico) {
-            if (!link || link === "" || link === "#") return "";
+            if (!link || link === "" || link === "#" || link.length < 5) return "";
             return `<div class="linha-link"><div class="link-nome"><span>${ico}</span> ${label}</div><div class="link-acoes"><button class="btn-mini btn-abrir" onclick="window.open('${link}', '_blank')">Abrir</button><button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">Copiar</button></div></div>`;
         }
 
@@ -189,6 +194,7 @@
                     </div>
                     ${item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 Dica do Corretor</span>${item.dica}</div>` : ''}
                     ${item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 Observações</span>${item.obs}</div>` : ''}
+                    
                     <span class="secao-titulo">Destaques da Região</span>
                     <div class="bloco-destaques">
                         ${item.localizacao ? `<div class="destaque-item"><span class="destaque-icon">📍</span><div class="destaque-texto"><strong>Localização</strong>${item.localizacao}</div></div>` : ''}
@@ -197,11 +203,19 @@
                         ${item.comercio ? `<div class="destaque-item"><span class="destaque-icon">🛒</span><div class="destaque-texto"><strong>Comércio</strong>${item.comercio}</div></div>` : ''}
                         ${item.saude_educacao ? `<div class="destaque-item"><span class="destaque-icon">🏥</span><div class="destaque-texto"><strong>Saúde e Educação</strong>${item.saude_educacao}</div></div>` : ''}
                     </div>
-                    <span class="secao-titulo">Links e Materiais</span>
+
+                    <span class="secao-titulo">Links e Vídeos</span>
                     ${renderLinkRow("Book Cliente", item.book_cli, "📄")}
                     ${renderLinkRow("Book Corretor", item.book_corr, "💼")}
                     ${renderLinkRow("Vídeo 1", item.video1, "🎥")}
                     ${renderLinkRow("Vídeo 2", item.video2, "🎥")}
+
+                    <span class="secao-titulo">Plantas e Modelos</span>
+                    ${renderLinkRow("Apart. com Varanda", item.aptVaranda, "🏢")}
+                    ${renderLinkRow("Apart. sem Varanda", item.aptSemVaranda, "🏢")}
+                    ${renderLinkRow("Apart. Garden", item.aptGarden, "🏡")}
+                    ${renderLinkRow("Opção de Planta 1", item.outroApt1, "📐")}
+                    ${renderLinkRow("Opção de Planta 2", item.outroApt2, "📐")}
                 </div>`;
             painel.innerHTML = html;
         }
