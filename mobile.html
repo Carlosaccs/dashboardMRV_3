@@ -16,23 +16,19 @@
         }
         @media (orientation: portrait) { #aviso-rotacao { display: flex; } }
 
+        /* Faixa Verde na Esquerda */
         .sidebar-titulo {
             background: rgb(6, 94, 3);
             width: 32px; height: 100vh;
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; /* Centralizado verticalmente */
             padding: 10px 0; color: white; flex-shrink: 0; z-index: 30;
         }
 
+        /* Texto Vertical Atualizado */
         .titulo-vertical {
             writing-mode: vertical-rl; transform: rotate(180deg);
-            text-transform: uppercase; font-size: 0.65rem; font-weight: bold;
+            text-transform: uppercase; font-size: 0.75rem; font-weight: bold;
             letter-spacing: 1.5px; white-space: nowrap;
-        }
-
-        .btn-sobre-mini {
-            background: rgba(255,255,255,0.2); border: 1px solid white; color: white;
-            border-radius: 50%; width: 22px; height: 22px;
-            display: flex; align-items: center; justify-content: center; font-size: 0.55rem; cursor: pointer;
         }
 
         .main-wrapper { display: flex; flex: 1; height: 100vh; background: #fff; overflow: hidden; }
@@ -97,14 +93,12 @@
 
     <div id="aviso-rotacao">
         <div style="font-size: 40px; margin-bottom: 15px;">🔄</div>
-        <h2 style="margin-bottom: 8px;">Gire o telemóvel</h2>
+        <h2 style="margin-bottom: 8px;">Gire o dispositivo</h2>
         <p>Dashboard otimizado para o modo horizontal.</p>
     </div>
 
     <div class="sidebar-titulo">
-        <div class="btn-sobre-mini" onclick="toggleModal(true)">?</div>
-        <div class="titulo-vertical">DASHBOARD MRV SP</div>
-        <div style="font-size: 0.4rem; opacity: 0.5;">v2.9</div>
+        <div class="titulo-vertical">RESIDENCIAIS MRV EM SP</div>
     </div>
 
     <div class="main-wrapper">
@@ -125,26 +119,12 @@
         </aside>
     </div>
 
-    <div class="modal-overlay" id="modal-sobre" onclick="toggleModal(false)">
-        <div class="modal-caixa" onclick="event.stopPropagation()">
-            <div style="font-size: 0.65rem; line-height: 1.4;">
-                <strong>Dashboard Mobile v2.9</strong><br><br>
-                - Colunas laterais ajustadas (23% / 31%).<br>
-                - Grid 2x2 restaurado.<br>
-                - Todos os materiais incluídos (Books, Vídeos e Plantas).
-            </div>
-            <button onclick="toggleModal(false)" style="margin-top:10px; padding:5px 10px; border: none; background: #065e03; color: white; border-radius: 4px; font-size: 0.6rem;">Fechar</button>
-        </div>
-    </div>
-
     <div id="toast">Copiado!</div>
 
     <script src="mrv-data.js"></script>
     <script>
         let pathSelecionado = null, botaoSelecionado = null, regiaoAtual = "gsp", DADOS_PLANILHA = [];
 
-        function toggleModal(show) { document.getElementById('modal-sobre').style.display = show ? 'flex' : 'none'; }
-        
         async function carregarPlanilha() {
             try {
                 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv&cachebuster=" + new Date().getTime();
@@ -165,7 +145,6 @@
                         menor_preco: col[8], 
                         plantas_txt: `de ${col[9]} até ${col[10]}`,
                         obra: col[11], 
-                        // MAPEAMENTO COMPLETO DAS COLUNAS
                         book_corr: col[18],
                         book_cli: col[19],
                         video1: col[21],
