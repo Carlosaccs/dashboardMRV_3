@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
     <style>
+        /* CSS BASE */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
         
@@ -16,11 +17,12 @@
         
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; background: #fff; }
 
-        /* Colunas Laterais */
+        /* COLUNAS */
         .col-lateral-esq { width: 25%; background: #fff; overflow-y: auto; padding: 10px; border-right: 1px solid #ddd; }
         .col-lateral-dir { width: 25%; background: #fff; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
+        .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
 
-        /* Botões Lista Esquerda */
+        /* LISTA ESQUERDA */
         .btRes { 
             width: 100%; padding: 8px 12px; margin-bottom: 4px; background: transparent; 
             border: none; border-left: 5px solid rgb(6, 94, 3); 
@@ -30,43 +32,49 @@
         .btRes:hover { background: #f4f4f4; border-left-color: #ff8c00; }
         .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%; text-transform: uppercase; }
         .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; }
-        
         .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; }
         .estoque-vendido { text-decoration: line-through; color: #999 !important; background: #f0f0f0; padding: 2px 4px; border-radius: 2px; }
 
-        /* Central */
-        .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
+        /* MAPA E TOPO */
         .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; background: #fdfdfd; }
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         .pos-cima { height: 78%; z-index: 5; }
         .pos-baixo { height: 22%; z-index: 10; cursor: pointer; }
-        
         svg { width: 100%; height: 100%; display: block; padding: 10px; pointer-events: auto; }
         path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; cursor: pointer; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
         .commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
-        /* Ficha Direita - Estilo Print */
+        /* FICHA DIREITA - CAMPOS DE TEXTO */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
-        .ficha-header { font-size: 0.85rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; }
-        .local-info { font-size: 0.75rem; color: #333; margin-bottom: 15px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+        .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         
-        .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        /* Grid de Informações Rápidas */
+        .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .grid-item { font-size: 0.72rem; color: #333; }
-        .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; display: flex; align-items: center; gap: 4px; }
+        .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; font-size: 0.65rem; text-transform: uppercase; }
 
-        /* Novos Campos de Texto */
-        .bloco-texto { margin-bottom: 12px; padding: 8px; border-radius: 4px; font-size: 0.75rem; line-height: 1.4; }
-        .dica-box { background: #fff5e6; border: 1px dashed #ff8c00; color: #856404; }
-        .obs-box { background: #f0f0f0; color: #555; font-style: italic; }
-        .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.65rem; display: block; margin-bottom: 3px; color: #333; }
+        /* Destaques (Diferenciais) */
+        .bloco-destaques { margin-bottom: 15px; }
+        .destaque-item { font-size: 0.72rem; color: #444; display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
+        .destaque-icon { color: #065e03; font-weight: bold; }
 
-        /* Botões de Ação */
+        /* Blocos de Texto Grande (Dica e Obs) */
+        .bloco-texto { margin-bottom: 10px; padding: 10px; border-radius: 6px; font-size: 0.75rem; line-height: 1.5; position: relative; }
+        .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.6rem; display: block; margin-bottom: 5px; letter-spacing: 0.5px; }
+        
+        .dica-box { background: #fff5e6; border: 1px solid #ffe0b3; color: #7a5a00; }
+        .dica-box::before { content: "💡"; position: absolute; right: 10px; top: 8px; opacity: 0.3; font-size: 1.2rem; }
+        
+        .obs-box { background: #f8f9fa; border-left: 4px solid #dee2e6; color: #555; }
+        .obs-box::before { content: "📝"; position: absolute; right: 10px; top: 8px; opacity: 0.2; font-size: 1.2rem; }
+
+        /* Botões (Mantidos mas aguardando ajustes) */
         .container-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
-        .btn-acao { padding: 10px 5px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; gap: 5px; transition: opacity 0.2s; }
-        .btn-acao:hover { opacity: 0.85; }
+        .btn-acao { padding: 10px 5px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .btn-green { background: #065e03; }
         .btn-orange { background: #ff8c00; }
     </style>
@@ -87,7 +95,7 @@
         </main>
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
-            <div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>
+            <div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial para ver os detalhes.</div>
         </aside>
     </div>
 
@@ -121,12 +129,19 @@
                         menor_preco: col[8], 
                         plantas: `de ${col[9]} até ${col[10]}`,
                         obra: col[11],
-                        dica: col[17], // Dica do Corretor
-                        obs: col[18],  // Obs
-                        book_cli: col[19],
-                        book_corr: col[20],
-                        video1: col[21],
-                        video2: col[22]
+                        // Campos de Diferenciais (Índices 12 a 15)
+                        localizacao: col[12],
+                        mobilidade: col[13],
+                        lazer: col[14],
+                        diferenciais: col[15],
+                        // Campos de Texto Grande
+                        dica: col[16], // Coluna Q
+                        obs: col[17],  // Coluna R
+                        // Botões (Índices 18 a 21)
+                        book_cli: col[18],
+                        book_corr: col[19],
+                        video1: col[20],
+                        video2: col[21]
                     };
                 }).filter(item => item !== null);
 
@@ -185,6 +200,12 @@
                     <span class="ficha-header">${item.nome}</span>
                     <div class="local-info"><span>📍</span> <span>${item.endereco_comp}</span></div>
                     
+                    <div class="bloco-destaques">
+                        ${item.localizacao ? `<div class="destaque-item"><span class="destaque-icon">✓</span> ${item.localizacao}</div>` : ''}
+                        ${item.mobilidade ? `<div class="destaque-item"><span class="destaque-icon">✓</span> ${item.mobilidade}</div>` : ''}
+                        ${item.lazer ? `<div class="destaque-item"><span class="destaque-icon">✓</span> ${item.lazer}</div>` : ''}
+                    </div>
+
                     <div class="ficha-grid">
                         <div class="grid-item"><div class="grid-label">💰 Menor preço:</div>${item.menor_preco || 'Sob consulta'}</div>
                         <div class="grid-item"><div class="grid-label">🔑 Entrega:</div>${item.entrega}</div>
@@ -196,18 +217,18 @@
                     ${item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 Observações</span>${item.obs}</div>` : ''}
 
                     <div class="container-btns">
-                        <button class="btn-acao btn-green" onclick="window.open('${item.book_cli}', '_blank')">📄 Book Cliente</button>
-                        <button class="btn-acao btn-green" onclick="window.open('${item.book_corr}', '_blank')">📄 Book Corretor</button>
-                        <button class="btn-acao btn-orange" onclick="copiarLink('${item.video1}', 'Vídeo 1')">🎥 Vídeo 1</button>
-                        <button class="btn-acao btn-orange" onclick="copiarLink('${item.video2}', 'Vídeo 2')">🎥 Vídeo 2</button>
+                        <button class="btn-acao btn-green" onclick="window.open('${item.book_cli}', '_blank')">Book Cliente</button>
+                        <button class="btn-acao btn-green" onclick="window.open('${item.book_corr}', '_blank')">Book Corr.</button>
+                        <button class="btn-acao btn-orange" onclick="copiarLink('${item.video1}', 'Vídeo 1')">Vídeo 1</button>
+                        <button class="btn-acao btn-orange" onclick="copiarLink('${item.video2}', 'Vídeo 2')">Vídeo 2</button>
                     </div>
                 </div>`;
             painel.innerHTML = html;
         }
 
         function copiarLink(link, nome) {
-            if(!link || link === "#") { alert(`Link do ${nome} não disponível.`); return; }
-            navigator.clipboard.writeText(link).then(() => alert(`${nome} copiado para a área de transferência!`));
+            if(!link || link === "" || link === "#") { alert(`Link do ${nome} não disponível.`); return; }
+            navigator.clipboard.writeText(link).then(() => alert(`${nome} copiado!`));
         }
 
         function destacarNoMapa(el) {
