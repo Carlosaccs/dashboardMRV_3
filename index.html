@@ -110,18 +110,20 @@
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                     
-                    // Removi a trava de nome que exigia "Res" ou "Vista" para evitar erros com o Vivenza
-                    if (!col[2] || col[2] === "") return null;
+                    // FILTRO ANTI-INVASOR: O nome (coluna C/index 2) deve existir e ter pelo menos 3 caracteres
+                    // Isso remove fragmentos como "3m²", "35" ou células vazias que quebram o layout
+                    const nomeValido = col[2] && col[2].length > 3;
+                    if (!nomeValido) return null;
 
                     return {
                         id_path: (col[0] || "").toLowerCase().trim(), 
                         regiao: col[1] ? col[1].toLowerCase() : "", 
                         nome: col[2],
                         estoque: parseInt(col[3]) || 0, 
-                        rua: col[4], num: col[5], cidade: col[6], entrega: col[7], menor_preco: col[8],
-                        plantas: `de ${col[9]} até ${col[10]}`, obra: col[11],
-                        localizacao: col[12], mobilidade: col[13], cultura_lazer: col[14], comercio: col[15], saude_educacao: col[16],
-                        dica: col[17], obs: col[18], book_cli: col[19], book_corr: col[20], video1: col[21], video2: col[22]
+                        rua: col[4] || "", num: col[5] || "", cidade: col[6] || "", entrega: col[7] || "", menor_preco: col[8] || "",
+                        plantas: `de ${col[9] || ""} até ${col[10] || ""}`, obra: col[11] || "0",
+                        localizacao: col[12] || "", mobilidade: col[13] || "", cultura_lazer: col[14] || "", comercio: col[15] || "", saude_educacao: col[16] || "",
+                        dica: col[17] || "", obs: col[18] || "", book_cli: col[19] || "", book_corr: col[20] || "", video1: col[21] || "", video2: col[22] || ""
                     };
                 }).filter(item => item !== null);
 
@@ -238,9 +240,7 @@
             const container = document.getElementById(idContainer);
             if (!container || !dados) return;
             const paths = dados.paths.map(p => {
-                // VERIFICA SE O ID DO PATH EXISTE NA PLANILHA
                 const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id.toLowerCase().trim());
-                // SE EXISTIR, APLICA A CLASSE 'COMMRV' AUTOMATICAMENTE
                 return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class || ''} ${(temMRV || p.id === 'grandesaopaulo') ? 'commrv' : ''}"></path>`;
             }).join('');
             container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform || ''}">${paths}</g></svg>`;
