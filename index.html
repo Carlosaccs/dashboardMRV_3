@@ -35,15 +35,15 @@
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         .pos-cima { height: 78%; z-index: 5; }
-        .pos-baixo { height: 22%; z-index: 10; cursor: pointer; }
+        .pos-baixo { height: 22%; z-index: 10; cursor: pointer; opacity: 0.8; }
         
         svg { width: 100%; height: 100%; display: block; padding: 10px; pointer-events: auto; }
         path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; cursor: pointer; }
+        path:hover { fill: #bbb; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
         .commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
-        /* FICHA TÉCNICA */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
         .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; border-bottom: 1px solid #eee; padding-bottom: 8px; }
@@ -52,20 +52,17 @@
         .grid-item { font-size: 0.72rem; color: #333; }
         .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; font-size: 0.65rem; text-transform: uppercase; }
 
-        /* BLOCOS DE TEXTO (DICA E OBS) */
         .bloco-texto { margin-bottom: 10px; padding: 10px; border-radius: 6px; font-size: 0.75rem; line-height: 1.5; }
         .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.6rem; display: block; margin-bottom: 5px; }
         .dica-box { background: #fff5e6; border: 1px solid #ffe0b3; color: #7a5a00; }
         .obs-box { background: #f1f3f5; border-left: 4px solid #adb5bd; color: #495057; }
 
-        /* DESTAQUES */
         .secao-titulo { font-size: 0.65rem; font-weight: bold; color: #999; text-transform: uppercase; margin: 15px 0 8px 0; display: block; border-top: 1px solid #eee; padding-top: 10px; }
         .bloco-destaques { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 15px; }
         .destaque-item { font-size: 0.7rem; color: #555; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; line-height: 1.2; }
         .destaque-icon { font-size: 0.85rem; min-width: 18px; text-align: center; }
         .destaque-texto strong { color: #065e03; font-size: 0.6rem; text-transform: uppercase; display: block; }
 
-        /* NOVA LINHA DE LINKS COM BOTÕES LADO A LADO */
         .linha-link { display: flex; align-items: center; justify-content: space-between; padding: 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; margin-bottom: 6px; gap: 8px; }
         .link-nome { font-size: 0.72rem; font-weight: bold; color: #444; display: flex; align-items: center; gap: 6px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .btn-mini { padding: 6px 10px; border: none; border-radius: 4px; color: white; font-size: 0.62rem; font-weight: bold; cursor: pointer; }
@@ -119,7 +116,7 @@
                         endereco_comp: `${col[4]}, ${col[5]} - ${col[6]}`,
                         entrega: col[7], 
                         menor_preco: col[8], 
-                        plantas: `de ${col[9]} até ${col[10]}`,
+                        plantas_txt: `de ${col[9]} até ${col[10]}`,
                         obra: col[11],
                         localizacao: col[12],
                         mobilidade: col[13],
@@ -132,8 +129,13 @@
                         book_corr: col[20],
                         video1: col[21],
                         video2: col[22],
+                        aptVaranda: col[23],
+                        aptSemVaranda: col[24],
+                        aptGarden: col[25],
+                        outraPlanta: col[26],
                         linkLocalizacao: col[28],
-                        linkDescritivo: col[29]
+                        linkDescritivo: col[29],
+                        div1: col[30]
                     };
                 }).filter(item => item !== null);
 
@@ -143,25 +145,27 @@
             } catch (e) { console.error("Erro nos dados:", e); }
         }
 
-        // TRATAMENTO PARA LINKS DO DRIVE
-        function abrirLinkSeguro(url) {
-            if (!url || url.length < 10) return;
-            let linkFinal = url;
-            if (url.includes("drive.google.com")) {
-                const match = url.match(/\/file\/d\/(.+?)\//) || url.match(/id=(.+?)(&|$)/);
-                if (match && match[1]) {
-                    linkFinal = `https://drive.google.com/file/d/${match[1].split('/')[0]}/preview`;
-                }
+        // FUNÇÃO QUE GERA O LINK DIRETO (PREVIEW) PARA DRIVE
+        function gerarLinkDireto(url) {
+            if (!url || !url.includes("drive.google.com")) return url;
+            const match = url.match(/\/file\/d\/(.+?)\//) || url.match(/id=(.+?)(&|$)/);
+            if (match && match[1]) {
+                return `https://drive.google.com/file/d/${match[1].split('/')[0]}/preview`;
             }
-            window.open(linkFinal, '_blank');
+            return url;
         }
 
-        function copiarLink(link, nome) {
-            if(!link || link.length < 5) { alert("Link não disponível."); return; }
-            navigator.clipboard.writeText(link).then(() => alert(`${nome} copiado!`));
+        function abrirLinkSeguro(url) {
+            if (!url || url.length < 5) return;
+            window.open(gerarLinkDireto(url), '_blank');
         }
 
-        // FUNÇÃO PARA RENDERIZAR A LINHA COM OS DOIS BOTÕES
+        function copiarLink(url, nome) {
+            if(!url || url.length < 5) { alert("Link não disponível."); return; }
+            const linkLimpo = gerarLinkDireto(url);
+            navigator.clipboard.writeText(linkLimpo).then(() => alert(`${nome} (Link Direto) copiado!`));
+        }
+
         function renderLinkRow(label, link, ico) {
             if (!link || link.trim() === "" || link.length < 5) return "";
             return `
@@ -216,7 +220,7 @@
                     <div class="ficha-grid">
                         <div class="grid-item"><div class="grid-label">💰 Preço:</div>${item.menor_preco || 'Sob consulta'}</div>
                         <div class="grid-item"><div class="grid-label">🔑 Entrega:</div>${item.entrega}</div>
-                        <div class="grid-item"><div class="grid-label">📐 Plantas:</div>${item.plantas}</div>
+                        <div class="grid-item"><div class="grid-label">📐 Plantas:</div>${item.plantas_txt}</div>
                         <div class="grid-item"><div class="grid-label">🏗️ Obra:</div>${item.obra}%</div>
                     </div>
 
@@ -239,6 +243,15 @@
                     ${renderLinkRow("Vídeo 2", item.video2, "🎥")}
                     ${renderLinkRow("Localização", item.linkLocalizacao, "📍")}
                     ${renderLinkRow("Descritivo", item.linkDescritivo, "📑")}
+
+                    <span class="secao-titulo">Plantas</span>
+                    ${renderLinkRow("Apto c/ Varanda", item.aptVaranda, "🏢")}
+                    ${renderLinkRow("Apto s/ Varanda", item.aptSemVaranda, "🏢")}
+                    ${renderLinkRow("Apto Garden", item.aptGarden, "🏡")}
+                    ${renderLinkRow("Outra Planta", item.outraPlanta, "📐")}
+
+                    <span class="secao-titulo">Diversos</span>
+                    ${renderLinkRow("Informações Adicionais", item.div1, "🔗")}
                 </div>`;
             painel.innerHTML = html;
         }
@@ -284,6 +297,15 @@
             if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
         }
 
+        // EVENTOS DE HOVER E CLIQUE REATIVADOS PARA TODOS OS PATHS
+        document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
+            const p = e.target.closest('.pos-cima path');
+            if (p) document.getElementById('display-nome').innerText = p.getAttribute('data-name');
+        });
+        document.getElementById('container-mapas').addEventListener('mouseleave', () => {
+            document.getElementById('display-nome').innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
+        });
+
         document.getElementById('container-mapas').addEventListener('click', (e) => {
             const caixaBaixo = e.target.closest('.pos-baixo');
             if (caixaBaixo) { solicitarTroca(false); return; }
@@ -292,6 +314,7 @@
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id.toLowerCase());
                 if(item) selecionarResidencial(item, null);
+                else destacarNoMapa(p); // Permite destacar mesmo cidades sem MRV
             }
         });
 
