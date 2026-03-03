@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard MRV SP - Mobile Compacto</title>
+    <title>Dashboard MRV SP - Mobile Equilibrado</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; width: 100vw; overflow: hidden; background: #fff; display: flex; }
         
-        /* AVISO DE ROTAÇÃO */
         #aviso-rotacao {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgb(6, 94, 3); color: white; z-index: 9999;
@@ -17,7 +16,6 @@
         }
         @media (orientation: portrait) { #aviso-rotacao { display: flex; } }
 
-        /* BARRA LATERAL VERDE */
         .sidebar-titulo {
             background: rgb(6, 94, 3);
             width: 32px;
@@ -61,21 +59,11 @@
         .col-lateral-dir { width: 38%; background: #fff; padding: 6px; overflow-y: auto; border-left: 1px solid #ddd; }
         .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
 
-        /* --- BOTÕES btRes MAIS COMPACTOS --- */
         .btRes { 
-            width: 100%; 
-            padding: 4px 4px; /* Altura reduzida em ~25% */
-            margin-bottom: 2px; 
-            background: transparent; 
-            border: none; 
-            border-left: 3px solid rgb(6, 94, 3); 
-            text-align: left; 
-            cursor: pointer; 
-            font-size: 0.55rem; /* Fonte reduzida em 1 ponto */
-            border-radius: 2px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
+            width: 100%; padding: 4px 4px; margin-bottom: 2px; background: transparent; 
+            border: none; border-left: 3px solid rgb(6, 94, 3); 
+            text-align: left; cursor: pointer; font-size: 0.55rem; 
+            border-radius: 2px; display: flex; justify-content: space-between; align-items: center;
             line-height: 1;
         }
         .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 72%; text-transform: uppercase; }
@@ -83,10 +71,13 @@
         .estoque-status { font-size: 0.5rem; font-weight: bold; color: #777; }
 
         .centro-topo { height: 26px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.65rem; border-bottom: 1px solid #eee; background: #fdfdfd; }
-        .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; padding: 2px; }
+        
+        .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; padding: 0; /* Removido padding para aproximar mapas */ }
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
-        .pos-cima { height: 80%; z-index: 5; }
-        .pos-baixo { height: 20%; z-index: 10; cursor: pointer; opacity: 0.9; }
+        
+        /* AJUSTE DE PROPORÇÃO E ESPAÇAMENTO */
+        .pos-cima { height: 85%; z-index: 5; margin-bottom: -5px; /* Puxa o mapa de cima para mais perto do de baixo */ }
+        .pos-baixo { height: 15%; z-index: 10; cursor: pointer; opacity: 0.8; border-top: 1px solid #eee; background: #f9f9f9; }
         
         svg { width: 100%; height: 100%; display: block; }
         path { stroke: #fff; stroke-width: 0.5; fill: #838383; }
@@ -97,7 +88,6 @@
         .ficha-card { border-left: 3px solid #ff8c00; padding: 6px; border-radius: 4px; background: #fafafa; margin-top: 4px; }
         .ficha-header { font-size: 0.7rem; color: #065e03; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 2px; }
         .local-info { font-size: 0.58rem; color: #333; margin-bottom: 6px; border-bottom: 1px solid #eee; padding-bottom: 4px; line-height: 1.1; }
-        
         .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; }
         .grid-item { font-size: 0.58rem; color: #333; }
         .grid-label { font-weight: bold; color: #666; font-size: 0.48rem; text-transform: uppercase; }
@@ -133,7 +123,7 @@
     <div class="sidebar-titulo">
         <div class="btn-sobre-mini" onclick="toggleModal(true)">?</div>
         <div class="titulo-vertical">DASHBOARD MRV SP</div>
-        <div style="font-size: 0.4rem; opacity: 0.5;">v2.1</div>
+        <div style="font-size: 0.4rem; opacity: 0.5;">v2.3</div>
     </div>
 
     <div class="main-wrapper">
@@ -143,7 +133,9 @@
             <div class="centro-topo" id="display-nome">Selecione</div>
             <div class="container-mapas" id="container-mapas">
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
-                <div id="caixa-b" class="caixa-troca pos-baixo"></div>
+                <div id="caixa-b" class="caixa-troca pos-baixo">
+                    <div style="font-size: 0.45rem; color: #065e03; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Trocar Região ↕</div>
+                </div>
             </div>
         </main>
 
@@ -155,8 +147,9 @@
     <div class="modal-overlay" id="modal-sobre" onclick="toggleModal(false)">
         <div class="modal-caixa" onclick="event.stopPropagation()">
             <div style="font-size: 0.65rem; line-height: 1.4;">
-                <strong>Dashboard Mobile v2.1</strong><br><br>
-                Botões compactos para melhor visualização.<br><br>
+                <strong>Dashboard Mobile v2.3</strong><br><br>
+                Proporção ajustada entre os mapas.<br>
+                Clique na faixa inferior para alternar região.<br><br>
                 Qualquer dúvida, fale com o Carlos!
             </div>
             <button onclick="toggleModal(false)" style="margin-top:10px; padding:5px 10px; border: none; background: #065e03; color: white; border-radius: 4px; font-size: 0.6rem;">Fechar</button>
