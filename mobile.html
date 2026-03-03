@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard MRV SP - Mobile Equilibrado</title>
+    <title>Dashboard MRV SP - Mobile Ajustado</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; width: 100vw; overflow: hidden; background: #fff; display: flex; }
@@ -70,15 +70,38 @@
         .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; }
         .estoque-status { font-size: 0.5rem; font-weight: bold; color: #777; }
 
-        .centro-topo { height: 26px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.65rem; border-bottom: 1px solid #eee; background: #fdfdfd; }
+        .centro-topo { height: 26px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.65rem; border-bottom: 1px solid #eee; background: #fdfdfd; z-index: 20; }
         
-        .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; padding: 0; /* Removido padding para aproximar mapas */ }
+        .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; padding: 0; background: #fff; }
+        
+        /* AJUSTES DE TAMANHO E POSIÇÃO DOS MAPAS */
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         
-        /* AJUSTE DE PROPORÇÃO E ESPAÇAMENTO */
-        .pos-cima { height: 85%; z-index: 5; margin-bottom: -5px; /* Puxa o mapa de cima para mais perto do de baixo */ }
-        .pos-baixo { height: 15%; z-index: 10; cursor: pointer; opacity: 0.8; border-top: 1px solid #eee; background: #f9f9f9; }
+        /* Mapa de cima: Sobe e aumenta */
+        .pos-cima { 
+            height: 72%; 
+            z-index: 5; 
+            margin-top: -10px; /* Sobe o mapa */
+            transform: scale(1.15); /* Aumenta o tamanho em 15% */
+        }
         
+        /* Mapa de baixo: Aumentado em altura e tamanho */
+        .pos-baixo { 
+            height: 28%; 
+            z-index: 10; 
+            cursor: pointer; 
+            opacity: 1; 
+            border-top: 2px solid #065e03; 
+            background: #f0f0f0;
+            transform: scale(1.1); /* Um pouco maior também */
+        }
+        
+        .label-troca {
+            position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+            font-size: 0.45rem; color: #065e03; font-weight: bold; text-transform: uppercase;
+            pointer-events: none; background: rgba(255,255,255,0.7); padding: 0 5px; border-radius: 10px;
+        }
+
         svg { width: 100%; height: 100%; display: block; }
         path { stroke: #fff; stroke-width: 0.5; fill: #838383; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
@@ -105,8 +128,6 @@
 
         #toast { visibility: hidden; min-width: 100px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 5px; position: fixed; z-index: 1000; left: 50%; bottom: 15px; transform: translateX(-50%); font-size: 0.55rem; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 1.5s; }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 15px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 15px; opacity: 1;} to {bottom: 0; opacity: 0;} }
 
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-caixa { background: white; width: 80%; max-width: 350px; padding: 15px; border-radius: 10px; position: relative; }
@@ -117,13 +138,13 @@
     <div id="aviso-rotacao">
         <div style="font-size: 40px; margin-bottom: 15px;">🔄</div>
         <h2 style="margin-bottom: 8px;">Gire o telemóvel</h2>
-        <p>Dashboard otimizado para o modo horizontal.</p>
+        <p>Aproveite o espaço máximo na horizontal.</p>
     </div>
 
     <div class="sidebar-titulo">
         <div class="btn-sobre-mini" onclick="toggleModal(true)">?</div>
         <div class="titulo-vertical">DASHBOARD MRV SP</div>
-        <div style="font-size: 0.4rem; opacity: 0.5;">v2.3</div>
+        <div style="font-size: 0.4rem; opacity: 0.5;">v2.4</div>
     </div>
 
     <div class="main-wrapper">
@@ -134,7 +155,7 @@
             <div class="container-mapas" id="container-mapas">
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
                 <div id="caixa-b" class="caixa-troca pos-baixo">
-                    <div style="font-size: 0.45rem; color: #065e03; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Trocar Região ↕</div>
+                    <div class="label-troca">↕ MUDAR REGIÃO</div>
                 </div>
             </div>
         </main>
@@ -147,9 +168,8 @@
     <div class="modal-overlay" id="modal-sobre" onclick="toggleModal(false)">
         <div class="modal-caixa" onclick="event.stopPropagation()">
             <div style="font-size: 0.65rem; line-height: 1.4;">
-                <strong>Dashboard Mobile v2.3</strong><br><br>
-                Proporção ajustada entre os mapas.<br>
-                Clique na faixa inferior para alternar região.<br><br>
+                <strong>Dashboard Mobile v2.4</strong><br><br>
+                Mapas ampliados e centralizados.<br><br>
                 Qualquer dúvida, fale com o Carlos!
             </div>
             <button onclick="toggleModal(false)" style="margin-top:10px; padding:5px 10px; border: none; background: #065e03; color: white; border-radius: 4px; font-size: 0.6rem;">Fechar</button>
