@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
     <style>
-        /* CSS BASE */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
         
@@ -35,40 +34,41 @@
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         .pos-cima { height: 78%; z-index: 5; }
-        .pos-baixo { height: 22%; z-index: 10; cursor: pointer; opacity: 0.7; transition: opacity 0.3s; }
-        .pos-baixo:hover { opacity: 1; }
+        .pos-baixo { height: 22%; z-index: 10; cursor: pointer; opacity: 0.8; }
         
         svg { width: 100%; height: 100%; display: block; padding: 10px; pointer-events: auto; }
-        path { stroke: #fff; stroke-width: 0.5; fill: #d1d1d1; transition: fill 0.15s; pointer-events: auto; cursor: pointer; }
-        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
-        path:hover { fill: #ff8c00 !important; }
+        
+        /* ESTILO PADRÃO PATHS */
+        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; cursor: default; }
+        
+        /* PATHS COM MRV E INTERATIVOS */
+        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
+        
+        /* HOVER GERAL (NOMES APARECEM NO TOPO) */
+        path:hover { fill: #bbb; } 
+        .commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
+        
+        /* ESTADO ATIVO SÓ PARA QUEM TEM MRV */
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
-        /* FICHA TÉCNICA */
+        /* FICHA TÉCNICA E BOTÕES */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
         .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-        
         .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .grid-item { font-size: 0.72rem; color: #333; }
         .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; font-size: 0.65rem; text-transform: uppercase; }
-
         .bloco-texto { margin-bottom: 10px; padding: 10px; border-radius: 6px; font-size: 0.75rem; line-height: 1.5; }
         .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.6rem; display: block; margin-bottom: 5px; }
         .dica-box { background: #fff5e6; border: 1px solid #ffe0b3; color: #7a5a00; }
         .obs-box { background: #f1f3f5; border-left: 4px solid #adb5bd; color: #495057; }
-
         .secao-titulo { font-size: 0.65rem; font-weight: bold; color: #999; text-transform: uppercase; margin: 15px 0 8px 0; display: block; border-top: 1px solid #eee; padding-top: 10px; }
         .bloco-destaques { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 15px; }
         .destaque-item { font-size: 0.7rem; color: #555; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
         .destaque-icon { font-size: 0.85rem; min-width: 18px; text-align: center; }
         .destaque-texto strong { color: #065e03; font-size: 0.6rem; text-transform: uppercase; display: block; }
 
-        .linha-link { 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 6px 8px; background: #fff; border: 1px solid #eee; 
-            border-radius: 6px; margin-bottom: 5px;
-        }
+        .linha-link { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; }
         .link-nome { font-size: 0.68rem; font-weight: bold; color: #444; display: flex; align-items: center; gap: 6px; }
         .link-acoes { display: flex; gap: 4px; }
         .btn-mini { padding: 5px 8px; border: none; border-radius: 4px; color: white; font-size: 0.6rem; font-weight: bold; cursor: pointer; text-transform: uppercase; }
@@ -217,31 +217,25 @@
             if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
         }
 
-        // --- EVENTOS DO CONTAINER DE MAPAS (CORREÇÃO DO HOVER) ---
         document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
             const p = e.target.closest('.pos-cima path');
-            if (p) {
-                document.getElementById('display-nome').innerText = p.getAttribute('data-name');
-            }
+            if (p) document.getElementById('display-nome').innerText = p.getAttribute('data-name');
         });
 
         document.getElementById('container-mapas').addEventListener('mouseleave', () => {
-            if (pathSelecionado) {
-                document.getElementById('display-nome').innerText = pathSelecionado.getAttribute('data-name');
-            } else {
-                document.getElementById('display-nome').innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
-            }
+            document.getElementById('display-nome').innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
         });
 
         document.getElementById('container-mapas').addEventListener('click', (e) => {
             const caixaBaixo = e.target.closest('.pos-baixo');
             if (caixaBaixo) { solicitarTroca(false); return; }
+            
             const p = e.target.closest('.pos-cima path');
             if (p) {
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
+                // SÓ PERMITE SELECIONAR SE TIVER MRV (VERDE)
                 if(item) selecionarResidencial(item, null);
-                else destacarNoMapa(p); // Permite destacar mesmo sem residencial
             }
         });
 
