@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <title>Dashboard MRV SP - Mobile v2.9</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -20,11 +24,11 @@
         .sidebar-titulo {
             background: rgb(6, 94, 3);
             width: 32px; height: 100vh;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; /* Centralizado verticalmente */
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 10px 0; color: white; flex-shrink: 0; z-index: 30;
+            cursor: pointer; /* Indica que é clicável para expandir */
         }
 
-        /* Texto Vertical Atualizado */
         .titulo-vertical {
             writing-mode: vertical-rl; transform: rotate(180deg);
             text-transform: uppercase; font-size: 0.75rem; font-weight: bold;
@@ -85,13 +89,9 @@
         #toast { visibility: hidden; min-width: 100px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 5px; position: fixed; z-index: 1000; left: 50%; bottom: 15px; transform: translateX(-50%); font-size: 0.5rem; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 1.5s; }
 
-        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-caixa { background: white; width: 85%; max-width: 320px; padding: 12px; border-radius: 10px; position: relative; }
     </style>
 </head>
-<body>
-
-    <div id="aviso-rotacao">
+<body onclick="entrarFullScreen()"> <div id="aviso-rotacao">
         <div style="font-size: 40px; margin-bottom: 15px;">🔄</div>
         <h2 style="margin-bottom: 8px;">Gire o dispositivo</h2>
         <p>Dashboard otimizado para o modo horizontal.</p>
@@ -124,6 +124,22 @@
     <script src="mrv-data.js"></script>
     <script>
         let pathSelecionado = null, botaoSelecionado = null, regiaoAtual = "gsp", DADOS_PLANILHA = [];
+
+        // FUNÇÃO PARA TELA CHEIA
+        function entrarFullScreen() {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+
+            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+
+            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                if (requestFullScreen) {
+                    requestFullScreen.call(docEl).catch(err => {
+                        console.log("Erro ao tentar entrar em tela cheia.");
+                    });
+                }
+            }
+        }
 
         async function carregarPlanilha() {
             try {
@@ -195,7 +211,7 @@
                 btn.className = 'btRes';
                 btn.id = `btn-esq-mob-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`;
                 btn.innerHTML = `<strong>${item.nome}</strong> <span class="estoque-status">${item.estoque} u.</span>`;
-                btn.onclick = () => selecionarResidencial(item, btn);
+                btn.onclick = (e) => { e.stopPropagation(); selecionarResidencial(item, btn); };
                 menu.appendChild(btn);
             });
         }
@@ -216,7 +232,7 @@
             
             const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
             vizinhos.forEach(v => {
-                html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'>
+                html += `<button class="btRes" onclick='event.stopPropagation(); selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'>
                             <strong>${v.nome}</strong> <span class="estoque-status">${v.estoque} u.</span>
                          </button>`;
             });
@@ -224,25 +240,21 @@
             html += `<div class="ficha-card">
                     <span class="ficha-header">${item.nome}</span>
                     <div class="local-info">📍 ${item.endereco_comp}</div>
-                    
                     <div class="ficha-grid">
                         <div class="grid-item"><div class="grid-label">💰 Preço</div>${item.menor_preco}</div>
                         <div class="grid-item"><div class="grid-label">🔑 Entrega</div>${item.entrega}</div>
                         <div class="grid-item"><div class="grid-label">📐 Plantas</div>${item.plantas_txt}</div>
                         <div class="grid-item"><div class="grid-label">🏗️ Obra</div>${item.obra}</div>
                     </div>
-                    
                     <span class="secao-titulo">Materiais de Apoio</span>
                     ${renderLinkRow("Book Corretor", item.book_corr, "📄")}
                     ${renderLinkRow("Book Cliente", item.book_cli, "📄")}
                     ${renderLinkRow("Vídeo 1", item.video1, "🎥")}
                     ${renderLinkRow("Vídeo 2", item.video2, "🎥")}
-                    
                     <span class="secao-titulo">Plantas</span>
                     ${renderLinkRow("Apto c/ Varanda", item.aptVaranda, "🏢")}
                     ${renderLinkRow("Apto s/ Varanda", item.aptSemVaranda, "🏢")}
                     ${renderLinkRow("Apto Garden", item.aptGarden, "🏡")}
-
                     <span class="secao-titulo">Diversos</span>
                     ${renderLinkRow("Localização", item.linkLocalizacao, "📍")}
                     ${renderLinkRow("Info Adicional", item.infoAdicional, "📎")}
@@ -287,9 +299,10 @@
 
         document.getElementById('container-mapas').addEventListener('click', (e) => {
             const caixaBaixo = e.target.closest('.pos-baixo');
-            if (caixaBaixo) { solicitarTroca(false); return; }
+            if (caixaBaixo) { e.stopPropagation(); solicitarTroca(false); return; }
             const p = e.target.closest('.pos-cima path');
             if (p) {
+                e.stopPropagation();
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id.toLowerCase());
                 if(item && p.classList.contains('commrv')) selecionarResidencial(item, null);
