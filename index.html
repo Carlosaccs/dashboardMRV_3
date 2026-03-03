@@ -123,7 +123,6 @@
                         dica: col[17] || "", obs: col[18] || "", 
                         book_cli: col[19] || "", book_corr: col[20] || "", 
                         video1: col[21] || "", video2: col[22] || "",
-                        // NOVOS CAMPOS: APARTAMENTOS (Colunas 23 a 27)
                         aptVaranda: col[23] || "", 
                         aptSemVaranda: col[24] || "", 
                         aptGarden: col[25] || "", 
@@ -136,6 +135,20 @@
                 gerarListaGeral();
                 desenharIniciais();
             } catch (e) { console.error("Erro nos dados:", e); }
+        }
+
+        // Função para garantir abertura segura do Drive (modo preview)
+        function abrirLinkSeguro(url) {
+            if (!url) return;
+            let linkFinal = url;
+            if (url.includes("drive.google.com")) {
+                linkFinal = url.replace(/\/view.*$/, "/preview").replace(/\/edit.*$/, "/preview");
+            }
+            window.open(linkFinal, '_blank');
+        }
+
+        function copiarLink(link, nome) {
+            navigator.clipboard.writeText(link).then(() => alert(`${nome} copiado!`));
         }
 
         function formatarEstoque(qtd) {
@@ -168,7 +181,14 @@
 
         function renderLinkRow(label, link, ico) {
             if (!link || link === "" || link === "#" || link.length < 5) return "";
-            return `<div class="linha-link"><div class="link-nome"><span>${ico}</span> ${label}</div><div class="link-acoes"><button class="btn-mini btn-abrir" onclick="window.open('${link}', '_blank')">Abrir</button><button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">Copiar</button></div></div>`;
+            // Usamos a função abrirLinkSeguro no botão Abrir
+            return `<div class="linha-link">
+                        <div class="link-nome"><span>${ico}</span> ${label}</div>
+                        <div class="link-acoes">
+                            <button class="btn-mini btn-abrir" onclick="abrirLinkSeguro('${link}')">Abrir</button>
+                            <button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">Copiar</button>
+                        </div>
+                    </div>`;
         }
 
         function exibirPainelDireito(item, nomeCidade) {
@@ -218,10 +238,6 @@
                     ${renderLinkRow("Opção de Planta 2", item.outroApt2, "📐")}
                 </div>`;
             painel.innerHTML = html;
-        }
-
-        function copiarLink(link, nome) {
-            navigator.clipboard.writeText(link).then(() => alert(`${nome} copiado!`));
         }
 
         function destacarNoMapa(el) {
