@@ -113,21 +113,17 @@
                     if (!nomeLimpo.toLowerCase().startsWith("res") && !nomeLimpo.toLowerCase().startsWith("vista")) return null;
 
                     return {
-                        id_path: col[0], 
+                        id_path: (col[0] || "").toLowerCase().trim(), // Normalizado aqui
                         regiao: col[1] ? col[1].toLowerCase() : "", 
                         nome: nomeLimpo,
                         estoque: parseInt(col[3]) || 0, 
-                        // AJUSTE DE MAPEAMENTO (ÍNDICE 0):
-                        rua: col[4],        // E
-                        num: col[5],        // F
-                        bairro: col[5],     // Se o bairro for o mesmo da coluna F ou se estiver antes da cidade. 
-                                            // Se a Cidade é a 6 (G), o Bairro deve ser a 5 (F)? 
-                                            // Ajustando abaixo para assumir que Cidade é a 6:
-                        cidade: col[6],     // G (Coluna 6) - SERÁ IGNORADA NO ENDEREÇO
-                        entrega: col[7],    // H
-                        menor_preco: col[8],// I
-                        plantas: `de ${col[9]} até ${col[10]}`, // J e K
-                        obra: col[11],      // L
+                        rua: col[4], 
+                        num: col[5], 
+                        cidade: col[6], 
+                        entrega: col[7], 
+                        menor_preco: col[8],
+                        plantas: `de ${col[9]} até ${col[10]}`, 
+                        obra: col[11], 
                         localizacao: col[12], 
                         mobilidade: col[13], 
                         cultura_lazer: col[14], 
@@ -189,8 +185,6 @@
                 html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v).replace(/'/g, "&apos;")}, null)'><strong>${v.nome}</strong> ${formatarEstoque(v.estoque)}</button>`;
             });
 
-            // ENDEREÇO LIMPO: Pega apenas Rua (4) e Número (5). 
-            // Como a cidade é a 6, ela não entra aqui.
             const enderecoLimpo = `${item.rua}, ${item.num}`;
 
             html += `
@@ -259,7 +253,8 @@
             const container = document.getElementById(idContainer);
             if (!container || !dados) return;
             const paths = dados.paths.map(p => {
-                const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id);
+                // Compara ignorando maiúsculas e espaços
+                const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id.toLowerCase().trim());
                 return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class || ''} ${(temMRV || p.id === 'grandesaopaulo') ? 'commrv' : ''}"></path>`;
             }).join('');
             container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform || ''}">${paths}</g></svg>`;
@@ -285,7 +280,8 @@
             const p = e.target.closest('.pos-cima path');
             if (p) {
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
-                const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
+                // Clique também ignorando maiúsculas e espaços
+                const item = DADOS_PLANILHA.find(d => d.id_path === p.id.toLowerCase().trim());
                 if(item) selecionarResidencial(item, null);
             }
         });
