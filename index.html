@@ -40,10 +40,10 @@
         svg { width: 100%; height: 100%; display: block; padding: 10px; pointer-events: auto; }
         path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; cursor: default; }
         
-        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
+        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer !important; }
         path:hover { fill: #bbb; } 
         .commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
-        .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
+        .path-ativo { fill: #ff8c00 !important; stroke: #000 !important; stroke-width: 1.5px !important; }
 
         /* FICHA TÉCNICA */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
@@ -113,32 +113,15 @@
                     if (!nomeLimpo.toLowerCase().startsWith("res") && !nomeLimpo.toLowerCase().startsWith("vista")) return null;
 
                     return {
-                        id_path: col[0], 
+                        id_path: (col[0] || "").trim().toLowerCase(), 
                         regiao: col[1] ? col[1].toLowerCase() : "", 
                         nome: nomeLimpo,
                         estoque: parseInt(col[3]) || 0, 
-                        // AJUSTE DE MAPEAMENTO (ÍNDICE 0):
-                        rua: col[4],        // E
-                        num: col[5],        // F
-                        bairro: col[5],     // Se o bairro for o mesmo da coluna F ou se estiver antes da cidade. 
-                                            // Se a Cidade é a 6 (G), o Bairro deve ser a 5 (F)? 
-                                            // Ajustando abaixo para assumir que Cidade é a 6:
-                        cidade: col[6],     // G (Coluna 6) - SERÁ IGNORADA NO ENDEREÇO
-                        entrega: col[7],    // H
-                        menor_preco: col[8],// I
-                        plantas: `de ${col[9]} até ${col[10]}`, // J e K
-                        obra: col[11],      // L
-                        localizacao: col[12], 
-                        mobilidade: col[13], 
-                        cultura_lazer: col[14], 
-                        comercio: col[15], 
-                        saude_educacao: col[16],
-                        dica: col[17], 
-                        obs: col[18], 
-                        book_cli: col[19], 
-                        book_corr: col[20], 
-                        video1: col[21], 
-                        video2: col[22]
+                        rua: col[4], num: col[5], cidade: col[6],
+                        entrega: col[7], menor_preco: col[8],
+                        plantas: `de ${col[9]} até ${col[10]}`,
+                        obra: col[11], localizacao: col[12], mobilidade: col[13], cultura_lazer: col[14], comercio: col[15], saude_educacao: col[16],
+                        dica: col[17], obs: col[18], book_cli: col[19], book_corr: col[20], video1: col[21], video2: col[22]
                     };
                 }).filter(item => item !== null);
 
@@ -170,7 +153,10 @@
             if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
             const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
             if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'auto', block: 'nearest' }); botaoSelecionado = btnEsq; }
+            
             if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca(true);
+            
+            // Busca o elemento no DOM
             const el = document.getElementById(item.id_path);
             if(el) destacarNoMapa(el);
             exibirPainelDireito(item, el ? el.getAttribute('data-name') : "Região");
@@ -189,8 +175,6 @@
                 html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v).replace(/'/g, "&apos;")}, null)'><strong>${v.nome}</strong> ${formatarEstoque(v.estoque)}</button>`;
             });
 
-            // ENDEREÇO LIMPO: Pega apenas Rua (4) e Número (5). 
-            // Como a cidade é a 6, ela não entra aqui.
             const enderecoLimpo = `${item.rua}, ${item.num}`;
 
             html += `
@@ -259,7 +243,7 @@
             const container = document.getElementById(idContainer);
             if (!container || !dados) return;
             const paths = dados.paths.map(p => {
-                const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id);
+                const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id.trim().toLowerCase());
                 return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class || ''} ${(temMRV || p.id === 'grandesaopaulo') ? 'commrv' : ''}"></path>`;
             }).join('');
             container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform || ''}">${paths}</g></svg>`;
@@ -279,14 +263,29 @@
             document.getElementById('display-nome').innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
         });
 
+        // LÓGICA DE CLIQUE MELHORADA
         document.getElementById('container-mapas').addEventListener('click', (e) => {
+            // Se clicar na caixa de baixo (troca de mapa)
             const caixaBaixo = e.target.closest('.pos-baixo');
             if (caixaBaixo) { solicitarTroca(false); return; }
+
+            // Se clicar em um path na caixa de cima
             const p = e.target.closest('.pos-cima path');
             if (p) {
+                // Se clicou na Grande SP (no mapa estadual)
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
-                const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
-                if(item) selecionarResidencial(item, null);
+                
+                // Busca na planilha pelo ID do elemento tocado
+                const targetId = p.id.trim().toLowerCase();
+                const item = DADOS_PLANILHA.find(d => d.id_path === targetId);
+                
+                if(item) {
+                    selecionarResidencial(item, null);
+                } else {
+                    // Se não tem residencial, apenas destaca visualmente a cidade
+                    destacarNoMapa(p);
+                    document.getElementById('detalhes-residencial').innerHTML = `<div style="text-align: center; color: #999; margin-top: 50px;">Nenhum residencial encontrado em ${p.getAttribute('data-name')}.</div>`;
+                }
             }
         });
 
