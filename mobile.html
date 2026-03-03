@@ -20,13 +20,12 @@
         }
         @media (orientation: portrait) { #aviso-rotacao { display: flex; } }
 
-        /* Faixa Verde na Esquerda */
         .sidebar-titulo {
             background: rgb(6, 94, 3);
             width: 32px; height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 10px 0; color: white; flex-shrink: 0; z-index: 30;
-            cursor: pointer; /* Indica que é clicável para expandir */
+            cursor: pointer;
         }
 
         .titulo-vertical {
@@ -72,7 +71,8 @@
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
         .ficha-card { border-left: 3px solid #ff8c00; padding: 5px; border-radius: 4px; background: #fafafa; margin-top: 2px; }
-        .ficha-header { font-size: 0.65rem; color: #065e03; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 2px; }
+        /* Ajuste do Header para mostrar estoque */
+        .ficha-header { font-size: 0.65rem; color: #065e03; font-weight: bold; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
         .local-info { font-size: 0.52rem; color: #333; margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 3px; line-height: 1.1; }
         
         .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 3px; margin-bottom: 5px; }
@@ -88,10 +88,11 @@
 
         #toast { visibility: hidden; min-width: 100px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 5px; position: fixed; z-index: 1000; left: 50%; bottom: 15px; transform: translateX(-50%); font-size: 0.5rem; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 1.5s; }
-
     </style>
 </head>
-<body onclick="entrarFullScreen()"> <div id="aviso-rotacao">
+<body onclick="entrarFullScreen()">
+
+    <div id="aviso-rotacao">
         <div style="font-size: 40px; margin-bottom: 15px;">🔄</div>
         <h2 style="margin-bottom: 8px;">Gire o dispositivo</h2>
         <p>Dashboard otimizado para o modo horizontal.</p>
@@ -125,19 +126,12 @@
     <script>
         let pathSelecionado = null, botaoSelecionado = null, regiaoAtual = "gsp", DADOS_PLANILHA = [];
 
-        // FUNÇÃO PARA TELA CHEIA
         function entrarFullScreen() {
             const doc = window.document;
             const docEl = doc.documentElement;
-
             const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-
             if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-                if (requestFullScreen) {
-                    requestFullScreen.call(docEl).catch(err => {
-                        console.log("Erro ao tentar entrar em tela cheia.");
-                    });
-                }
+                if (requestFullScreen) { requestFullScreen.call(docEl).catch(err => console.log("Erro Fullscreen")); }
             }
         }
 
@@ -156,7 +150,7 @@
                         regiao: col[1] ? col[1].toLowerCase() : "", 
                         nome: col[2], 
                         estoque: col[3] || "0", 
-                        endereco_comp: `${col[4]}, ${col[5]}`,
+                        endereco_comp: col[4], // AJUSTE: Removida a cidade (col[5])
                         entrega: col[7], 
                         menor_preco: col[8], 
                         plantas_txt: `de ${col[9]} até ${col[10]}`,
@@ -237,24 +231,32 @@
                          </button>`;
             });
 
+            // AJUSTE: Header agora mostra Nome e Estoque
             html += `<div class="ficha-card">
-                    <span class="ficha-header">${item.nome}</span>
+                    <div class="ficha-header">
+                        <span>${item.nome}</span>
+                        <span class="estoque-status" style="color:#ff8c00">${item.estoque} u.</span>
+                    </div>
                     <div class="local-info">📍 ${item.endereco_comp}</div>
+                    
                     <div class="ficha-grid">
                         <div class="grid-item"><div class="grid-label">💰 Preço</div>${item.menor_preco}</div>
                         <div class="grid-item"><div class="grid-label">🔑 Entrega</div>${item.entrega}</div>
                         <div class="grid-item"><div class="grid-label">📐 Plantas</div>${item.plantas_txt}</div>
                         <div class="grid-item"><div class="grid-label">🏗️ Obra</div>${item.obra}</div>
                     </div>
+                    
                     <span class="secao-titulo">Materiais de Apoio</span>
                     ${renderLinkRow("Book Corretor", item.book_corr, "📄")}
                     ${renderLinkRow("Book Cliente", item.book_cli, "📄")}
                     ${renderLinkRow("Vídeo 1", item.video1, "🎥")}
                     ${renderLinkRow("Vídeo 2", item.video2, "🎥")}
+                    
                     <span class="secao-titulo">Plantas</span>
                     ${renderLinkRow("Apto c/ Varanda", item.aptVaranda, "🏢")}
                     ${renderLinkRow("Apto s/ Varanda", item.aptSemVaranda, "🏢")}
                     ${renderLinkRow("Apto Garden", item.aptGarden, "🏡")}
+
                     <span class="secao-titulo">Diversos</span>
                     ${renderLinkRow("Localização", item.linkLocalizacao, "📍")}
                     ${renderLinkRow("Info Adicional", item.infoAdicional, "📎")}
