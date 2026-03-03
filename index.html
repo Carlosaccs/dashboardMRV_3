@@ -1,305 +1,563 @@
 <!DOCTYPE html>
+
 <html lang="pt-br">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Dashboard MRV SP</title>
+
     <style>
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
         body, html { height: 100vh; overflow: hidden; background: #fff; }
+
         
+
         header { 
+
             background: rgb(6, 94, 3); height: 50px; display: flex; 
+
             align-items: center; justify-content: center; color: white; 
+
             z-index: 100; position: relative;
+
         }
+
         
+
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; background: #fff; }
 
+
+
         .col-lateral-esq { width: 25%; background: #fff; overflow-y: auto; padding: 10px; border-right: 1px solid #ddd; }
-        .col-lateral-dir { width: 28%; background: #fff; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
+
+        .col-lateral-dir { width: 25%; background: #fff; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
+
         .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
 
+
+
         .btRes { 
+
             width: 100%; padding: 8px 12px; margin-bottom: 4px; background: transparent; 
+
             border: none; border-left: 5px solid rgb(6, 94, 3); 
+
             text-align: left; cursor: pointer; font-size: 0.72rem; 
+
             border-radius: 4px; display: flex; justify-content: space-between; align-items: center;
+
         }
+
         .btRes:hover { background: #f4f4f4; border-left-color: #ff8c00; }
+
+        .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%; text-transform: uppercase; }
+
         .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; }
+
         .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; }
 
+        .estoque-vendido { text-decoration: line-through; color: #999 !important; background: #f0f0f0; padding: 2px 4px; border-radius: 2px; }
+
+
+
         .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; background: #fdfdfd; }
+
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+
         .pos-cima { height: 78%; z-index: 5; }
-        .pos-baixo { height: 22%; z-index: 10; cursor: pointer; opacity: 0.8; }
-        
+
+        .pos-baixo { height: 22%; z-index: 10; cursor: pointer; }
+
         svg { width: 100%; height: 100%; display: block; padding: 10px; pointer-events: auto; }
-        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; cursor: default; }
-        
-        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
-        path:hover { fill: #bbb; } 
+
+        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; cursor: pointer; }
+
+        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
+
         .commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
+
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
+
+
+        /* FICHA TÉCNICA */
+
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
-        .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
-        .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+
+        .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
+
+        .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+
         
+
         .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+
         .grid-item { font-size: 0.72rem; color: #333; }
+
         .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; font-size: 0.65rem; text-transform: uppercase; }
-        
-        /* BLOCOS DE TEXTO */
-        .bloco-texto { margin-bottom: 10px; padding: 10px; border-radius: 6px; font-size: 0.75rem; line-height: 1.4; }
-        .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.6rem; display: block; margin-bottom: 4px; }
+
+
+
+        /* BLOCOS DE TEXTO (DICA E OBS) */
+
+        .bloco-texto { margin-bottom: 10px; padding: 10px; border-radius: 6px; font-size: 0.75rem; line-height: 1.5; }
+
+        .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.6rem; display: block; margin-bottom: 5px; }
+
         .dica-box { background: #fff5e6; border: 1px solid #ffe0b3; color: #7a5a00; }
+
         .obs-box { background: #f1f3f5; border-left: 4px solid #adb5bd; color: #495057; }
 
-        .secao-titulo { font-size: 0.7rem; font-weight: bold; color: #999; text-transform: uppercase; margin: 15px 0 8px 0; display: block; border-top: 1px solid #eee; padding-top: 10px; }
-        
-        .linha-link { display: flex; align-items: center; justify-content: space-between; padding: 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; margin-bottom: 6px; gap: 8px; }
-        .link-nome { font-size: 0.72rem; font-weight: bold; color: #444; display: flex; align-items: center; gap: 6px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .btn-mini { padding: 6px 10px; border: none; border-radius: 4px; color: white; font-size: 0.62rem; font-weight: bold; cursor: pointer; }
-        .btn-abrir { background: #065e03; }
-        .btn-copiar { background: #ff8c00; }
+
+
+        /* DIFERENCIAIS (AGORA APÓS OBS) */
+
+        .secao-titulo { font-size: 0.65rem; font-weight: bold; color: #999; text-transform: uppercase; margin: 15px 0 8px 0; display: block; border-top: 1px solid #eee; padding-top: 10px; }
+
+        .bloco-destaques { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 15px; }
+
+        .destaque-item { font-size: 0.7rem; color: #555; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; line-height: 1.2; }
+
+        .destaque-icon { font-size: 0.85rem; min-width: 18px; text-align: center; }
+
+        .destaque-texto strong { color: #065e03; font-size: 0.6rem; text-transform: uppercase; display: block; }
+
+
+
+        .container-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
+
+        .btn-acao { padding: 10px 5px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; gap: 4px; }
+
+        .btn-green { background: #065e03; }
+
+        .btn-orange { background: #ff8c00; }
+
     </style>
+
 </head>
+
 <body>
+
+
 
     <header><h1>Residenciais MRV em São Paulo</h1></header>
 
+
+
     <div class="main-wrapper">
+
         <aside class="col-lateral-esq" id="menu-residenciais">Carregando...</aside>
+
         
+
         <main class="col-central">
+
             <div class="centro-topo" id="display-nome">Selecione uma região</div>
+
             <div class="container-mapas" id="container-mapas">
+
                 <div id="caixa-a" class="caixa-troca pos-cima"></div>
+
                 <div id="caixa-b" class="caixa-troca pos-baixo"></div>
+
             </div>
+
         </main>
 
+
+
         <aside class="col-lateral-dir" id="detalhes-residencial">
+
             <div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>
+
         </aside>
+
     </div>
 
+
+
     <script src="mrv-data.js"></script>
+
     <script>
+
         let pathSelecionado = null;
+
         let botaoSelecionado = null;
+
         let regiaoAtual = "gsp"; 
+
         let DADOS_PLANILHA = [];
 
+
+
         async function carregarPlanilha() {
+
             try {
-                const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv&cachebuster=" + new Date().getTime();
+
+                const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv";
+
                 const response = await fetch(url);
+
                 const texto = await response.text();
+
                 const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
+
                 
+
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
-                    // Regex robusta para CSV com vírgulas dentro de aspas
+
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
-                    
-                    if (!col[2]) return null;
+
+                    if (!col[2] || (!col[2].toLowerCase().startsWith("res") && !col[2].toLowerCase().startsWith("vista"))) return null;
+
+
 
                     return {
-                        id_path: (col[0] || "").toLowerCase().trim(), 
-                        regiao: (col[1] || "").toLowerCase(), 
+
+                        id_path: col[0], 
+
+                        regiao: col[1] ? col[1].toLowerCase() : "", 
+
                         nome: col[2],
-                        estoque: col[3] || "0", 
-                        rua: col[4] || "", num: col[5] || "", cidade: col[6] || "", entrega: col[7] || "", menor_preco: col[8] || "",
-                        plantas_desc: (col[9] || col[10]) ? `de ${col[9]} até ${col[10]}` : "Consulte", 
-                        obra: col[11] || "0",
-                        dica: col[17] || "", 
-                        obs: col[18] || "", 
-                        book_cli: col[19] || "", 
-                        book_corr: col[20] || "", 
-                        video1: col[21] || "", 
-                        video2: col[22] || "",
-                        aptVaranda: col[23] || "", 
-                        aptSemVaranda: col[24] || "", 
-                        aptGarden: col[25] || "", 
-                        outroApt1: col[26] || "", 
-                        outroApt2: col[27] || "",
-                        linkLocalizacao: col[28] || "", 
-                        linkDescritivo: col[29] || "",
-                        div1: col[30] || "",
-                        div2: col[31] || "",
-                        div3: col[32] || "",
-                        div4: col[33] || "",
-                        div5: col[34] || ""
+
+                        estoque: parseInt(col[3]) || 0,
+
+                        endereco_comp: `${col[4]}, ${col[5]} - ${col[6]}`,
+
+                        entrega: col[7], 
+
+                        menor_preco: col[8], 
+
+                        plantas: `de ${col[9]} até ${col[10]}`,
+
+                        obra: col[11],
+
+                        localizacao: col[12],
+
+                        mobilidade: col[13],
+
+                        cultura_lazer: col[14],
+
+                        comercio: col[15],
+
+                        saude_educacao: col[16],
+
+                        dica: col[17], 
+
+                        obs: col[18],  
+
+                        book_cli: col[19],
+
+                        book_corr: col[20],
+
+                        video1: col[21],
+
+                        video2: col[22]
+
                     };
+
                 }).filter(item => item !== null);
 
+
+
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
+
                 gerarListaGeral();
+
                 desenharIniciais();
-            } catch (e) { console.error("Erro na carga:", e); }
+
+            } catch (e) { console.error("Erro nos dados:", e); }
+
         }
 
-        function abrirLinkSeguro(url) {
-            if (!url || url.length < 10) return;
-            let linkFinal = url;
-            if (url.includes("drive.google.com")) {
-                const match = url.match(/\/file\/d\/(.+?)\//) || url.match(/id=(.+?)(&|$)/);
-                if (match && match[1]) {
-                    linkFinal = `https://drive.google.com/file/d/${match[1].split('/')[0]}/preview`;
-                }
-            }
-            window.open(linkFinal, '_blank');
+
+
+        function formatarEstoque(qtd) {
+
+            if (qtd === 0) return `<span class="estoque-status estoque-vendido">VENDIDO</span>`;
+
+            return `<span class="estoque-status" style="${qtd <= 5 ? 'color:red' : ''}">${qtd <= 5 ? 'restam ' : ''}${qtd} un.</span>`;
+
         }
 
-        function copiarLink(link, nome) {
-            navigator.clipboard.writeText(link).then(() => alert(`${nome} copiado!`));
-        }
 
-        function renderLinkRow(label, link, ico) {
-            if (!link || link.trim() === "" || link.length < 10) return "";
-            return `
-                <div class="linha-link">
-                    <div class="link-nome"><span>${ico}</span> ${label}</div>
-                    <div class="link-acoes">
-                        <button class="btn-mini btn-abrir" onclick="abrirLinkSeguro('${link}')">Abrir</button>
-                        <button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">Copiar</button>
-                    </div>
-                </div>`;
-        }
-
-        function exibirPainelDireito(item, nomeCidade) {
-            const painel = document.getElementById('detalhes-residencial');
-            let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
-            
-            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
-            vizinhos.forEach(v => {
-                html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'><strong>${v.nome}</strong> <span class="estoque-status">${v.estoque == '0' || v.estoque == 'VENDIDO' ? 'VENDIDO' : 'restam ' + v.estoque + ' un.'}</span></button>`;
-            });
-
-            let blocoDica = item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 Dica:</span>${item.dica}</div>` : "";
-            let blocoObs = item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 Observações:</span>${item.obs}</div>` : "";
-
-            html += `
-                <div class="ficha-card">
-                    <div class="ficha-header">${item.nome}</div>
-                    <div class="local-info">📍 ${item.rua}, ${item.num}</div>
-                    <div class="ficha-grid">
-                        <div class="grid-item"><div class="grid-label">Preço:</div>${item.menor_preco || 'Sob consulta'}</div>
-                        <div class="grid-item"><div class="grid-label">Entrega:</div>${item.entrega}</div>
-                        <div class="grid-item"><div class="grid-label">Plantas:</div>${item.plantas_desc}</div>
-                        <div class="grid-item"><div class="grid-label">Obra:</div>${item.obra}%</div>
-                    </div>
-                    
-                    ${blocoDica}
-                    ${blocoObs}
-
-                    <span class="secao-titulo">Materiais de Apoio</span>
-                    ${renderLinkRow("Book Cliente", item.book_cli, "📄")}
-                    ${renderLinkRow("Book Corretor", item.book_corr, "💼")}
-                    ${renderLinkRow("Localização", item.linkLocalizacao, "📍")}
-                    ${renderLinkRow("Descritivo", item.linkDescritivo, "📑")}
-
-                    <span class="secao-titulo">Vídeos</span>
-                    ${renderLinkRow("Vídeo 1", item.video1, "🎥")}
-                    ${renderLinkRow("Vídeo 2", item.video2, "🎥")}
-
-                    <span class="secao-titulo">Plantas</span>
-                    ${renderLinkRow("Apto c/ Varanda", item.aptVaranda, "🏢")}
-                    ${renderLinkRow("Apto s/ Varanda", item.aptSemVaranda, "🏢")}
-                    ${renderLinkRow("Apto Garden", item.aptGarden, "🏡")}
-                    ${renderLinkRow("Planta Opcional 1", item.outroApt1, "📐")}
-                    ${renderLinkRow("Planta Opcional 2", item.outroApt2, "📐")}
-
-                    <span class="secao-titulo">Diversos</span>
-                    ${renderLinkRow("Material 1", item.div1, "🔗")}
-                    ${renderLinkRow("Material 2", item.div2, "🔗")}
-                    ${renderLinkRow("Material 3", item.div3, "🔗")}
-                    ${renderLinkRow("Material 4", item.div4, "🔗")}
-                    ${renderLinkRow("Material 5", item.div5, "🔗")}
-                </div>`;
-            painel.innerHTML = html;
-        }
-
-        function destacarNoMapa(el) {
-            if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
-            el.classList.add('path-ativo');
-            pathSelecionado = el;
-            document.getElementById('display-nome').innerText = el.getAttribute('data-name');
-        }
-
-        function solicitarTroca(manterFicha = false) {
-            regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
-            const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b');
-            const container = document.getElementById('container-mapas');
-            if (cA.classList.contains('pos-cima')) {
-                cA.className = 'caixa-troca pos-baixo'; cB.className = 'caixa-troca pos-cima';
-                container.appendChild(cA); 
-            } else {
-                cB.className = 'caixa-troca pos-baixo'; cA.className = 'caixa-troca pos-cima';
-                container.appendChild(cB); 
-            }
-            if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
-            pathSelecionado = null;
-            if (!manterFicha) {
-                document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>';
-                document.getElementById('display-nome').innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
-            }
-        }
-
-        function desenhar(idContainer, dados) {
-            const container = document.getElementById(idContainer);
-            if (!container || !dados) return;
-            const paths = dados.paths.map(p => {
-                const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id.toLowerCase().trim());
-                return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class || ''} ${(temMRV || p.id === 'grandesaopaulo') ? 'commrv' : ''}"></path>`;
-            }).join('');
-            container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform || ''}">${paths}</g></svg>`;
-        }
-
-        function desenharIniciais() {
-            if (typeof MAPA_GSP !== 'undefined') desenhar('caixa-a', MAPA_GSP);
-            if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
-        }
-
-        function selecionarResidencial(item, btn) {
-            if (!item) return;
-            if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
-            const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
-            if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'auto', block: 'nearest' }); botaoSelecionado = btnEsq; }
-            if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca(true);
-            const el = document.getElementById(item.id_path);
-            if(el) destacarNoMapa(el);
-            exibirPainelDireito(item, el ? el.getAttribute('data-name') : "Região");
-        }
 
         function gerarListaGeral() {
+
             const menu = document.getElementById('menu-residenciais');
+
             menu.innerHTML = "";
+
             DADOS_PLANILHA.forEach(item => {
+
                 const btn = document.createElement('button');
+
                 btn.className = 'btRes';
+
                 btn.id = `btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`;
-                btn.innerHTML = `<strong>${item.nome}</strong> <span class="estoque-status">${item.estoque == '0' || item.estoque == 'VENDIDO' ? 'VENDIDO' : 'restam ' + item.estoque + ' un.'}</span>`;
+
+                btn.innerHTML = `<strong>${item.nome}</strong> ${formatarEstoque(item.estoque)}`;
+
                 btn.onclick = () => selecionarResidencial(item, btn);
+
                 menu.appendChild(btn);
+
             });
+
         }
 
-        document.getElementById('container-mapas').addEventListener('click', (e) => {
-            const caixaBaixo = e.target.closest('.pos-baixo');
-            if (caixaBaixo) { solicitarTroca(false); return; }
-            const p = e.target.closest('.pos-cima path');
-            if (p) {
-                if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
-                const item = DADOS_PLANILHA.find(d => d.id_path === p.id.toLowerCase().trim());
-                if(item) selecionarResidencial(item, null);
+
+
+        function selecionarResidencial(item, btn) {
+
+            if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
+
+            const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
+
+            if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'auto', block: 'nearest' }); botaoSelecionado = btnEsq; }
+
+            if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca(true);
+
+            const el = document.getElementById(item.id_path);
+
+            if(el) destacarNoMapa(el);
+
+            exibirPainelDireito(item, el ? el.getAttribute('data-name') : "Região");
+
+        }
+
+
+
+        function exibirPainelDireito(item, nomeCidade) {
+
+            const painel = document.getElementById('detalhes-residencial');
+
+            let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
+
+            
+
+            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
+
+            vizinhos.forEach(v => {
+
+                html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v).replace(/'/g, "&apos;")}, null)'>
+
+                            <strong>${v.nome}</strong> ${formatarEstoque(v.estoque)}
+
+                         </button>`;
+
+            });
+
+
+
+            html += `
+
+                <div class="ficha-card">
+
+                    <span class="ficha-header">${item.nome}</span>
+
+                    <div class="local-info"><span>📍</span> <span>${item.endereco_comp}</span></div>
+
+                    
+
+                    <div class="ficha-grid">
+
+                        <div class="grid-item"><div class="grid-label">💰 Menor preço:</div>${item.menor_preco || 'Sob consulta'}</div>
+
+                        <div class="grid-item"><div class="grid-label">🔑 Entrega:</div>${item.entrega}</div>
+
+                        <div class="grid-item"><div class="grid-label">📐 Plantas:</div>${item.plantas}</div>
+
+                        <div class="grid-item"><div class="grid-label">🏗️ Obra:</div>${item.obra}%</div>
+
+                    </div>
+
+
+
+                    ${item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 Dica do Corretor</span>${item.dica}</div>` : ''}
+
+                    ${item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 Observações</span>${item.obs}</div>` : ''}
+
+
+
+                    <span class="secao-titulo">Destaques da Região</span>
+
+                    <div class="bloco-destaques">
+
+                        ${item.localizacao ? `<div class="destaque-item"><span class="destaque-icon">📍</span><div class="destaque-texto"><strong>Localização</strong>${item.localizacao}</div></div>` : ''}
+
+                        ${item.mobilidade ? `<div class="destaque-item"><span class="destaque-icon">🚆</span><div class="destaque-texto"><strong>Mobilidade</strong>${item.mobilidade}</div></div>` : ''}
+
+                        ${item.cultura_lazer ? `<div class="destaque-item"><span class="destaque-icon">🌳</span><div class="destaque-texto"><strong>Lazer</strong>${item.cultura_lazer}</div></div>` : ''}
+
+                        ${item.comercio ? `<div class="destaque-item"><span class="destaque-icon">🛒</span><div class="destaque-texto"><strong>Comércio</strong>${item.comercio}</div></div>` : ''}
+
+                        ${item.saude_educacao ? `<div class="destaque-item"><span class="destaque-icon">🏥</span><div class="destaque-texto"><strong>Saúde e Educação</strong>${item.saude_educacao}</div></div>` : ''}
+
+                    </div>
+
+
+
+                    <div class="container-btns">
+
+                        <button class="btn-acao btn-green" onclick="window.open('${item.book_cli}', '_blank')">Book Cliente</button>
+
+                        <button class="btn-acao btn-green" onclick="window.open('${item.book_corr}', '_blank')">Book Corr.</button>
+
+                        <button class="btn-acao btn-orange" onclick="copiarLink('${item.video1}', 'Vídeo 1')">Vídeo 1</button>
+
+                        <button class="btn-acao btn-orange" onclick="copiarLink('${item.video2}', 'Vídeo 2')">Vídeo 2</button>
+
+                    </div>
+
+                </div>`;
+
+            painel.innerHTML = html;
+
+        }
+
+
+
+        function copiarLink(link, nome) {
+
+            if(!link || link === "" || link === "#") { alert(`Link do ${nome} não disponível.`); return; }
+
+            navigator.clipboard.writeText(link).then(() => alert(`${nome} copiado!`));
+
+        }
+
+
+
+        function destacarNoMapa(el) {
+
+            if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
+
+            el.classList.add('path-ativo');
+
+            pathSelecionado = el;
+
+            document.getElementById('display-nome').innerText = el.getAttribute('data-name');
+
+        }
+
+
+
+        function solicitarTroca(manterFicha = false) {
+
+            regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
+
+            const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b');
+
+            const container = document.getElementById('container-mapas');
+
+            if (cA.classList.contains('pos-cima')) {
+
+                cA.className = 'caixa-troca pos-baixo'; cB.className = 'caixa-troca pos-cima';
+
+                container.appendChild(cA); 
+
+            } else {
+
+                cB.className = 'caixa-troca pos-baixo'; cA.className = 'caixa-troca pos-cima';
+
+                container.appendChild(cB); 
+
             }
+
+            if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
+
+            pathSelecionado = null;
+
+            if (!manterFicha) {
+
+                document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>';
+
+                document.getElementById('display-nome').innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
+
+            }
+
+        }
+
+
+
+        function desenhar(idContainer, dados) {
+
+            const container = document.getElementById(idContainer);
+
+            if (!container || !dados) return;
+
+            const paths = dados.paths.map(p => {
+
+                const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id);
+
+                return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class || ''} ${(temMRV || p.id === 'grandesaopaulo') ? 'commrv' : ''}"></path>`;
+
+            }).join('');
+
+            container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform || ''}">${paths}</g></svg>`;
+
+        }
+
+
+
+        function desenharIniciais() {
+
+            if (typeof MAPA_GSP !== 'undefined') desenhar('caixa-a', MAPA_GSP);
+
+            if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
+
+        }
+
+
+
+        document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
+
+            const p = e.target.closest('.pos-cima path');
+
+            if (p) document.getElementById('display-nome').innerText = p.getAttribute('data-name');
+
         });
 
+        document.getElementById('container-mapas').addEventListener('mouseleave', () => {
+
+            document.getElementById('display-nome').innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
+
+        });
+
+        document.getElementById('container-mapas').addEventListener('click', (e) => {
+
+            const caixaBaixo = e.target.closest('.pos-baixo');
+
+            if (caixaBaixo) { solicitarTroca(false); return; }
+
+            const p = e.target.closest('.pos-cima path');
+
+            if (p) {
+
+                if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
+
+                const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
+
+                if(item) selecionarResidencial(item, null);
+
+            }
+
+        });
+
+
+
         window.onload = carregarPlanilha;
+
     </script>
+
 </body>
+
 </html>
