@@ -47,32 +47,29 @@
         .commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
-        /* FICHA DIREITA - CAMPOS DE TEXTO */
+        /* FICHA DIREITA */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
         .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         
-        /* Grid de Informações Rápidas */
+        /* Grid Info */
         .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .grid-item { font-size: 0.72rem; color: #333; }
         .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; font-size: 0.65rem; text-transform: uppercase; }
 
-        /* Destaques (Diferenciais) */
-        .bloco-destaques { margin-bottom: 15px; }
-        .destaque-item { font-size: 0.72rem; color: #444; display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
-        .destaque-icon { color: #065e03; font-weight: bold; }
+        /* Diferenciais */
+        .bloco-destaques { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .destaque-item { font-size: 0.7rem; color: #444; display: flex; align-items: center; gap: 5px; margin-bottom: 4px; line-height: 1.2; }
+        .destaque-icon { color: #065e03; font-weight: bold; font-size: 0.8rem; }
 
-        /* Blocos de Texto Grande (Dica e Obs) */
+        /* Blocos de Texto */
         .bloco-texto { margin-bottom: 10px; padding: 10px; border-radius: 6px; font-size: 0.75rem; line-height: 1.5; position: relative; }
         .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.6rem; display: block; margin-bottom: 5px; letter-spacing: 0.5px; }
         
         .dica-box { background: #fff5e6; border: 1px solid #ffe0b3; color: #7a5a00; }
-        .dica-box::before { content: "💡"; position: absolute; right: 10px; top: 8px; opacity: 0.3; font-size: 1.2rem; }
-        
         .obs-box { background: #f8f9fa; border-left: 4px solid #dee2e6; color: #555; }
-        .obs-box::before { content: "📝"; position: absolute; right: 10px; top: 8px; opacity: 0.2; font-size: 1.2rem; }
 
-        /* Botões (Mantidos mas aguardando ajustes) */
+        /* Botões */
         .container-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
         .btn-acao { padding: 10px 5px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .btn-green { background: #065e03; }
@@ -95,7 +92,7 @@
         </main>
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
-            <div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial para ver os detalhes.</div>
+            <div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>
         </aside>
     </div>
 
@@ -124,24 +121,25 @@
                         regiao: col[1] ? col[1].toLowerCase() : "", 
                         nome: nomeValidado,
                         estoque: parseInt(col[3]) || 0,
-                        endereco_comp: `${col[4]}, ${col[5]} - ${col[6]}`,
+                        endereco_comp: `${col[4]}, ${col[5]} - ${col[6]}`, // Endereço, Bairro - Cidade
                         entrega: col[7], 
                         menor_preco: col[8], 
                         plantas: `de ${col[9]} até ${col[10]}`,
                         obra: col[11],
-                        // Campos de Diferenciais (Índices 12 a 15)
-                        localizacao: col[12],
-                        mobilidade: col[13],
+                        // Diferenciais (12 a 16)
+                        loc: col[12],
+                        mob: col[13],
                         lazer: col[14],
-                        diferenciais: col[15],
-                        // Campos de Texto Grande
-                        dica: col[16], // Coluna Q
-                        obs: col[17],  // Coluna R
-                        // Botões (Índices 18 a 21)
-                        book_cli: col[18],
-                        book_corr: col[19],
-                        video1: col[20],
-                        video2: col[21]
+                        comercio: col[15],
+                        saude: col[16],
+                        // Textos Grandes (17 e 18)
+                        dica: col[17], // Coluna R (DicaCorretor)
+                        obs: col[18],  // Coluna S (Obs)
+                        // Links (19 a 22)
+                        book_cli: col[19],
+                        book_corr: col[20],
+                        video1: col[21],
+                        video2: col[22]
                     };
                 }).filter(item => item !== null);
 
@@ -201,9 +199,11 @@
                     <div class="local-info"><span>📍</span> <span>${item.endereco_comp}</span></div>
                     
                     <div class="bloco-destaques">
-                        ${item.localizacao ? `<div class="destaque-item"><span class="destaque-icon">✓</span> ${item.localizacao}</div>` : ''}
-                        ${item.mobilidade ? `<div class="destaque-item"><span class="destaque-icon">✓</span> ${item.mobilidade}</div>` : ''}
-                        ${item.lazer ? `<div class="destaque-item"><span class="destaque-icon">✓</span> ${item.lazer}</div>` : ''}
+                        ${item.loc ? `<div class="destaque-item"><span class="destaque-icon">📍</span> ${item.loc}</div>` : ''}
+                        ${item.mob ? `<div class="destaque-item"><span class="destaque-icon">🚆</span> ${item.mob}</div>` : ''}
+                        ${item.lazer ? `<div class="destaque-item"><span class="destaque-icon">🌳</span> ${item.lazer}</div>` : ''}
+                        ${item.comercio ? `<div class="destaque-item"><span class="destaque-icon">🛒</span> ${item.comercio}</div>` : ''}
+                        ${item.saude ? `<div class="destaque-item"><span class="destaque-icon">🏥</span> ${item.saude}</div>` : ''}
                     </div>
 
                     <div class="ficha-grid">
