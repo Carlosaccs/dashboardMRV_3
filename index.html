@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Residenciais MRV em São Paulo</title>
+    <title>Dashboard MRV SP</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
@@ -53,13 +53,13 @@
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
-        .ficha-nome { font-size: 0.85rem; color: #065e03; font-weight: bold; text-transform: uppercase; display: inline-block; }
         
-        .item-info-row { font-size: 0.8rem; color: #333; margin-top: 10px; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; }
+        /* Título laranja que agora espelha o botão */
+        .ficha-nome-wrapper { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; width: 100%; }
+        .ficha-nome { font-size: 0.85rem; color: #ff8c00; font-weight: bold; text-transform: uppercase; }
         
-        .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
-        .grid-item { font-size: 0.75rem; color: #333; line-height: 1.3; }
-        .grid-item-header { font-weight: bold; display: flex; align-items: center; gap: 4px; margin-bottom: 2px; }
+        .item-info { font-size: 0.75rem; color: #333; margin-bottom: 8px; line-height: 1.2; }
+        .item-info strong { font-size: 0.65rem; color: #999; text-transform: uppercase; display: block; margin-bottom: 2px; }
 
         .btn-acao { width: 100%; padding: 10px; margin-top: 8px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-book { background: #065e03; }
@@ -87,7 +87,6 @@
     </div>
 
     <script src="mrv-data.js"></script>
-    
     <script>
         let pathSelecionado = null;
         let botaoSelecionado = null;
@@ -104,31 +103,22 @@
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     let col = linha.split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
                     if (col.length < 4 || !col[2]) return null;
-                    
-                    // Tratamento para a data não virar número
-                    let entregaRaw = col[7];
-                    if (!isNaN(entregaRaw) && entregaRaw.length > 4) {
-                         entregaRaw = "Verificar Sheets"; 
-                    }
+                    const n = col[2].toUpperCase();
+                    if (n.includes("LAZER") || n.includes(".PDF") || n.includes("BOOK") || 
+                        n.includes("CORRETOR") || n.includes("EQUIPADO") || col[0].includes("IDs")) return null;
 
                     return {
-                        id_path: col[0], 
-                        regiao: col[1] ? col[1].toLowerCase() : "", 
-                        nome: col[2], 
-                        estoque: parseInt(col[3]) || 0,
-                        entrega: entregaRaw,
-                        preco: col[8],
-                        plantas: `${col[9]} até ${col[10]}`,
-                        obra: col[11],
-                        endereco: col[12], 
-                        link_book: col[13] || "#"
+                        id_path: col[0], regiao: col[1] ? col[1].toLowerCase() : "", 
+                        nome: col[2], estoque: parseInt(col[3]) || 0,
+                        endereco: col[4], bairro: col[5], cidade: col[6],
+                        entrega: col[7], preco: col[8], obra: col[11], link_book: col[12]
                     };
                 }).filter(item => item !== null);
 
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaGeral();
                 desenharIniciais();
-            } catch (e) { console.error("Erro:", e); }
+            } catch (e) { console.error(e); }
         }
 
         function formatarEstoque(qtd) {
@@ -162,7 +152,7 @@
             
             const el = document.getElementById(item.id_path);
             if(el) destacarNoMapa(el);
-            exibirPainelDireito(item, el ? el.getAttribute('data-name') : "Região");
+            exibirPainelDireito(item, el ? el.getAttribute('data-name') : item.cidade);
         }
 
         function exibirPainelDireito(item, nomeCidade) {
@@ -176,38 +166,20 @@
                          </button>`;
             });
 
+            // Título laranja agora contém o mesmo HTML do botão (Nome + Estoque)
             html += `
                 <div class="ficha-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="ficha-nome-wrapper">
                         <span class="ficha-nome">${item.nome}</span>
                         ${formatarEstoque(item.estoque)}
                     </div>
-
-                    <div class="item-info-row">
-                        <span style="color:#d93025">📍</span> <span>${item.endereco}</span>
-                    </div>
-
-                    <div class="ficha-grid">
-                        <div class="grid-item">
-                            <div class="grid-item-header">💰 Preço:</div>
-                            R$ ${item.preco}
-                        </div>
-                        <div class="grid-item">
-                            <div class="grid-item-header">🔑 Entrega:</div>
-                            ${item.entrega}
-                        </div>
-                        <div class="grid-item">
-                            <div class="grid-item-header">📐 Plantas:</div>
-                            ${item.plantas}
-                        </div>
-                        <div class="grid-item">
-                            <div class="grid-item-header">🏗️ Obra:</div>
-                            ${item.obra}%
-                        </div>
-                    </div>
-
+                    <div class="item-info"><strong>📍 Localização</strong>${item.endereco}<br>${item.bairro} - ${item.cidade}</div>
+                    <div class="item-info"><strong>💰 Valor Sugerido</strong>R$ ${item.preco || 'Sob consulta'}</div>
+                    <div class="item-info"><strong>📅 Entrega</strong>${item.entrega}</div>
+                    <div class="item-info"><strong>🏗️ Obra</strong>${item.obra || '0%'}</div>
+                    <div class="item-info"><strong>📊 Estoque</strong>${item.estoque} unidades</div>
                     <button class="btn-acao btn-book" onclick="window.open('${item.link_book}', '_blank')">📄 Abrir Book</button>
-                    <button class="btn-acao btn-video" onclick="alert('Link em breve!')">🎥 Copiar Vídeo</button>
+                    <button class="btn-acao btn-video" onclick="alert('Copiado!')">🎥 Copiar Vídeo</button>
                 </div>`;
             painel.innerHTML = html;
         }
@@ -240,20 +212,40 @@
 
         function desenhar(idContainer, dados) {
             const container = document.getElementById(idContainer);
-            if(!container || !dados) return;
             const paths = dados.paths.map(p => {
                 const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id);
                 const isGSP = p.id === "grandesaopaulo";
-                return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class || ''} ${(temMRV || isGSP) ? 'commrv' : ''}"></path>`;
+                return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class} ${(temMRV || isGSP) ? 'commrv' : ''}"></path>`;
             }).join('');
-            container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform || ''}">${paths}</g></svg>`;
+            container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform}">${paths}</g></svg>`;
         }
 
         function desenharIniciais() {
-            // Garante que o desenho ocorra mesmo se as variáveis demorarem a carregar
-            if (typeof MAPA_GSP !== 'undefined') desenhar('caixa-a', MAPA_GSP);
-            if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
+            desenhar('caixa-a', MAPA_GSP);
+            desenhar('caixa-b', MAPA_INTERIOR);
         }
+
+        document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
+            if (e.target.tagName === 'path' && e.target.closest('.pos-cima')) {
+                document.getElementById('display-nome').innerText = e.target.getAttribute('data-name');
+            }
+        });
+
+        document.getElementById('container-mapas').addEventListener('mouseleave', () => {
+            document.getElementById('display-nome').innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
+        });
+
+        document.getElementById('container-mapas').addEventListener('click', (e) => {
+            const caixaBaixo = e.target.closest('.pos-baixo');
+            if (caixaBaixo) { solicitarTroca(); return; }
+            
+            if (e.target.tagName === 'path' && e.target.closest('.pos-cima')) {
+                const p = e.target;
+                if (p.id === "grandesaopaulo") { solicitarTroca(); return; }
+                const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
+                if(item) selecionarResidencial(item, null);
+            }
+        });
 
         window.onload = carregarPlanilha;
     </script>
