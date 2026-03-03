@@ -61,14 +61,8 @@
         
         .secao-titulo { font-size: 0.65rem; font-weight: bold; color: #999; text-transform: uppercase; margin: 15px 0 8px 0; display: block; border-top: 1px solid #eee; padding-top: 10px; }
         .bloco-destaques { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 15px; }
-        .destaque-item { font-size: 0.7rem; color: #555; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
-        .destaque-icon { font-size: 0.85rem; min-width: 18px; text-align: center; }
-        .destaque-texto strong { color: #065e03; font-size: 0.6rem; text-transform: uppercase; display: block; }
-
         .linha-link { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; }
-        .link-nome { font-size: 0.68rem; font-weight: bold; color: #444; display: flex; align-items: center; gap: 6px; }
-        .link-acoes { display: flex; gap: 4px; }
-        .btn-mini { padding: 5px 8px; border: none; border-radius: 4px; color: white; font-size: 0.6rem; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .btn-mini { padding: 5px 8px; border: none; border-radius: 4px; color: white; font-size: 0.6rem; font-weight: bold; cursor: pointer; }
         .btn-abrir { background: #065e03; }
         .btn-copiar { background: #ff8c00; }
     </style>
@@ -109,13 +103,12 @@
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
-                    const nomeLimpo = col[2] || "";
-                    if (!nomeLimpo.toLowerCase().startsWith("res") && !nomeLimpo.toLowerCase().startsWith("vista")) return null;
+                    if (col.length < 3) return null;
 
                     return {
-                        id_path: (col[0] || "").toLowerCase().trim(), 
-                        regiao: col[1] ? col[1].toLowerCase() : "", 
-                        nome: nomeLimpo,
+                        id_path: col[0].toLowerCase().trim(), 
+                        regiao_nome: col[1], 
+                        nome: col[2],
                         estoque: parseInt(col[3]) || 0, 
                         rua: col[4], num: col[5], cidade: col[6],
                         entrega: col[7], menor_preco: col[8],
@@ -131,11 +124,6 @@
             } catch (e) { console.error("Erro nos dados:", e); }
         }
 
-        function formatarEstoque(qtd) {
-            if (qtd === 0) return `<span class="estoque-status" style="text-decoration:line-through">VENDIDO</span>`;
-            return `<span class="estoque-status" style="${qtd <= 5 ? 'color:red' : ''}">restam ${qtd} un.</span>`;
-        }
-
         function gerarListaGeral() {
             const menu = document.getElementById('menu-residenciais');
             menu.innerHTML = "";
@@ -143,7 +131,7 @@
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
                 btn.id = `btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`;
-                btn.innerHTML = `<strong>${item.nome}</strong> ${formatarEstoque(item.estoque)}`;
+                btn.innerHTML = `<strong>${item.nome}</strong> <span class="estoque-status">restam ${item.estoque} un.</span>`;
                 btn.onclick = () => selecionarResidencial(item, btn);
                 menu.appendChild(btn);
             });
@@ -154,63 +142,38 @@
             const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
             if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'auto', block: 'nearest' }); botaoSelecionado = btnEsq; }
             
-            if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca(true);
-            
-            // Busca o elemento usando o id_path da planilha
+            // Tenta achar o path no mapa para destacar
             const el = document.getElementById(item.id_path);
             if(el) destacarNoMapa(el);
-            exibirPainelDireito(item, el ? el.getAttribute('data-name') : "Região");
+
+            exibirPainelDireito(item);
         }
 
-        function renderLinkRow(label, link, ico) {
-            if (!link || link === "" || link === "#") return "";
-            return `<div class="linha-link"><div class="link-nome"><span>${ico}</span> ${label}</div><div class="link-acoes"><button class="btn-mini btn-abrir" onclick="window.open('${link}', '_blank')">Abrir</button><button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">Copiar</button></div></div>`;
-        }
-
-        function exibirPainelDireito(item, nomeCidade) {
+        function exibirPainelDireito(item) {
             const painel = document.getElementById('detalhes-residencial');
-            let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
-            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
+            let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">Residenciais nesta região:</div>`;
+            
+            // Busca todos os empreendimentos que compartilham o mesmo id_path
+            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path);
             vizinhos.forEach(v => {
-                html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v).replace(/'/g, "&apos;")}, null)'><strong>${v.nome}</strong> ${formatarEstoque(v.estoque)}</button>`;
+                const ativo = (v.nome === item.nome) ? 'ativo' : '';
+                html += `<button class="btRes ${ativo}" onclick='selecionarResidencial(${JSON.stringify(v).replace(/'/g, "&apos;")}, null)'><strong>${v.nome}</strong></button>`;
             });
-
-            const enderecoLimpo = `${item.rua}, ${item.num}`;
 
             html += `
                 <div class="ficha-card">
-                    <span class="ficha-header">
-                        <span>${item.nome}</span> 
-                        ${formatarEstoque(item.estoque)}
-                    </span>
-                    <div class="local-info"><span>📍</span> <span>${enderecoLimpo}</span></div>
+                    <span class="ficha-header">${item.nome}</span>
+                    <div class="local-info">📍 ${item.rua}, ${item.num} - ${item.regiao_nome}</div>
                     <div class="ficha-grid">
-                        <div class="grid-item"><div class="grid-label">💰 Preço:</div>${item.menor_preco || 'Sob consulta'}</div>
-                        <div class="grid-item"><div class="grid-label">🔑 Entrega:</div>${item.entrega}</div>
-                        <div class="grid-item"><div class="grid-label">📐 Plantas:</div>${item.plantas}</div>
-                        <div class="grid-item"><div class="grid-label">🏗️ Obra:</div>${item.obra}%</div>
+                        <div class="grid-item"><div class="grid-label">Preço a partir de:</div>${item.menor_preco}</div>
+                        <div class="grid-item"><div class="grid-label">Entrega:</div>${item.entrega}</div>
+                        <div class="grid-item"><div class="grid-label">Plantas:</div>${item.plantas}</div>
+                        <div class="grid-item"><div class="grid-label">Obra:</div>${item.obra}%</div>
                     </div>
                     ${item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 Dica do Corretor</span>${item.dica}</div>` : ''}
-                    ${item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 Observações</span>${item.obs}</div>` : ''}
-                    <span class="secao-titulo">Destaques da Região</span>
-                    <div class="bloco-destaques">
-                        ${item.localizacao ? `<div class="destaque-item"><span class="destaque-icon">📍</span><div class="destaque-texto"><strong>Localização</strong>${item.localizacao}</div></div>` : ''}
-                        ${item.mobilidade ? `<div class="destaque-item"><span class="destaque-icon">🚆</span><div class="destaque-texto"><strong>Mobilidade</strong>${item.mobilidade}</div></div>` : ''}
-                        ${item.cultura_lazer ? `<div class="destaque-item"><span class="destaque-icon">🌳</span><div class="destaque-texto"><strong>Lazer</strong>${item.cultura_lazer}</div></div>` : ''}
-                        ${item.comercio ? `<div class="destaque-item"><span class="destaque-icon">🛒</span><div class="destaque-texto"><strong>Comércio</strong>${item.comercio}</div></div>` : ''}
-                        ${item.saude_educacao ? `<div class="destaque-item"><span class="destaque-icon">🏥</span><div class="destaque-texto"><strong>Saúde e Educação</strong>${item.saude_educacao}</div></div>` : ''}
-                    </div>
-                    <span class="secao-titulo">Links e Materiais</span>
-                    ${renderLinkRow("Book Cliente", item.book_cli, "📄")}
-                    ${renderLinkRow("Book Corretor", item.book_corr, "💼")}
-                    ${renderLinkRow("Vídeo 1", item.video1, "🎥")}
-                    ${renderLinkRow("Vídeo 2", item.video2, "🎥")}
+                    ${item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 Obs</span>${item.obs}</div>` : ''}
                 </div>`;
             painel.innerHTML = html;
-        }
-
-        function copiarLink(link, nome) {
-            navigator.clipboard.writeText(link).then(() => alert(`${nome} copiado!`));
         }
 
         function destacarNoMapa(el) {
@@ -220,33 +183,23 @@
             document.getElementById('display-nome').innerText = el.getAttribute('data-name');
         }
 
-        function solicitarTroca(manterFicha = false) {
+        function solicitarTroca() {
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
             const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b');
-            const container = document.getElementById('container-mapas');
             if (cA.classList.contains('pos-cima')) {
                 cA.className = 'caixa-troca pos-baixo'; cB.className = 'caixa-troca pos-cima';
-                container.appendChild(cA); 
             } else {
                 cB.className = 'caixa-troca pos-baixo'; cA.className = 'caixa-troca pos-cima';
-                container.appendChild(cB); 
-            }
-            if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
-            pathSelecionado = null;
-            if (!manterFicha) {
-                document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>';
-                document.getElementById('display-nome').innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
             }
         }
 
         function desenhar(idContainer, dados) {
             const container = document.getElementById(idContainer);
-            if (!container || !dados) return;
             const paths = dados.paths.map(p => {
                 const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id.toLowerCase().trim());
-                return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class || ''} ${(temMRV || p.id === 'grandesaopaulo') ? 'commrv' : ''}"></path>`;
+                return `<path id="${p.id}" data-name="${p.name}" d="${p.d}" class="${p.class || ''} ${temMRV ? 'commrv' : ''}"></path>`;
             }).join('');
-            container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform || ''}">${paths}</g></svg>`;
+            container.innerHTML = `<svg viewBox="${dados.viewBox}"><g>${paths}</g></svg>`;
         }
 
         function desenharIniciais() {
@@ -254,43 +207,20 @@
             if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
         }
 
-        document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
-            const p = e.target.closest('.pos-cima path');
-            if (p) document.getElementById('display-nome').innerText = p.getAttribute('data-name');
-        });
-
-        document.getElementById('container-mapas').addEventListener('mouseleave', () => {
-            document.getElementById('display-nome').innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
-        });
-
-        // LÓGICA DE CLIQUE REVISADA
         document.getElementById('container-mapas').addEventListener('click', (e) => {
-            const caixaBaixo = e.target.closest('.pos-baixo');
-            if (caixaBaixo) { solicitarTroca(false); return; }
-
             const p = e.target.closest('.pos-cima path');
             if (p) {
-                if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
-                
-                // Pega o ID exato do path clicado
-                const clicadoId = p.id.toLowerCase().trim();
-                
-                // Busca na planilha se este ID existe
-                const item = DADOS_PLANILHA.find(d => d.id_path === clicadoId);
-                
+                const item = DADOS_PLANILHA.find(d => d.id_path === p.id.toLowerCase().trim());
                 if(item) {
                     selecionarResidencial(item, null);
                 } else {
-                    // SE CLICOU EM CINZA: Remove laranja e limpa ficha
+                    // Clicou em cinza: limpa o laranja e a lateral
                     if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
                     pathSelecionado = null;
-                    if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
-                    botaoSelecionado = null;
-                    
-                    document.getElementById('detalhes-residencial').innerHTML = `<div style="text-align: center; color: #999; margin-top: 50px;">Nenhum residencial encontrado em ${p.getAttribute('data-name')}.</div>`;
-                    document.getElementById('display-nome').innerText = p.getAttribute('data-name');
+                    document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 50px;">Selecione uma região verde.</div>';
                 }
             }
+            if (e.target.closest('.pos-baixo')) solicitarTroca();
         });
 
         window.onload = carregarPlanilha;
