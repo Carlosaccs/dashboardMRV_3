@@ -20,6 +20,7 @@
         .col-lateral-dir { width: 25%; background: #fff; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
         .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
 
+        /* LISTA ESQUERDA */
         .btRes { 
             width: 100%; padding: 8px 12px; margin-bottom: 4px; background: transparent; 
             border: none; border-left: 5px solid rgb(6, 94, 3); 
@@ -37,21 +38,14 @@
         .pos-baixo { height: 22%; z-index: 10; cursor: pointer; opacity: 0.8; }
         
         svg { width: 100%; height: 100%; display: block; padding: 10px; pointer-events: auto; }
-        
-        /* ESTILO PADRÃO PATHS */
         path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; cursor: default; }
         
-        /* PATHS COM MRV E INTERATIVOS */
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
-        
-        /* HOVER GERAL (NOMES APARECEM NO TOPO) */
         path:hover { fill: #bbb; } 
         .commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
-        
-        /* ESTADO ATIVO SÓ PARA QUEM TEM MRV */
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
-        /* FICHA TÉCNICA E BOTÕES */
+        /* FICHA TÉCNICA */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
         .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
@@ -68,6 +62,7 @@
         .destaque-icon { font-size: 0.85rem; min-width: 18px; text-align: center; }
         .destaque-texto strong { color: #065e03; font-size: 0.6rem; text-transform: uppercase; display: block; }
 
+        /* BOTÕES DE LINKS */
         .linha-link { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; }
         .link-nome { font-size: 0.68rem; font-weight: bold; color: #444; display: flex; align-items: center; gap: 6px; }
         .link-acoes { display: flex; gap: 4px; }
@@ -112,9 +107,13 @@
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
-                    if (!col[2]) return null;
+                    
+                    // FILTRO DE INVASORES: Apenas nomes que começam com Res ou Vista
+                    const nomeLimpo = col[2] || "";
+                    if (!nomeLimpo.toLowerCase().startsWith("res") && !nomeLimpo.toLowerCase().startsWith("vista")) return null;
+
                     return {
-                        id_path: col[0], regiao: col[1] ? col[1].toLowerCase() : "", nome: col[2],
+                        id_path: col[0], regiao: col[1] ? col[1].toLowerCase() : "", nome: nomeLimpo,
                         estoque: parseInt(col[3]) || 0, endereco_comp: `${col[4]}, ${col[5]} - ${col[6]}`,
                         entrega: col[7], menor_preco: col[8], plantas: `de ${col[9]} até ${col[10]}`,
                         obra: col[11], localizacao: col[12], mobilidade: col[13], cultura_lazer: col[14], comercio: col[15], saude_educacao: col[16],
@@ -130,7 +129,8 @@
 
         function formatarEstoque(qtd) {
             if (qtd === 0) return `<span class="estoque-status" style="text-decoration:line-through">VENDIDO</span>`;
-            return `<span class="estoque-status" style="${qtd <= 5 ? 'color:red' : ''}">${qtd <= 5 ? 'restam ' : ''}${qtd} un.</span>`;
+            // MAQUIAGEM: Sempre inclui "restam" e fica vermelho se for <= 5
+            return `<span class="estoque-status" style="${qtd <= 5 ? 'color:red' : ''}">restam ${qtd} un.</span>`;
         }
 
         function gerarListaGeral() {
@@ -229,12 +229,10 @@
         document.getElementById('container-mapas').addEventListener('click', (e) => {
             const caixaBaixo = e.target.closest('.pos-baixo');
             if (caixaBaixo) { solicitarTroca(false); return; }
-            
             const p = e.target.closest('.pos-cima path');
             if (p) {
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
-                // SÓ PERMITE SELECIONAR SE TIVER MRV (VERDE)
                 if(item) selecionarResidencial(item, null);
             }
         });
