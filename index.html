@@ -102,39 +102,26 @@
 
         async function carregarPlanilha() {
             try {
-                const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv";
+                const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv&cachebuster=" + new Date().getTime();
                 const response = await fetch(url);
                 const texto = await response.text();
                 const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
-                    const nomeLimpo = col[2] || "";
-                    if (!nomeLimpo.toLowerCase().startsWith("res") && !nomeLimpo.toLowerCase().startsWith("vista")) return null;
+                    
+                    // Removi a trava de nome que exigia "Res" ou "Vista" para evitar erros com o Vivenza
+                    if (!col[2] || col[2] === "") return null;
 
                     return {
-                        id_path: (col[0] || "").toLowerCase().trim(), // Normalizado aqui
+                        id_path: (col[0] || "").toLowerCase().trim(), 
                         regiao: col[1] ? col[1].toLowerCase() : "", 
-                        nome: nomeLimpo,
+                        nome: col[2],
                         estoque: parseInt(col[3]) || 0, 
-                        rua: col[4], 
-                        num: col[5], 
-                        cidade: col[6], 
-                        entrega: col[7], 
-                        menor_preco: col[8],
-                        plantas: `de ${col[9]} até ${col[10]}`, 
-                        obra: col[11], 
-                        localizacao: col[12], 
-                        mobilidade: col[13], 
-                        cultura_lazer: col[14], 
-                        comercio: col[15], 
-                        saude_educacao: col[16],
-                        dica: col[17], 
-                        obs: col[18], 
-                        book_cli: col[19], 
-                        book_corr: col[20], 
-                        video1: col[21], 
-                        video2: col[22]
+                        rua: col[4], num: col[5], cidade: col[6], entrega: col[7], menor_preco: col[8],
+                        plantas: `de ${col[9]} até ${col[10]}`, obra: col[11],
+                        localizacao: col[12], mobilidade: col[13], cultura_lazer: col[14], comercio: col[15], saude_educacao: col[16],
+                        dica: col[17], obs: col[18], book_cli: col[19], book_corr: col[20], video1: col[21], video2: col[22]
                     };
                 }).filter(item => item !== null);
 
@@ -185,15 +172,13 @@
                 html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v).replace(/'/g, "&apos;")}, null)'><strong>${v.nome}</strong> ${formatarEstoque(v.estoque)}</button>`;
             });
 
-            const enderecoLimpo = `${item.rua}, ${item.num}`;
-
             html += `
                 <div class="ficha-card">
                     <span class="ficha-header">
                         <span>${item.nome}</span> 
                         ${formatarEstoque(item.estoque)}
                     </span>
-                    <div class="local-info"><span>📍</span> <span>${enderecoLimpo}</span></div>
+                    <div class="local-info"><span>📍</span> <span>${item.rua}, ${item.num}</span></div>
                     <div class="ficha-grid">
                         <div class="grid-item"><div class="grid-label">💰 Preço:</div>${item.menor_preco || 'Sob consulta'}</div>
                         <div class="grid-item"><div class="grid-label">🔑 Entrega:</div>${item.entrega}</div>
@@ -253,8 +238,9 @@
             const container = document.getElementById(idContainer);
             if (!container || !dados) return;
             const paths = dados.paths.map(p => {
-                // Compara ignorando maiúsculas e espaços
+                // VERIFICA SE O ID DO PATH EXISTE NA PLANILHA
                 const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id.toLowerCase().trim());
+                // SE EXISTIR, APLICA A CLASSE 'COMMRV' AUTOMATICAMENTE
                 return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class || ''} ${(temMRV || p.id === 'grandesaopaulo') ? 'commrv' : ''}"></path>`;
             }).join('');
             container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform || ''}">${paths}</g></svg>`;
@@ -280,7 +266,6 @@
             const p = e.target.closest('.pos-cima path');
             if (p) {
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
-                // Clique também ignorando maiúsculas e espaços
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id.toLowerCase().trim());
                 if(item) selecionarResidencial(item, null);
             }
