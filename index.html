@@ -117,11 +117,28 @@
                         regiao: col[1] ? col[1].toLowerCase() : "", 
                         nome: nomeLimpo,
                         estoque: parseInt(col[3]) || 0, 
-                        // AJUSTE PRECISO: Coluna 4 (Rua), Coluna 5 (Nº) e Coluna 6 (Bairro). A Coluna 7 (Cidade) é ignorada.
-                        endereco_comp: `${col[4]}, ${col[5]} - ${col[6]}`,
-                        entrega: col[7], menor_preco: col[8], plantas: `de ${col[9]} até ${col[10]}`,
-                        obra: col[11], localizacao: col[12], mobilidade: col[13], cultura_lazer: col[14], comercio: col[15], saude_educacao: col[16],
-                        dica: col[17], obs: col[18], book_cli: col[19], book_corr: col[20], video1: col[21], video2: col[22]
+                        // AJUSTE DE MAPEAMENTO (ÍNDICE 0):
+                        rua: col[4],        // E
+                        num: col[5],        // F
+                        bairro: col[5],     // Se o bairro for o mesmo da coluna F ou se estiver antes da cidade. 
+                                            // Se a Cidade é a 6 (G), o Bairro deve ser a 5 (F)? 
+                                            // Ajustando abaixo para assumir que Cidade é a 6:
+                        cidade: col[6],     // G (Coluna 6) - SERÁ IGNORADA NO ENDEREÇO
+                        entrega: col[7],    // H
+                        menor_preco: col[8],// I
+                        plantas: `de ${col[9]} até ${col[10]}`, // J e K
+                        obra: col[11],      // L
+                        localizacao: col[12], 
+                        mobilidade: col[13], 
+                        cultura_lazer: col[14], 
+                        comercio: col[15], 
+                        saude_educacao: col[16],
+                        dica: col[17], 
+                        obs: col[18], 
+                        book_cli: col[19], 
+                        book_corr: col[20], 
+                        video1: col[21], 
+                        video2: col[22]
                     };
                 }).filter(item => item !== null);
 
@@ -172,13 +189,17 @@
                 html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v).replace(/'/g, "&apos;")}, null)'><strong>${v.nome}</strong> ${formatarEstoque(v.estoque)}</button>`;
             });
 
+            // ENDEREÇO LIMPO: Pega apenas Rua (4) e Número (5). 
+            // Como a cidade é a 6, ela não entra aqui.
+            const enderecoLimpo = `${item.rua}, ${item.num}`;
+
             html += `
                 <div class="ficha-card">
                     <span class="ficha-header">
                         <span>${item.nome}</span> 
                         ${formatarEstoque(item.estoque)}
                     </span>
-                    <div class="local-info"><span>📍</span> <span>${item.endereco_comp}</span></div>
+                    <div class="local-info"><span>📍</span> <span>${enderecoLimpo}</span></div>
                     <div class="ficha-grid">
                         <div class="grid-item"><div class="grid-label">💰 Preço:</div>${item.menor_preco || 'Sob consulta'}</div>
                         <div class="grid-item"><div class="grid-label">🔑 Entrega:</div>${item.entrega}</div>
