@@ -55,7 +55,7 @@
         .secao-titulo { font-size: 0.65rem; font-weight: bold; color: #999; text-transform: uppercase; margin: 15px 0 8px 0; display: block; border-top: 1px solid #eee; padding-top: 10px; }
         
         .linha-link { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; }
-        .link-nome { font-size: 0.68rem; font-weight: bold; color: #444; display: flex; align-items: center; gap: 6px; }
+        .link-nome { font-size: 0.68rem; font-weight: bold; color: #444; display: flex; align-items: center; gap: 6px; flex: 1; }
         .link-acoes { display: flex; gap: 4px; }
         .btn-mini { padding: 5px 8px; border: none; border-radius: 4px; color: white; font-size: 0.6rem; font-weight: bold; cursor: pointer; text-transform: uppercase; }
         .btn-abrir { background: #065e03; }
@@ -116,7 +116,8 @@
                         aptVaranda: col[23] || "", aptSemVaranda: col[24] || "", aptGarden: col[25] || "", 
                         outroApt1: col[26] || "", outroApt2: col[27] || "",
                         linkLocalizacao: col[28] || "", linkDescritivo: col[29] || "",
-                        div1: col[30] || "", div2: col[31] || "", div3: col[32] || "", div4: col[33] || "", div5: col[34] || ""
+                        div1: col[30] || "", div2: col[31] || "", div3: col[32] || "", div4: col[33] || "", div5: col[34] || "",
+                        div6: col[35] || "", div7: col[36] || "", div8: col[37] || "", div9: col[38] || "", div10: col[39] || ""
                     };
                 }).filter(item => item !== null);
 
@@ -129,32 +130,21 @@
             }
         }
 
-        // NOVA FUNÇÃO DE ABERTURA: EXTRAI O ID DO DRIVE COM PRECISÃO
+        // FUNÇÃO DE ABERTURA CORRIGIDA: Captura IDs longos e curtos sem erro 404
         function abrirLinkSeguro(url) {
             if (!url || url.length < 10) return;
             
             if (url.includes("drive.google.com")) {
-                // Tenta encontrar o ID do arquivo (padrão de 33 caracteres alfanuméricos)
-                const regExp = /\/file\/d\/([a-zA-Z0-9_-]{25,50})\//;
-                const match = url.match(regExp);
+                // Regex melhorada para capturar o ID entre /d/ e /view
+                const idMatch = url.match(/\/d\/(.+?)\//) || url.match(/id=(.+?)(&|$)/);
                 
-                if (match && match[1]) {
-                    // Reconstrói o link de preview limpo usando apenas o ID
-                    const linkLimpo = `https://drive.google.com/file/d/${match[1]}/preview`;
+                if (idMatch && idMatch[1]) {
+                    const id = idMatch[1].split('/')[0]; // Garante que pegamos só o ID
+                    const linkLimpo = `https://drive.google.com/file/d/${id}/preview`;
                     window.open(linkLimpo, '_blank');
                     return;
                 }
-                
-                // Caso não ache pelo padrão /file/d/, tenta pelo parâmetro id=
-                const urlParams = new URLSearchParams(url.split('?')[1]);
-                const idParam = urlParams.get('id');
-                if (idParam) {
-                    window.open(`https://drive.google.com/file/d/${idParam}/preview`, '_blank');
-                    return;
-                }
             }
-            
-            // Se não for Drive ou não achar ID, abre o link original em nova aba
             window.open(url, '_blank');
         }
 
@@ -162,6 +152,7 @@
             navigator.clipboard.writeText(link).then(() => alert(`${nome} copiado!`));
         }
 
+        // FUNÇÃO DE RENDERIZAÇÃO: Garante que o texto (label) apareça
         function renderLinkRow(label, link, ico) {
             if (!link || link.trim() === "" || link.length < 10) return "";
             return `<div class="linha-link">
@@ -207,8 +198,8 @@
                     ${renderLinkRow("Apto c/ Varanda", item.aptVaranda, "🏢")}
                     ${renderLinkRow("Apto s/ Varanda", item.aptSemVaranda, "🏢")}
                     ${renderLinkRow("Apto Garden", item.aptGarden, "🏡")}
-                    ${renderLinkRow("Outra Planta 1", item.outroApt1, "📐")}
-                    ${renderLinkRow("Outra Planta 2", item.outroApt2, "📐")}
+                    ${renderLinkRow("Planta Opcional 1", item.outroApt1, "📐")}
+                    ${renderLinkRow("Planta Opcional 2", item.outroApt2, "📐")}
 
                     <span class="secao-titulo">Diversos</span>
                     ${renderLinkRow("Material 1", item.div1, "🔗")}
@@ -216,6 +207,11 @@
                     ${renderLinkRow("Material 3", item.div3, "🔗")}
                     ${renderLinkRow("Material 4", item.div4, "🔗")}
                     ${renderLinkRow("Material 5", item.div5, "🔗")}
+                    ${renderLinkRow("Material 6", item.div6, "🔗")}
+                    ${renderLinkRow("Material 7", item.div7, "🔗")}
+                    ${renderLinkRow("Material 8", item.div8, "🔗")}
+                    ${renderLinkRow("Material 9", item.div9, "🔗")}
+                    ${renderLinkRow("Material 10", item.div10, "🔗")}
                 </div>`;
             painel.innerHTML = html;
         }
