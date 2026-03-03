@@ -127,7 +127,7 @@
         </main>
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
-            <div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial ou clique em uma região verde do mapa.</div>
+            <div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>
         </aside>
     </div>
 
@@ -139,7 +139,7 @@
                 Este dashboard foi desenvolvido para agilizar o acesso a informações básicas sobre os residenciais MRV de SP, auxiliando no atendimento rápido aos nossos leads.<br><br>
                 <strong>⚠️ Aviso Importante:</strong> As informações mostradas podem estar desatualizadas e até incorretas.<br><br>
                 <strong>🤝 Colabore com o projeto!</strong><br>
-                Sentiu falta de algum material? Se você tiver Books (PDF), Vídeos ou fotos de decorados que ainda não estão aqui, se encontrou alguma informação incorretase ou se pode colaborar com dicas melhores ou observações sobre um residencial, por favor, envie para que possamos manter a ferramenta completa para todos.
+                Sentiu falta de algum material? Se você tiver Books (PDF), Vídeos ou fotos de decorados que ainda não estão aqui, ou se encontrou alguma informação incorreta, por favor, envie para que possamos manter a ferramenta completa para todos.
             </div>
             <a href="https://wa.me/551192617026?text=Olá Carlos, gostaria de colaborar com o Dashboard MRV!" target="_blank" class="btn-whatsapp">
                 Carlos Custódio - (11) 9261-7026
