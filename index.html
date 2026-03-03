@@ -44,7 +44,6 @@
         .commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
-        /* FICHA DETALHES */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
         .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
@@ -53,7 +52,7 @@
         .grid-item { font-size: 0.72rem; color: #333; }
         .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; font-size: 0.65rem; text-transform: uppercase; }
         
-        /* BLOCOS DE TEXTO (Dica e Obs) */
+        /* BLOCOS DE TEXTO */
         .bloco-texto { margin-bottom: 10px; padding: 10px; border-radius: 6px; font-size: 0.75rem; line-height: 1.4; }
         .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.6rem; display: block; margin-bottom: 4px; }
         .dica-box { background: #fff5e6; border: 1px solid #ffe0b3; color: #7a5a00; }
@@ -103,7 +102,9 @@
                 const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
+                    // Regex robusta para CSV com vírgulas dentro de aspas
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
+                    
                     if (!col[2]) return null;
 
                     return {
@@ -112,23 +113,33 @@
                         nome: col[2],
                         estoque: col[3] || "0", 
                         rua: col[4] || "", num: col[5] || "", cidade: col[6] || "", entrega: col[7] || "", menor_preco: col[8] || "",
-                        plantas: (col[9] || col[10]) ? `de ${col[9]} até ${col[10]}` : "Consulte", 
+                        plantas_desc: (col[9] || col[10]) ? `de ${col[9]} até ${col[10]}` : "Consulte", 
                         obra: col[11] || "0",
                         dica: col[17] || "", 
                         obs: col[18] || "", 
-                        book_cli: col[19] || "", book_corr: col[20] || "", 
-                        video1: col[21] || "", video2: col[22] || "",
-                        aptVaranda: col[23] || "", aptSemVaranda: col[24] || "", aptGarden: col[25] || "", 
-                        outroApt1: col[26] || "", outroApt2: col[27] || "",
-                        linkLocalizacao: col[28] || "", linkDescritivo: col[29] || "",
-                        div1: col[30] || ""
+                        book_cli: col[19] || "", 
+                        book_corr: col[20] || "", 
+                        video1: col[21] || "", 
+                        video2: col[22] || "",
+                        aptVaranda: col[23] || "", 
+                        aptSemVaranda: col[24] || "", 
+                        aptGarden: col[25] || "", 
+                        outroApt1: col[26] || "", 
+                        outroApt2: col[27] || "",
+                        linkLocalizacao: col[28] || "", 
+                        linkDescritivo: col[29] || "",
+                        div1: col[30] || "",
+                        div2: col[31] || "",
+                        div3: col[32] || "",
+                        div4: col[33] || "",
+                        div5: col[34] || ""
                     };
                 }).filter(item => item !== null);
 
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaGeral();
                 desenharIniciais();
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Erro na carga:", e); }
         }
 
         function abrirLinkSeguro(url) {
@@ -168,7 +179,6 @@
                 html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'><strong>${v.nome}</strong> <span class="estoque-status">${v.estoque == '0' || v.estoque == 'VENDIDO' ? 'VENDIDO' : 'restam ' + v.estoque + ' un.'}</span></button>`;
             });
 
-            // LOGICA PARA OS TEXTOS (DICA E OBS) COM TÍTULOS SIMPLIFICADOS
             let blocoDica = item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 Dica:</span>${item.dica}</div>` : "";
             let blocoObs = item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 Observações:</span>${item.obs}</div>` : "";
 
@@ -179,7 +189,7 @@
                     <div class="ficha-grid">
                         <div class="grid-item"><div class="grid-label">Preço:</div>${item.menor_preco || 'Sob consulta'}</div>
                         <div class="grid-item"><div class="grid-label">Entrega:</div>${item.entrega}</div>
-                        <div class="grid-item"><div class="grid-label">Plantas:</div>${item.plantas}</div>
+                        <div class="grid-item"><div class="grid-label">Plantas:</div>${item.plantas_desc}</div>
                         <div class="grid-item"><div class="grid-label">Obra:</div>${item.obra}%</div>
                     </div>
                     
@@ -200,10 +210,15 @@
                     ${renderLinkRow("Apto c/ Varanda", item.aptVaranda, "🏢")}
                     ${renderLinkRow("Apto s/ Varanda", item.aptSemVaranda, "🏢")}
                     ${renderLinkRow("Apto Garden", item.aptGarden, "🏡")}
-                    ${renderLinkRow("Outra Planta 1", item.outroApt1, "📐")}
+                    ${renderLinkRow("Planta Opcional 1", item.outroApt1, "📐")}
+                    ${renderLinkRow("Planta Opcional 2", item.outroApt2, "📐")}
 
                     <span class="secao-titulo">Diversos</span>
                     ${renderLinkRow("Material 1", item.div1, "🔗")}
+                    ${renderLinkRow("Material 2", item.div2, "🔗")}
+                    ${renderLinkRow("Material 3", item.div3, "🔗")}
+                    ${renderLinkRow("Material 4", item.div4, "🔗")}
+                    ${renderLinkRow("Material 5", item.div5, "🔗")}
                 </div>`;
             painel.innerHTML = html;
         }
