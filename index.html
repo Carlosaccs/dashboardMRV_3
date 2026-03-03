@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
     <style>
+        /* CSS BASE E ESTRUTURA */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
         
@@ -20,6 +21,7 @@
         .col-lateral-dir { width: 25%; background: #fff; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
         .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
 
+        /* LISTA ESQUERDA */
         .btRes { 
             width: 100%; padding: 8px 12px; margin-bottom: 4px; background: transparent; 
             border: none; border-left: 5px solid rgb(6, 94, 3); 
@@ -27,18 +29,17 @@
             border-radius: 4px; display: flex; justify-content: space-between; align-items: center;
         }
         .btRes:hover { background: #f4f4f4; border-left-color: #ff8c00; }
-        .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%; text-transform: uppercase; }
         .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; }
         .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; }
-        .estoque-vendido { text-decoration: line-through; color: #999 !important; background: #f0f0f0; padding: 2px 4px; border-radius: 2px; }
 
-        .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; background: #fdfdfd; }
+        /* MAPA */
+        .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; }
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
         .pos-cima { height: 78%; z-index: 5; }
         .pos-baixo { height: 22%; z-index: 10; cursor: pointer; }
-        svg { width: 100%; height: 100%; display: block; padding: 10px; pointer-events: auto; }
-        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; cursor: pointer; }
+        svg { width: 100%; height: 100%; display: block; padding: 10px; }
+        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; cursor: pointer; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
         .commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
@@ -46,29 +47,44 @@
         /* FICHA TÉCNICA */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         
         .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .grid-item { font-size: 0.72rem; color: #333; }
         .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; font-size: 0.65rem; text-transform: uppercase; }
 
-        /* BLOCOS DE TEXTO (DICA E OBS) */
+        /* BLOCOS DE TEXTO */
         .bloco-texto { margin-bottom: 10px; padding: 10px; border-radius: 6px; font-size: 0.75rem; line-height: 1.5; }
-        .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.6rem; display: block; margin-bottom: 5px; }
+        .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.6rem; display: block; margin-bottom: 3px; }
         .dica-box { background: #fff5e6; border: 1px solid #ffe0b3; color: #7a5a00; }
         .obs-box { background: #f1f3f5; border-left: 4px solid #adb5bd; color: #495057; }
 
-        /* DIFERENCIAIS (AGORA APÓS OBS) */
+        /* DIFERENCIAIS */
         .secao-titulo { font-size: 0.65rem; font-weight: bold; color: #999; text-transform: uppercase; margin: 15px 0 8px 0; display: block; border-top: 1px solid #eee; padding-top: 10px; }
         .bloco-destaques { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 15px; }
-        .destaque-item { font-size: 0.7rem; color: #555; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; line-height: 1.2; }
+        .destaque-item { font-size: 0.7rem; color: #555; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
         .destaque-icon { font-size: 0.85rem; min-width: 18px; text-align: center; }
         .destaque-texto strong { color: #065e03; font-size: 0.6rem; text-transform: uppercase; display: block; }
 
-        .container-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
-        .btn-acao { padding: 10px 5px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        .btn-green { background: #065e03; }
-        .btn-orange { background: #ff8c00; }
+        /* --- NOVOS BOTÕES EM LINHA --- */
+        .linha-link { 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 8px; background: #fff; border: 1px solid #eee; 
+            border-radius: 6px; margin-bottom: 6px;
+        }
+        .link-nome { font-size: 0.7rem; font-weight: bold; color: #444; display: flex; align-items: center; gap: 6px; }
+        .link-acoes { display: flex; gap: 4px; }
+        
+        .btn-mini {
+            padding: 6px 10px; border: none; border-radius: 4px; color: white; 
+            font-size: 0.65rem; font-weight: bold; cursor: pointer; 
+            display: flex; align-items: center; gap: 3px; transition: opacity 0.2s;
+        }
+        .btn-mini:hover { opacity: 0.8; }
+        .btn-abrir { background: #065e03; } /* Verde MRV */
+        .btn-copiar { background: #ff8c00; } /* Laranja MRV */
+        /* ---------------------------- */
+
     </style>
 </head>
 <body>
@@ -87,7 +103,7 @@
         </main>
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
-            <div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>
+            <div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial para ver detalhes.</div>
         </aside>
     </div>
 
@@ -107,7 +123,7 @@
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
-                    if (!col[2] || (!col[2].toLowerCase().startsWith("res") && !col[2].toLowerCase().startsWith("vista"))) return null;
+                    if (!col[2]) return null;
 
                     return {
                         id_path: col[0], 
@@ -140,7 +156,7 @@
         }
 
         function formatarEstoque(qtd) {
-            if (qtd === 0) return `<span class="estoque-status estoque-vendido">VENDIDO</span>`;
+            if (qtd === 0) return `<span class="estoque-status" style="text-decoration:line-through; color:#999">VENDIDO</span>`;
             return `<span class="estoque-status" style="${qtd <= 5 ? 'color:red' : ''}">${qtd <= 5 ? 'restam ' : ''}${qtd} un.</span>`;
         }
 
@@ -167,6 +183,19 @@
             exibirPainelDireito(item, el ? el.getAttribute('data-name') : "Região");
         }
 
+        // Função auxiliar para gerar a linha de botões
+        function criarLinhaLink(label, link, icone) {
+            if (!link || link === "" || link === "#") return "";
+            return `
+                <div class="linha-link">
+                    <div class="link-nome"><span>${icone}</span> ${label}</div>
+                    <div class="link-acoes">
+                        <button class="btn-mini btn-abrir" onclick="window.open('${link}', '_blank')">ABRIR</button>
+                        <button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">COPIAR</button>
+                    </div>
+                </div>`;
+        }
+
         function exibirPainelDireito(item, nomeCidade) {
             const painel = document.getElementById('detalhes-residencial');
             let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
@@ -184,7 +213,7 @@
                     <div class="local-info"><span>📍</span> <span>${item.endereco_comp}</span></div>
                     
                     <div class="ficha-grid">
-                        <div class="grid-item"><div class="grid-label">💰 Menor preço:</div>${item.menor_preco || 'Sob consulta'}</div>
+                        <div class="grid-item"><div class="grid-label">💰 Preço:</div>${item.menor_preco || 'Sob consulta'}</div>
                         <div class="grid-item"><div class="grid-label">🔑 Entrega:</div>${item.entrega}</div>
                         <div class="grid-item"><div class="grid-label">📐 Plantas:</div>${item.plantas}</div>
                         <div class="grid-item"><div class="grid-label">🏗️ Obra:</div>${item.obra}%</div>
@@ -202,19 +231,19 @@
                         ${item.saude_educacao ? `<div class="destaque-item"><span class="destaque-icon">🏥</span><div class="destaque-texto"><strong>Saúde e Educação</strong>${item.saude_educacao}</div></div>` : ''}
                     </div>
 
-                    <div class="container-btns">
-                        <button class="btn-acao btn-green" onclick="window.open('${item.book_cli}', '_blank')">Book Cliente</button>
-                        <button class="btn-acao btn-green" onclick="window.open('${item.book_corr}', '_blank')">Book Corr.</button>
-                        <button class="btn-acao btn-orange" onclick="copiarLink('${item.video1}', 'Vídeo 1')">Vídeo 1</button>
-                        <button class="btn-acao btn-orange" onclick="copiarLink('${item.video2}', 'Vídeo 2')">Vídeo 2</button>
-                    </div>
+                    <span class="secao-titulo">Links e Materiais</span>
+                    ${criarLinhaLink("Book Cliente", item.book_cli, "📄")}
+                    ${criarLinhaLink("Book Corretor", item.book_corr, "💼")}
+                    ${criarLinhaLink("Vídeo Tour 1", item.video1, "🎥")}
+                    ${criarLinhaLink("Vídeo Tour 2", item.video2, "🎬")}
                 </div>`;
             painel.innerHTML = html;
         }
 
         function copiarLink(link, nome) {
-            if(!link || link === "" || link === "#") { alert(`Link do ${nome} não disponível.`); return; }
-            navigator.clipboard.writeText(link).then(() => alert(`${nome} copiado!`));
+            navigator.clipboard.writeText(link).then(() => {
+                alert(`Link do ${nome} copiado para a área de transferência!`);
+            });
         }
 
         function destacarNoMapa(el) {
@@ -258,13 +287,6 @@
             if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
         }
 
-        document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
-            const p = e.target.closest('.pos-cima path');
-            if (p) document.getElementById('display-nome').innerText = p.getAttribute('data-name');
-        });
-        document.getElementById('container-mapas').addEventListener('mouseleave', () => {
-            document.getElementById('display-nome').innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
-        });
         document.getElementById('container-mapas').addEventListener('click', (e) => {
             const caixaBaixo = e.target.closest('.pos-baixo');
             if (caixaBaixo) { solicitarTroca(false); return; }
