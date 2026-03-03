@@ -102,7 +102,6 @@
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                     if (!col[2] || col[2].length < 3) return null;
 
-                    // Criamos o objeto com segurança: se a coluna não existir, fica vazio
                     return {
                         id_path: (col[0] || "").toLowerCase().trim(), 
                         regiao: (col[1] || "").toLowerCase(), 
@@ -130,15 +129,33 @@
             }
         }
 
-        // FUNÇÃO DE ABERTURA BLINDADA (FOCADO EM PREVIEW)
+        // NOVA FUNÇÃO DE ABERTURA: EXTRAI O ID DO DRIVE COM PRECISÃO
         function abrirLinkSeguro(url) {
             if (!url || url.length < 10) return;
-            let linkFinal = url;
+            
             if (url.includes("drive.google.com")) {
-                // Remove tudo após o ID e força o /preview
-                linkFinal = url.split('?')[0].replace(/\/view$/, "").replace(/\/edit$/, "").replace(/\/preview$/, "") + "/preview";
+                // Tenta encontrar o ID do arquivo (padrão de 33 caracteres alfanuméricos)
+                const regExp = /\/file\/d\/([a-zA-Z0-9_-]{25,50})\//;
+                const match = url.match(regExp);
+                
+                if (match && match[1]) {
+                    // Reconstrói o link de preview limpo usando apenas o ID
+                    const linkLimpo = `https://drive.google.com/file/d/${match[1]}/preview`;
+                    window.open(linkLimpo, '_blank');
+                    return;
+                }
+                
+                // Caso não ache pelo padrão /file/d/, tenta pelo parâmetro id=
+                const urlParams = new URLSearchParams(url.split('?')[1]);
+                const idParam = urlParams.get('id');
+                if (idParam) {
+                    window.open(`https://drive.google.com/file/d/${idParam}/preview`, '_blank');
+                    return;
+                }
             }
-            window.open(linkFinal, '_blank');
+            
+            // Se não for Drive ou não achar ID, abre o link original em nova aba
+            window.open(url, '_blank');
         }
 
         function copiarLink(link, nome) {
@@ -190,10 +207,15 @@
                     ${renderLinkRow("Apto c/ Varanda", item.aptVaranda, "🏢")}
                     ${renderLinkRow("Apto s/ Varanda", item.aptSemVaranda, "🏢")}
                     ${renderLinkRow("Apto Garden", item.aptGarden, "🏡")}
+                    ${renderLinkRow("Outra Planta 1", item.outroApt1, "📐")}
+                    ${renderLinkRow("Outra Planta 2", item.outroApt2, "📐")}
 
                     <span class="secao-titulo">Diversos</span>
                     ${renderLinkRow("Material 1", item.div1, "🔗")}
                     ${renderLinkRow("Material 2", item.div2, "🔗")}
+                    ${renderLinkRow("Material 3", item.div3, "🔗")}
+                    ${renderLinkRow("Material 4", item.div4, "🔗")}
+                    ${renderLinkRow("Material 5", item.div5, "🔗")}
                 </div>`;
             painel.innerHTML = html;
         }
