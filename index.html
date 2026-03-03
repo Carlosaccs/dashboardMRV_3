@@ -38,7 +38,7 @@
         .pos-baixo { height: 22%; z-index: 10; cursor: pointer; opacity: 0.8; }
         
         svg { width: 100%; height: 100%; display: block; padding: 10px; pointer-events: auto; }
-        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; cursor: default; }
+        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; }
         
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer !important; }
         path:hover { fill: #bbb; } 
@@ -113,7 +113,7 @@
                     if (!nomeLimpo.toLowerCase().startsWith("res") && !nomeLimpo.toLowerCase().startsWith("vista")) return null;
 
                     return {
-                        id_path: (col[0] || "").trim().toLowerCase(), 
+                        id_path: (col[0] || "").toLowerCase().trim(), 
                         regiao: col[1] ? col[1].toLowerCase() : "", 
                         nome: nomeLimpo,
                         estoque: parseInt(col[3]) || 0, 
@@ -156,7 +156,7 @@
             
             if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca(true);
             
-            // Busca o elemento no DOM
+            // Busca o elemento usando o id_path da planilha
             const el = document.getElementById(item.id_path);
             if(el) destacarNoMapa(el);
             exibirPainelDireito(item, el ? el.getAttribute('data-name') : "Região");
@@ -243,7 +243,7 @@
             const container = document.getElementById(idContainer);
             if (!container || !dados) return;
             const paths = dados.paths.map(p => {
-                const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id.trim().toLowerCase());
+                const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id.toLowerCase().trim());
                 return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class || ''} ${(temMRV || p.id === 'grandesaopaulo') ? 'commrv' : ''}"></path>`;
             }).join('');
             container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform || ''}">${paths}</g></svg>`;
@@ -263,28 +263,32 @@
             document.getElementById('display-nome').innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
         });
 
-        // LÓGICA DE CLIQUE MELHORADA
+        // LÓGICA DE CLIQUE REVISADA
         document.getElementById('container-mapas').addEventListener('click', (e) => {
-            // Se clicar na caixa de baixo (troca de mapa)
             const caixaBaixo = e.target.closest('.pos-baixo');
             if (caixaBaixo) { solicitarTroca(false); return; }
 
-            // Se clicar em um path na caixa de cima
             const p = e.target.closest('.pos-cima path');
             if (p) {
-                // Se clicou na Grande SP (no mapa estadual)
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
                 
-                // Busca na planilha pelo ID do elemento tocado
-                const targetId = p.id.trim().toLowerCase();
-                const item = DADOS_PLANILHA.find(d => d.id_path === targetId);
+                // Pega o ID exato do path clicado
+                const clicadoId = p.id.toLowerCase().trim();
+                
+                // Busca na planilha se este ID existe
+                const item = DADOS_PLANILHA.find(d => d.id_path === clicadoId);
                 
                 if(item) {
                     selecionarResidencial(item, null);
                 } else {
-                    // Se não tem residencial, apenas destaca visualmente a cidade
-                    destacarNoMapa(p);
+                    // SE CLICOU EM CINZA: Remove laranja e limpa ficha
+                    if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
+                    pathSelecionado = null;
+                    if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
+                    botaoSelecionado = null;
+                    
                     document.getElementById('detalhes-residencial').innerHTML = `<div style="text-align: center; color: #999; margin-top: 50px;">Nenhum residencial encontrado em ${p.getAttribute('data-name')}.</div>`;
+                    document.getElementById('display-nome').innerText = p.getAttribute('data-name');
                 }
             }
         });
