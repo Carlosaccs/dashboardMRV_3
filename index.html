@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard MRV SP</title>
     <style>
+        /* Estilos Base */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; overflow: hidden; background: #fff; }
         
@@ -16,10 +17,12 @@
         
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; background: #fff; }
 
+        /* Colunas */
         .col-lateral-esq { width: 25%; background: #fff; overflow-y: auto; padding: 10px; border-right: 1px solid #ddd; }
-        .col-lateral-dir { width: 25%; background: #fff; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
+        .col-lateral-dir { width: 28%; background: #fff; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
         .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
 
+        /* Botões Lista Esquerda */
         .btRes { 
             width: 100%; padding: 8px 12px; margin-bottom: 4px; background: transparent; 
             border: none; border-left: 5px solid rgb(6, 94, 3); 
@@ -30,6 +33,7 @@
         .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; }
         .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; }
 
+        /* Mapa e Título Central */
         .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; background: #fdfdfd; }
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
@@ -44,20 +48,36 @@
         .commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
+        /* Cartão de Detalhes (Direita) */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
-        .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; border-bottom: 1px solid #eee; padding-bottom: 8px; line-height: 1.3; }
+        .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
+        .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; line-height: 1.3; }
         
         .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .grid-item { font-size: 0.72rem; color: #333; }
         .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; font-size: 0.65rem; text-transform: uppercase; }
         
-        .secao-titulo { font-size: 0.65rem; font-weight: bold; color: #999; text-transform: uppercase; margin: 15px 0 8px 0; display: block; border-top: 1px solid #eee; padding-top: 10px; }
+        .secao-titulo { font-size: 0.7rem; font-weight: bold; color: #999; text-transform: uppercase; margin: 15px 0 8px 0; display: block; border-top: 1px solid #eee; padding-top: 10px; }
         
-        .linha-link { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; }
-        .link-nome { font-size: 0.68rem; font-weight: bold; color: #444; display: flex; align-items: center; gap: 6px; flex: 1; }
-        .link-acoes { display: flex; gap: 4px; }
-        .btn-mini { padding: 5px 8px; border: none; border-radius: 4px; color: white; font-size: 0.6rem; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        /* Linhas de Link - CORREÇÃO VISUAL */
+        .linha-link { 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 8px; background: #fff; border: 1px solid #eee; 
+            border-radius: 6px; margin-bottom: 6px; gap: 10px;
+        }
+        .link-nome { 
+            font-size: 0.75rem; font-weight: 600; color: #444; 
+            display: flex; align-items: center; gap: 8px; 
+            flex: 1; /* Garante que o texto ocupe o espaço disponível */
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .link-acoes { display: flex; gap: 4px; flex-shrink: 0; }
+        
+        .btn-mini { 
+            padding: 6px 10px; border: none; border-radius: 4px; 
+            color: white; font-size: 0.65rem; font-weight: bold; 
+            cursor: pointer; text-transform: uppercase; 
+        }
         .btn-abrir { background: #065e03; }
         .btn-copiar { background: #ff8c00; }
     </style>
@@ -93,31 +113,27 @@
             try {
                 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv&cachebuster=" + new Date().getTime();
                 const response = await fetch(url);
-                if (!response.ok) throw new Error("Falha ao buscar planilha");
-                
                 const texto = await response.text();
                 const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
-                    if (!col[2] || col[2].length < 3) return null;
+                    if (!col[2]) return null;
 
                     return {
                         id_path: (col[0] || "").toLowerCase().trim(), 
                         regiao: (col[1] || "").toLowerCase(), 
                         nome: col[2] || "Sem Nome",
-                        estoque: parseInt(col[3]) || 0, 
+                        estoque: col[3] || "0", 
                         rua: col[4] || "", num: col[5] || "", cidade: col[6] || "", entrega: col[7] || "", menor_preco: col[8] || "",
-                        plantas: (col[9] || col[10]) ? `de ${col[9] || '?'} até ${col[10] || '?'}` : "Sob consulta", 
+                        plantas: (col[9] || col[10]) ? `de ${col[9]} até ${col[10]}` : "Sob consulta", 
                         obra: col[11] || "0",
-                        dica: col[17] || "", obs: col[18] || "", 
                         book_cli: col[19] || "", book_corr: col[20] || "", 
                         video1: col[21] || "", video2: col[22] || "",
                         aptVaranda: col[23] || "", aptSemVaranda: col[24] || "", aptGarden: col[25] || "", 
                         outroApt1: col[26] || "", outroApt2: col[27] || "",
                         linkLocalizacao: col[28] || "", linkDescritivo: col[29] || "",
-                        div1: col[30] || "", div2: col[31] || "", div3: col[32] || "", div4: col[33] || "", div5: col[34] || "",
-                        div6: col[35] || "", div7: col[36] || "", div8: col[37] || "", div9: col[38] || "", div10: col[39] || ""
+                        div1: col[30] || ""
                     };
                 }).filter(item => item !== null);
 
@@ -125,43 +141,38 @@
                 gerarListaGeral();
                 desenharIniciais();
             } catch (e) { 
-                console.error("Erro nos dados:", e);
                 document.getElementById('menu-residenciais').innerText = "Erro ao carregar dados.";
             }
         }
 
-        // FUNÇÃO DE ABERTURA CORRIGIDA: Captura IDs longos e curtos sem erro 404
+        // FUNÇÃO DE ABERTURA BLINDADA (FOCADO EM PREVIEW)
         function abrirLinkSeguro(url) {
             if (!url || url.length < 10) return;
-            
+            let linkFinal = url;
             if (url.includes("drive.google.com")) {
-                // Regex melhorada para capturar o ID entre /d/ e /view
-                const idMatch = url.match(/\/d\/(.+?)\//) || url.match(/id=(.+?)(&|$)/);
-                
-                if (idMatch && idMatch[1]) {
-                    const id = idMatch[1].split('/')[0]; // Garante que pegamos só o ID
-                    const linkLimpo = `https://drive.google.com/file/d/${id}/preview`;
-                    window.open(linkLimpo, '_blank');
-                    return;
+                const match = url.match(/\/file\/d\/(.+?)\//) || url.match(/id=(.+?)(&|$)/);
+                if (match && match[1]) {
+                    linkFinal = `https://drive.google.com/file/d/${match[1].split('/')[0]}/preview`;
                 }
             }
-            window.open(url, '_blank');
+            window.open(linkFinal, '_blank');
         }
 
         function copiarLink(link, nome) {
             navigator.clipboard.writeText(link).then(() => alert(`${nome} copiado!`));
         }
 
-        // FUNÇÃO DE RENDERIZAÇÃO: Garante que o texto (label) apareça
+        // RENDERIZAÇÃO MELHORADA DOS BOTÕES
         function renderLinkRow(label, link, ico) {
-            if (!link || link.trim() === "" || link.length < 10) return "";
-            return `<div class="linha-link">
-                        <div class="link-nome"><span>${ico}</span> ${label}</div>
-                        <div class="link-acoes">
-                            <button class="btn-mini btn-abrir" onclick="abrirLinkSeguro('${link}')">Abrir</button>
-                            <button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">Copiar</button>
-                        </div>
-                    </div>`;
+            if (!link || link.length < 10) return "";
+            return `
+                <div class="linha-link">
+                    <div class="link-nome"><span>${ico}</span> ${label}</div>
+                    <div class="link-acoes">
+                        <button class="btn-mini btn-abrir" onclick="abrirLinkSeguro('${link}')">Abrir</button>
+                        <button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">Copiar</button>
+                    </div>
+                </div>`;
         }
 
         function exibirPainelDireito(item, nomeCidade) {
@@ -170,15 +181,15 @@
             
             const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
             vizinhos.forEach(v => {
-                html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'><strong>${v.nome}</strong> ${v.estoque === 0 ? 'VENDIDO' : 'restam ' + v.estoque + ' un.'}</button>`;
+                html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'><strong>${v.nome}</strong> <span class="estoque-status">${v.estoque == '0' || v.estoque == 'VENDIDO' ? 'VENDIDO' : 'restam ' + v.estoque + ' un.'}</span></button>`;
             });
 
             html += `
                 <div class="ficha-card">
-                    <span class="ficha-header"><span>${item.nome}</span></span>
-                    <div class="local-info">📍 ${item.rua}, ${item.num}</div>
+                    <div class="ficha-header">${item.nome}</div>
+                    <div class="local-info">📍 ${item.rua}, ${item.num} - ${item.cidade}</div>
                     <div class="ficha-grid">
-                        <div class="grid-item"><div class="grid-label">Preço:</div>${item.menor_preco || 'Consulta'}</div>
+                        <div class="grid-item"><div class="grid-label">Preço:</div>${item.menor_preco || 'Sob consulta'}</div>
                         <div class="grid-item"><div class="grid-label">Entrega:</div>${item.entrega}</div>
                         <div class="grid-item"><div class="grid-label">Plantas:</div>${item.plantas}</div>
                         <div class="grid-item"><div class="grid-label">Obra:</div>${item.obra}%</div>
@@ -198,20 +209,9 @@
                     ${renderLinkRow("Apto c/ Varanda", item.aptVaranda, "🏢")}
                     ${renderLinkRow("Apto s/ Varanda", item.aptSemVaranda, "🏢")}
                     ${renderLinkRow("Apto Garden", item.aptGarden, "🏡")}
-                    ${renderLinkRow("Planta Opcional 1", item.outroApt1, "📐")}
-                    ${renderLinkRow("Planta Opcional 2", item.outroApt2, "📐")}
 
                     <span class="secao-titulo">Diversos</span>
                     ${renderLinkRow("Material 1", item.div1, "🔗")}
-                    ${renderLinkRow("Material 2", item.div2, "🔗")}
-                    ${renderLinkRow("Material 3", item.div3, "🔗")}
-                    ${renderLinkRow("Material 4", item.div4, "🔗")}
-                    ${renderLinkRow("Material 5", item.div5, "🔗")}
-                    ${renderLinkRow("Material 6", item.div6, "🔗")}
-                    ${renderLinkRow("Material 7", item.div7, "🔗")}
-                    ${renderLinkRow("Material 8", item.div8, "🔗")}
-                    ${renderLinkRow("Material 9", item.div9, "🔗")}
-                    ${renderLinkRow("Material 10", item.div10, "🔗")}
                 </div>`;
             painel.innerHTML = html;
         }
@@ -275,7 +275,7 @@
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
                 btn.id = `btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`;
-                btn.innerHTML = `<strong>${item.nome}</strong> <span class="estoque-status">${item.estoque === 0 ? 'VENDIDO' : 'restam ' + item.estoque + ' un.'}</span>`;
+                btn.innerHTML = `<strong>${item.nome}</strong> <span class="estoque-status">${item.estoque == '0' || item.estoque == 'VENDIDO' ? 'VENDIDO' : 'restam ' + item.estoque + ' un.'}</span>`;
                 btn.onclick = () => selecionarResidencial(item, btn);
                 menu.appendChild(btn);
             });
