@@ -53,7 +53,7 @@
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
-        .ficha-nome { font-size: 0.85rem; color: #065e03; font-weight: bold; text-transform: uppercase; display: inline-block; }
+        .ficha-nome { font-size: 0.85rem; color: #065e03; font-weight: bold; text-transform: uppercase; }
         
         .item-info-row { font-size: 0.8rem; color: #333; margin-top: 10px; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; }
         
@@ -68,7 +68,7 @@
 </head>
 <body>
 
-    <header><h1>Residenciais MRV em São Paulo</h1></header>
+    <header><h1>Dashboard MRV - São Paulo</h1></header>
 
     <div class="main-wrapper">
         <aside class="col-lateral-esq" id="menu-residenciais">Carregando...</aside>
@@ -103,24 +103,23 @@
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     let col = linha.split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
-                    if (col.length < 4 || !col[2]) return null;
-                    
-                    // Tratamento para a data não virar número
-                    let entregaRaw = col[7];
-                    if (!isNaN(entregaRaw) && entregaRaw.length > 4) {
-                         entregaRaw = "Verificar Sheets"; 
-                    }
+                    if (col.length < 13 || !col[2]) return null;
 
+                    // Mapeamento correto baseado na imagem da sua planilha:
+                    // col[0]: IDsDosPaths, col[1]: Regiao, col[2]: btRes, col[3]: Estoque (deduzido)
+                    // col[7]: PrevisaoDeEntrega (H), col[8]: MenorPreco (I), col[9]: De (J), col[10]: Ate (K)
+                    // col[11]: Obra (L), col[12]: Localizacao (M), col[13]: LinkBook
+                    
                     return {
                         id_path: col[0], 
                         regiao: col[1] ? col[1].toLowerCase() : "", 
                         nome: col[2], 
                         estoque: parseInt(col[3]) || 0,
-                        entrega: entregaRaw,
-                        preco: col[8],
-                        plantas: `${col[9]} até ${col[10]}`,
-                        obra: col[11],
-                        endereco: col[12], 
+                        entrega: col[7], // H
+                        preco: col[8],   // I
+                        plantas: `de ${col[9]} até ${col[10]}`, // J e K
+                        obra: col[11],   // L
+                        endereco: col[12], // M
                         link_book: col[13] || "#"
                     };
                 }).filter(item => item !== null);
@@ -178,9 +177,8 @@
 
             html += `
                 <div class="ficha-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="ficha-nome">${item.nome}</span>
-                        ${formatarEstoque(item.estoque)}
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <span class="ficha-nome">${item.nome} - ${formatarEstoque(item.estoque)}</span>
                     </div>
 
                     <div class="item-info-row">
@@ -189,8 +187,8 @@
 
                     <div class="ficha-grid">
                         <div class="grid-item">
-                            <div class="grid-item-header">💰 Preço:</div>
-                            R$ ${item.preco}
+                            <div class="grid-item-header">💰 Menor preço:</div>
+                            ${item.preco}
                         </div>
                         <div class="grid-item">
                             <div class="grid-item-header">🔑 Entrega:</div>
@@ -250,7 +248,6 @@
         }
 
         function desenharIniciais() {
-            // Garante que o desenho ocorra mesmo se as variáveis demorarem a carregar
             if (typeof MAPA_GSP !== 'undefined') desenhar('caixa-a', MAPA_GSP);
             if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
         }
