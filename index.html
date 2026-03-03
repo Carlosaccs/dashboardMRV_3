@@ -16,13 +16,11 @@
         
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; background: #fff; }
 
-        /* Coluna Esquerda - Largura Fixa para não quebrar */
-        .col-lateral-esq { width: 300px; background: #fff; overflow-y: auto; padding: 10px; border-right: 1px solid #ddd; }
-        /* Coluna Direita - Largura Fixa */
-        .col-lateral-dir { width: 350px; background: #fff; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
-        /* Centro - Flexível */
+        .col-lateral-esq { width: 25%; background: #fff; overflow-y: auto; padding: 10px; border-right: 1px solid #ddd; }
+        .col-lateral-dir { width: 25%; background: #fff; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
         .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
 
+        /* LISTA ESQUERDA */
         .btRes { 
             width: 100%; padding: 8px 12px; margin-bottom: 4px; background: transparent; 
             border: none; border-left: 5px solid rgb(6, 94, 3); 
@@ -31,30 +29,48 @@
         }
         .btRes:hover { background: #f4f4f4; border-left-color: #ff8c00; }
         .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; }
-        .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; white-space: nowrap; margin-left: 10px; }
+        .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; }
 
         .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; background: #fdfdfd; }
+        .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .pos-cima { height: 78%; z-index: 5; }
+        .pos-baixo { height: 22%; z-index: 10; cursor: pointer; opacity: 0.8; }
         
-        /* Container do Mapa - Mantém a proporção */
-        .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; padding: 10px; }
-        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; transition: all 0.5s ease; }
-        .pos-cima { height: 75%; z-index: 5; }
-        .pos-baixo { height: 25%; z-index: 10; cursor: pointer; opacity: 0.7; border-top: 1px solid #eee; background: #f9f9f9; }
+        svg { width: 100%; height: 100%; display: block; padding: 10px; pointer-events: auto; }
+        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; cursor: default; }
         
-        svg { width: 100%; height: 100%; display: block; }
-        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; }
-        
-        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer !important; }
+        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
+        path:hover { fill: #bbb; } 
         .commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
-        .path-ativo { fill: #ff8c00 !important; stroke: #000 !important; stroke-width: 1.5px !important; }
+        .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
-        /* Ficha Técnica Estilizada */
+        /* FICHA TÉCNICA */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
-        .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; }
-        .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-        .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .grid-label { font-weight: bold; color: #666; font-size: 0.65rem; text-transform: uppercase; }
-        .grid-valor { font-size: 0.72rem; color: #333; }
+        .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; border-bottom: 1px solid #eee; padding-bottom: 8px; line-height: 1.3; }
+        
+        .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .grid-item { font-size: 0.72rem; color: #333; }
+        .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; font-size: 0.65rem; text-transform: uppercase; }
+        
+        .bloco-texto { margin-bottom: 10px; padding: 10px; border-radius: 6px; font-size: 0.75rem; line-height: 1.5; }
+        .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.6rem; display: block; margin-bottom: 5px; }
+        .dica-box { background: #fff5e6; border: 1px solid #ffe0b3; color: #7a5a00; }
+        .obs-box { background: #f1f3f5; border-left: 4px solid #adb5bd; color: #495057; }
+        
+        .secao-titulo { font-size: 0.65rem; font-weight: bold; color: #999; text-transform: uppercase; margin: 15px 0 8px 0; display: block; border-top: 1px solid #eee; padding-top: 10px; }
+        .bloco-destaques { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 15px; }
+        .destaque-item { font-size: 0.7rem; color: #555; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+        .destaque-icon { font-size: 0.85rem; min-width: 18px; text-align: center; }
+        .destaque-texto strong { color: #065e03; font-size: 0.6rem; text-transform: uppercase; display: block; }
+
+        .linha-link { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; }
+        .link-nome { font-size: 0.68rem; font-weight: bold; color: #444; display: flex; align-items: center; gap: 6px; }
+        .link-acoes { display: flex; gap: 4px; }
+        .btn-mini { padding: 5px 8px; border: none; border-radius: 4px; color: white; font-size: 0.6rem; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .btn-abrir { background: #065e03; }
+        .btn-copiar { background: #ff8c00; }
     </style>
 </head>
 <body>
@@ -93,22 +109,48 @@
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
-                    // Validação para ignorar linhas sujas ou incompletas (como o erro de 3m² que apareceu no print)
-                    if (col.length < 5 || col[2] === "" || col[2].includes('m²')) return null;
+                    const nomeLimpo = col[2] || "";
+                    if (!nomeLimpo.toLowerCase().startsWith("res") && !nomeLimpo.toLowerCase().startsWith("vista")) return null;
 
                     return {
-                        id_path: col[0].toLowerCase().trim(), 
-                        regiao_csv: col[1].toLowerCase().trim(), 
-                        nome: col[2],
+                        id_path: col[0], 
+                        regiao: col[1] ? col[1].toLowerCase() : "", 
+                        nome: nomeLimpo,
                         estoque: parseInt(col[3]) || 0, 
-                        rua: col[4], num: col[5], cidade: col[6], entrega: col[7], menor_preco: col[8],
-                        plantas: `de ${col[9]} até ${col[10]}`, obra: col[11], dica: col[17], obs: col[18]
+                        // AJUSTE DE MAPEAMENTO (ÍNDICE 0):
+                        rua: col[4],        // E
+                        num: col[5],        // F
+                        bairro: col[5],     // Se o bairro for o mesmo da coluna F ou se estiver antes da cidade. 
+                                            // Se a Cidade é a 6 (G), o Bairro deve ser a 5 (F)? 
+                                            // Ajustando abaixo para assumir que Cidade é a 6:
+                        cidade: col[6],     // G (Coluna 6) - SERÁ IGNORADA NO ENDEREÇO
+                        entrega: col[7],    // H
+                        menor_preco: col[8],// I
+                        plantas: `de ${col[9]} até ${col[10]}`, // J e K
+                        obra: col[11],      // L
+                        localizacao: col[12], 
+                        mobilidade: col[13], 
+                        cultura_lazer: col[14], 
+                        comercio: col[15], 
+                        saude_educacao: col[16],
+                        dica: col[17], 
+                        obs: col[18], 
+                        book_cli: col[19], 
+                        book_corr: col[20], 
+                        video1: col[21], 
+                        video2: col[22]
                     };
                 }).filter(item => item !== null);
 
+                DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaGeral();
                 desenharIniciais();
-            } catch (e) { console.error("Erro ao processar dados:", e); }
+            } catch (e) { console.error("Erro nos dados:", e); }
+        }
+
+        function formatarEstoque(qtd) {
+            if (qtd === 0) return `<span class="estoque-status" style="text-decoration:line-through">VENDIDO</span>`;
+            return `<span class="estoque-status" style="${qtd <= 5 ? 'color:red' : ''}">restam ${qtd} un.</span>`;
         }
 
         function gerarListaGeral() {
@@ -117,8 +159,8 @@
             DADOS_PLANILHA.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
-                btn.id = `btn-${item.nome.replace(/[^a-zA-Z0-9]/g, '')}`;
-                btn.innerHTML = `<strong>${item.nome}</strong> <span class="estoque-status">restam ${item.estoque} un.</span>`;
+                btn.id = `btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                btn.innerHTML = `<strong>${item.nome}</strong> ${formatarEstoque(item.estoque)}`;
                 btn.onclick = () => selecionarResidencial(item, btn);
                 menu.appendChild(btn);
             });
@@ -126,40 +168,65 @@
 
         function selecionarResidencial(item, btn) {
             if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
-            const b = btn || document.getElementById(`btn-${item.nome.replace(/[^a-zA-Z0-9]/g, '')}`);
-            if (b) { b.classList.add('ativo'); b.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); botaoSelecionado = b; }
-            
-            // Troca de mapa se o residencial for de outra região
-            if (item.regiao_csv === "esp" && regiaoAtual === "gsp") solicitarTroca(true);
-            if (item.regiao_csv === "gsp" && regiaoAtual === "esp") solicitarTroca(true);
-
+            const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
+            if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'auto', block: 'nearest' }); botaoSelecionado = btnEsq; }
+            if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca(true);
             const el = document.getElementById(item.id_path);
             if(el) destacarNoMapa(el);
-            exibirFicha(item);
+            exibirPainelDireito(item, el ? el.getAttribute('data-name') : "Região");
         }
 
-        function exibirFicha(item) {
+        function renderLinkRow(label, link, ico) {
+            if (!link || link === "" || link === "#") return "";
+            return `<div class="linha-link"><div class="link-nome"><span>${ico}</span> ${label}</div><div class="link-acoes"><button class="btn-mini btn-abrir" onclick="window.open('${link}', '_blank')">Abrir</button><button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">Copiar</button></div></div>`;
+        }
+
+        function exibirPainelDireito(item, nomeCidade) {
             const painel = document.getElementById('detalhes-residencial');
-            const outrosNoBairro = DADOS_PLANILHA.filter(d => d.id_path === item.id_path);
-            
-            let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:10px;">Residenciais nesta região:</div>`;
-            outrosNoBairro.forEach(v => {
-                const ativo = (v.nome === item.nome) ? 'ativo' : '';
-                html += `<button class="btRes ${ativo}" onclick='selecionarResidencial(${JSON.stringify(v).replace(/'/g, "&apos;")}, null)'><strong>${v.nome}</strong></button>`;
+            let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
+            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
+            vizinhos.forEach(v => {
+                html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v).replace(/'/g, "&apos;")}, null)'><strong>${v.nome}</strong> ${formatarEstoque(v.estoque)}</button>`;
             });
+
+            // ENDEREÇO LIMPO: Pega apenas Rua (4) e Número (5). 
+            // Como a cidade é a 6, ela não entra aqui.
+            const enderecoLimpo = `${item.rua}, ${item.num}`;
 
             html += `
                 <div class="ficha-card">
-                    <div class="ficha-header">${item.nome}</div>
-                    <div class="local-info">📍 ${item.rua}, ${item.num} - ${item.cidade}</div>
+                    <span class="ficha-header">
+                        <span>${item.nome}</span> 
+                        ${formatarEstoque(item.estoque)}
+                    </span>
+                    <div class="local-info"><span>📍</span> <span>${enderecoLimpo}</span></div>
                     <div class="ficha-grid">
-                        <div class="grid-item"><div class="grid-label">Preço:</div><div class="grid-valor">${item.menor_preco}</div></div>
-                        <div class="grid-item"><div class="grid-label">Entrega:</div><div class="grid-valor">${item.entrega}</div></div>
-                        <div class="grid-item"><div class="grid-label">Plantas:</div><div class="grid-valor">${item.plantas}</div></div>
-                        <div class="grid-item"><div class="grid-label">Obra:</div><div class="grid-valor">${item.obra}%</div></div>
+                        <div class="grid-item"><div class="grid-label">💰 Preço:</div>${item.menor_preco || 'Sob consulta'}</div>
+                        <div class="grid-item"><div class="grid-label">🔑 Entrega:</div>${item.entrega}</div>
+                        <div class="grid-item"><div class="grid-label">📐 Plantas:</div>${item.plantas}</div>
+                        <div class="grid-item"><div class="grid-label">🏗️ Obra:</div>${item.obra}%</div>
                     </div>
+                    ${item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 Dica do Corretor</span>${item.dica}</div>` : ''}
+                    ${item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 Observações</span>${item.obs}</div>` : ''}
+                    <span class="secao-titulo">Destaques da Região</span>
+                    <div class="bloco-destaques">
+                        ${item.localizacao ? `<div class="destaque-item"><span class="destaque-icon">📍</span><div class="destaque-texto"><strong>Localização</strong>${item.localizacao}</div></div>` : ''}
+                        ${item.mobilidade ? `<div class="destaque-item"><span class="destaque-icon">🚆</span><div class="destaque-texto"><strong>Mobilidade</strong>${item.mobilidade}</div></div>` : ''}
+                        ${item.cultura_lazer ? `<div class="destaque-item"><span class="destaque-icon">🌳</span><div class="destaque-texto"><strong>Lazer</strong>${item.cultura_lazer}</div></div>` : ''}
+                        ${item.comercio ? `<div class="destaque-item"><span class="destaque-icon">🛒</span><div class="destaque-texto"><strong>Comércio</strong>${item.comercio}</div></div>` : ''}
+                        ${item.saude_educacao ? `<div class="destaque-item"><span class="destaque-icon">🏥</span><div class="destaque-texto"><strong>Saúde e Educação</strong>${item.saude_educacao}</div></div>` : ''}
+                    </div>
+                    <span class="secao-titulo">Links e Materiais</span>
+                    ${renderLinkRow("Book Cliente", item.book_cli, "📄")}
+                    ${renderLinkRow("Book Corretor", item.book_corr, "💼")}
+                    ${renderLinkRow("Vídeo 1", item.video1, "🎥")}
+                    ${renderLinkRow("Vídeo 2", item.video2, "🎥")}
                 </div>`;
             painel.innerHTML = html;
+        }
+
+        function copiarLink(link, nome) {
+            navigator.clipboard.writeText(link).then(() => alert(`${nome} copiado!`));
         }
 
         function destacarNoMapa(el) {
@@ -172,15 +239,19 @@
         function solicitarTroca(manterFicha = false) {
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
             const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b');
+            const container = document.getElementById('container-mapas');
             if (cA.classList.contains('pos-cima')) {
                 cA.className = 'caixa-troca pos-baixo'; cB.className = 'caixa-troca pos-cima';
+                container.appendChild(cA); 
             } else {
                 cB.className = 'caixa-troca pos-baixo'; cA.className = 'caixa-troca pos-cima';
+                container.appendChild(cB); 
             }
+            if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
+            pathSelecionado = null;
             if (!manterFicha) {
                 document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>';
-                if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
-                pathSelecionado = null;
+                document.getElementById('display-nome').innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
             }
         }
 
@@ -188,11 +259,10 @@
             const container = document.getElementById(idContainer);
             if (!container || !dados) return;
             const paths = dados.paths.map(p => {
-                const idLimpo = p.id.toLowerCase().trim();
-                const temMRV = DADOS_PLANILHA.some(d => d.id_path === idLimpo);
-                return `<path id="${p.id}" data-name="${p.name}" d="${p.d}" class="${p.class || ''} ${temMRV || p.id === 'grandesaopaulo' ? 'commrv' : ''}"></path>`;
+                const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id);
+                return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class || ''} ${(temMRV || p.id === 'grandesaopaulo') ? 'commrv' : ''}"></path>`;
             }).join('');
-            container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g>${paths}</g></svg>`;
+            container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform || ''}">${paths}</g></svg>`;
         }
 
         function desenharIniciais() {
@@ -200,20 +270,24 @@
             if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
         }
 
+        document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
+            const p = e.target.closest('.pos-cima path');
+            if (p) document.getElementById('display-nome').innerText = p.getAttribute('data-name');
+        });
+
+        document.getElementById('container-mapas').addEventListener('mouseleave', () => {
+            document.getElementById('display-nome').innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
+        });
+
         document.getElementById('container-mapas').addEventListener('click', (e) => {
+            const caixaBaixo = e.target.closest('.pos-baixo');
+            if (caixaBaixo) { solicitarTroca(false); return; }
             const p = e.target.closest('.pos-cima path');
             if (p) {
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
-                const item = DADOS_PLANILHA.find(d => d.id_path === p.id.toLowerCase().trim());
-                if(item) {
-                    selecionarResidencial(item, null);
-                } else {
-                    if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
-                    pathSelecionado = null;
-                    document.getElementById('detalhes-residencial').innerHTML = `<div style="text-align: center; color: #999; margin-top: 50px;">Nenhum residencial em ${p.getAttribute('data-name')}.</div>`;
-                }
+                const item = DADOS_PLANILHA.find(d => d.id_path === p.id);
+                if(item) selecionarResidencial(item, null);
             }
-            if (e.target.closest('.pos-baixo')) solicitarTroca(false);
         });
 
         window.onload = carregarPlanilha;
