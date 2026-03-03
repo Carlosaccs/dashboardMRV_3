@@ -52,14 +52,14 @@
         path:not(.commrv):hover { fill: #666; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
+        /* Estilos da Ficha Direita - Ajustados conforme print */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
-        
-        /* Título laranja que agora espelha o botão */
         .ficha-nome-wrapper { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; width: 100%; }
-        .ficha-nome { font-size: 0.85rem; color: #ff8c00; font-weight: bold; text-transform: uppercase; }
+        .ficha-nome { font-size: 0.85rem; color: #065e03; font-weight: bold; text-transform: uppercase; }
         
-        .item-info { font-size: 0.75rem; color: #333; margin-bottom: 8px; line-height: 1.2; }
-        .item-info strong { font-size: 0.65rem; color: #999; text-transform: uppercase; display: block; margin-bottom: 2px; }
+        .item-info { font-size: 0.75rem; color: #333; margin-bottom: 10px; line-height: 1.3; }
+        .item-info strong { font-size: 0.68rem; color: #999; text-transform: uppercase; display: block; margin-bottom: 2px; }
+        .icone-laranja { color: #ff8c00; font-weight: bold; margin-right: 4px; font-style: normal; }
 
         .btn-acao { width: 100%; padding: 10px; margin-top: 8px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-book { background: #065e03; }
@@ -98,20 +98,25 @@
                 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv";
                 const response = await fetch(url);
                 const texto = await response.text();
-                const linhas = texto.split(/\r?\n/);
+                const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
-                    let col = linha.split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
-                    if (col.length < 4 || !col[2]) return null;
-                    const n = col[2].toUpperCase();
-                    if (n.includes("LAZER") || n.includes(".PDF") || n.includes("BOOK") || 
-                        n.includes("CORRETOR") || n.includes("EQUIPADO") || col[0].includes("IDs")) return null;
+                    // Regex para capturar colunas respeitando aspas
+                    let col = linha.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                    if (!col || col.length < 9) return null;
+                    col = col.map(c => c.trim().replace(/^"|"$/g, ''));
 
                     return {
-                        id_path: col[0], regiao: col[1] ? col[1].toLowerCase() : "", 
-                        nome: col[2], estoque: parseInt(col[3]) || 0,
-                        endereco: col[4], bairro: col[5], cidade: col[6],
-                        entrega: col[7], preco: col[8], obra: col[11], link_book: col[12]
+                        id_path: col[0], 
+                        regiao: col[1] ? col[1].toLowerCase() : "", 
+                        nome: col[2], // btRes
+                        estoque: parseInt(col[3]) || 0,
+                        endereco: col[4], 
+                        bairro: col[5], 
+                        cidade: col[6],
+                        entrega: col[7], // PrevisaoDeEntrega
+                        preco: col[8],   // MenorPreco
+                        link_book: col[19] || "#" 
                     };
                 }).filter(item => item !== null);
 
@@ -161,23 +166,33 @@
             
             const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
             vizinhos.forEach(v => {
-                html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v)}, null)'>
+                html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v).replace(/'/g, "&apos;")}, null)'>
                             <strong>${v.nome}</strong> ${formatarEstoque(v.estoque)}
                          </button>`;
             });
 
-            // Título laranja agora contém o mesmo HTML do botão (Nome + Estoque)
             html += `
                 <div class="ficha-card">
                     <div class="ficha-nome-wrapper">
                         <span class="ficha-nome">${item.nome}</span>
                         ${formatarEstoque(item.estoque)}
                     </div>
-                    <div class="item-info"><strong>📍 Localização</strong>${item.endereco}<br>${item.bairro} - ${item.cidade}</div>
-                    <div class="item-info"><strong>💰 Valor Sugerido</strong>R$ ${item.preco || 'Sob consulta'}</div>
-                    <div class="item-info"><strong>📅 Entrega</strong>${item.entrega}</div>
-                    <div class="item-info"><strong>🏗️ Obra</strong>${item.obra || '0%'}</div>
-                    <div class="item-info"><strong>📊 Estoque</strong>${item.estoque} unidades</div>
+                    
+                    <div class="item-info">
+                        <strong>📍 Localização</strong>
+                        ${item.endereco}<br>${item.bairro} - ${item.cidade}
+                    </div>
+
+                    <div class="item-info">
+                        <strong>💰 Menor preço:</strong>
+                        ${item.preco || 'Sob consulta'}
+                    </div>
+
+                    <div class="item-info">
+                        <strong>📅 Entrega</strong>
+                        ${item.entrega}
+                    </div>
+
                     <button class="btn-acao btn-book" onclick="window.open('${item.link_book}', '_blank')">📄 Abrir Book</button>
                     <button class="btn-acao btn-video" onclick="alert('Copiado!')">🎥 Copiar Vídeo</button>
                 </div>`;
@@ -207,11 +222,11 @@
             }
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
             pathSelecionado = null;
-            document.getElementById('display-nome').innerText = regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral";
         }
 
         function desenhar(idContainer, dados) {
             const container = document.getElementById(idContainer);
+            if (!container || !dados) return;
             const paths = dados.paths.map(p => {
                 const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id);
                 const isGSP = p.id === "grandesaopaulo";
@@ -221,24 +236,22 @@
         }
 
         function desenharIniciais() {
-            desenhar('caixa-a', MAPA_GSP);
-            desenhar('caixa-b', MAPA_INTERIOR);
+            if (typeof MAPA_GSP !== 'undefined') desenhar('caixa-a', MAPA_GSP);
+            if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
         }
 
+        // Lógica de Mouse nos Mapas (Preservada)
         document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
             if (e.target.tagName === 'path' && e.target.closest('.pos-cima')) {
                 document.getElementById('display-nome').innerText = e.target.getAttribute('data-name');
             }
         });
-
         document.getElementById('container-mapas').addEventListener('mouseleave', () => {
             document.getElementById('display-nome').innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
         });
-
         document.getElementById('container-mapas').addEventListener('click', (e) => {
             const caixaBaixo = e.target.closest('.pos-baixo');
             if (caixaBaixo) { solicitarTroca(); return; }
-            
             if (e.target.tagName === 'path' && e.target.closest('.pos-cima')) {
                 const p = e.target;
                 if (p.id === "grandesaopaulo") { solicitarTroca(); return; }
