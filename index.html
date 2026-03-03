@@ -55,12 +55,12 @@
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-nome { font-size: 0.85rem; color: #065e03; font-weight: bold; text-transform: uppercase; }
         
-        /* Estilo da Localização (Coluna M) */
-        .item-localizacao { font-size: 0.78rem; color: #333; margin-top: 8px; margin-bottom: 15px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.3; font-weight: 500; }
+        .item-info-row { font-size: 0.78rem; color: #333; margin-top: 8px; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+        .item-localizacao-texto { font-size: 0.7rem; color: #666; margin-bottom: 15px; font-style: italic; line-height: 1.2; display: block; padding-left: 22px; }
         
         .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
         .grid-item { font-size: 0.75rem; color: #333; line-height: 1.3; }
-        .grid-item-header { font-weight: bold; display: flex; align-items: center; gap: 4px; margin-bottom: 2px; color: #666; font-size: 0.68rem; text-transform: uppercase; }
+        .grid-item-header { font-weight: bold; display: flex; align-items: center; gap: 4px; margin-bottom: 2px; }
 
         .btn-acao { width: 100%; padding: 10px; margin-top: 8px; border: none; border-radius: 4px; color: white; font-weight: bold; cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-book { background: #065e03; }
@@ -100,33 +100,34 @@
                 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv";
                 const response = await fetch(url);
                 const texto = await response.text();
-                const linhas = texto.split(/\r?\n/);
+                const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
                 
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
-                    // CSV parser para lidar com aspas e vírgulas internas
+                    // Regex para não quebrar o CSV em vírgulas dentro de aspas
                     let col = linha.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
                     if (!col || col.length < 13) return null;
                     
                     col = col.map(c => c.trim().replace(/^"|"$/g, ''));
 
                     return {
-                        id_path: col[0], 
+                        id_path: col[0],       // Col 0: IDsDosPaths
                         regiao: col[1] ? col[1].toLowerCase() : "", 
-                        nome: col[2], 
+                        nome: col[2],          // Col 2: btRes
                         estoque: parseInt(col[3]) || 0,
-                        entrega: col[7],   // Coluna H
-                        preco: col[8],     // Coluna I
-                        plantas: `de ${col[9]} até ${col[10]}`, // Colunas J e K
-                        obra: col[11],     // Coluna L
-                        info_local: col[12], // Coluna M (Sua descrição personalizada)
-                        link_book: col[13] || "#"
+                        endereco_completo: `${col[4]}, ${col[5]}`, // Col 4: Endereco + Col 5: Bairro
+                        entrega: col[7],       // Col 7: PrevisaoDeEntrega
+                        preco: col[8],         // Col 8: MenorPreco
+                        plantas: `de ${col[9]} até ${col[10]}`, 
+                        obra: col[11],         // Col 11: Obra
+                        texto_local: col[12],  // Col 12: Localizacao
+                        link_book: col[19] || "#" // Col 19: Book do Cliente
                     };
                 }).filter(item => item !== null);
 
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaGeral();
                 desenharIniciais();
-            } catch (e) { console.error("Erro na planilha:", e); }
+            } catch (e) { console.error("Erro no carregamento:", e); }
         }
 
         function formatarEstoque(qtd) {
@@ -176,14 +177,15 @@
 
             html += `
                 <div class="ficha-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div style="margin-bottom:10px;">
                         <span class="ficha-nome">${item.nome} - ${formatarEstoque(item.estoque)}</span>
                     </div>
 
-                    <div class="item-localizacao">
-                        <span style="color:#d93025; font-size:1rem;">📍</span> 
-                        <span>${item.info_local}</span>
+                    <div class="item-info-row">
+                        <span style="color:#d93025">📍</span> <strong>${item.endereco_completo}</strong>
                     </div>
+                    
+                    <span class="item-localizacao-texto">${item.texto_local}</span>
 
                     <div class="ficha-grid">
                         <div class="grid-item">
@@ -205,7 +207,7 @@
                     </div>
 
                     <button class="btn-acao btn-book" onclick="window.open('${item.link_book}', '_blank')">📄 Abrir Book</button>
-                    <button class="btn-acao btn-video" onclick="alert('Funcionalidade de vídeo em breve!')">🎥 Copiar Vídeo</button>
+                    <button class="btn-acao btn-video" onclick="alert('Link em breve!')">🎥 Copiar Vídeo</button>
                 </div>`;
             painel.innerHTML = html;
         }
@@ -238,21 +240,4 @@
 
         function desenhar(idContainer, dados) {
             const container = document.getElementById(idContainer);
-            if(!container || !dados) return;
-            const paths = dados.paths.map(p => {
-                const temMRV = DADOS_PLANILHA.some(d => d.id_path === p.id);
-                const isGSP = p.id === "grandesaopaulo";
-                return `<path id="${p.id}" data-name="${p.name || p.id}" d="${p.d}" class="${p.class || ''} ${(temMRV || isGSP) ? 'commrv' : ''}"></path>`;
-            }).join('');
-            container.innerHTML = `<svg viewBox="${dados.viewBox}" preserveAspectRatio="xMidYMid meet"><g transform="${dados.transform || ''}">${paths}</g></svg>`;
-        }
-
-        function desenharIniciais() {
-            if (typeof MAPA_GSP !== 'undefined') desenhar('caixa-a', MAPA_GSP);
-            if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
-        }
-
-        window.onload = carregarPlanilha;
-    </script>
-</body>
-</html>
+            if(!container ||
