@@ -38,9 +38,9 @@
         .pos-baixo { height: 22%; z-index: 10; cursor: pointer; opacity: 0.8; }
         
         svg { width: 100%; height: 100%; display: block; padding: 10px; pointer-events: auto; }
-        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; cursor: pointer; }
+        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; }
         path:hover { fill: #bbb; }
-        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
+        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
         .commrv:hover, #grandesaopaulo:hover { fill: #ff8c00 !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
@@ -68,6 +68,16 @@
         .btn-mini { padding: 6px 10px; border: none; border-radius: 4px; color: white; font-size: 0.62rem; font-weight: bold; cursor: pointer; }
         .btn-abrir { background: #065e03; }
         .btn-copiar { background: #ff8c00; }
+
+        /* Estilo da notificação (Toast) */
+        #toast {
+            visibility: hidden; min-width: 200px; background-color: #333; color: #fff;
+            text-align: center; border-radius: 4px; padding: 10px; position: fixed;
+            z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%); font-size: 0.8rem;
+        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 1.5s; }
+        @keyframes fadein { from {top: 0; opacity: 0;} to {top: 30px; opacity: 1;} }
+        @keyframes fadeout { from {top: 30px; opacity: 1;} to {top: 0; opacity: 0;} }
     </style>
 </head>
 <body>
@@ -90,6 +100,8 @@
         </aside>
     </div>
 
+    <div id="toast">Link copiado!</div>
+
     <script src="mrv-data.js"></script>
     <script>
         let pathSelecionado = null;
@@ -107,35 +119,15 @@
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                     if (!col[2]) return null;
-
                     return {
-                        id_path: col[0].toLowerCase().trim(), 
-                        regiao: col[1] ? col[1].toLowerCase() : "", 
-                        nome: col[2],
-                        estoque: col[3] || "0",
-                        endereco_comp: `${col[4]}, ${col[5]} - ${col[6]}`,
-                        entrega: col[7], 
-                        menor_preco: col[8], 
-                        plantas_txt: `de ${col[9]} até ${col[10]}`,
-                        obra: col[11],
-                        localizacao: col[12],
-                        mobilidade: col[13],
-                        cultura_lazer: col[14],
-                        comercio: col[15],
-                        saude_educacao: col[16],
-                        dica: col[17], 
-                        obs: col[18],  
-                        book_cli: col[19],
-                        book_corr: col[20],
-                        video1: col[21],
-                        video2: col[22],
-                        aptVaranda: col[23],
-                        aptSemVaranda: col[24],
-                        aptGarden: col[25],
-                        outraPlanta: col[26],
-                        linkLocalizacao: col[28],
-                        linkDescritivo: col[29],
-                        div1: col[30]
+                        id_path: col[0].toLowerCase().trim(), regiao: col[1] ? col[1].toLowerCase() : "", 
+                        nome: col[2], estoque: col[3] || "0", endereco_comp: `${col[4]}, ${col[5]} - ${col[6]}`,
+                        entrega: col[7], menor_preco: col[8], plantas_txt: `de ${col[9]} até ${col[10]}`,
+                        obra: col[11], localizacao: col[12], mobilidade: col[13], cultura_lazer: col[14],
+                        comercio: col[15], saude_educacao: col[16], dica: col[17], obs: col[18],  
+                        book_cli: col[19], book_corr: col[20], video1: col[21], video2: col[22],
+                        aptVaranda: col[23], aptSemVaranda: col[24], aptGarden: col[25], outraPlanta: col[26],
+                        linkLocalizacao: col[28], linkDescritivo: col[29], div1: col[30]
                     };
                 }).filter(item => item !== null);
 
@@ -145,25 +137,24 @@
             } catch (e) { console.error("Erro nos dados:", e); }
         }
 
-        // FUNÇÃO QUE GERA O LINK DIRETO (PREVIEW) PARA DRIVE
         function gerarLinkDireto(url) {
             if (!url || !url.includes("drive.google.com")) return url;
             const match = url.match(/\/file\/d\/(.+?)\//) || url.match(/id=(.+?)(&|$)/);
-            if (match && match[1]) {
-                return `https://drive.google.com/file/d/${match[1].split('/')[0]}/preview`;
-            }
+            if (match && match[1]) return `https://drive.google.com/file/d/${match[1].split('/')[0]}/preview`;
             return url;
         }
 
-        function abrirLinkSeguro(url) {
-            if (!url || url.length < 5) return;
-            window.open(gerarLinkDireto(url), '_blank');
+        function mostrarToast(texto) {
+            const x = document.getElementById("toast");
+            x.innerText = texto;
+            x.className = "show";
+            setTimeout(() => { x.className = x.className.replace("show", ""); }, 2000);
         }
 
         function copiarLink(url, nome) {
-            if(!url || url.length < 5) { alert("Link não disponível."); return; }
+            if(!url || url.length < 5) return;
             const linkLimpo = gerarLinkDireto(url);
-            navigator.clipboard.writeText(linkLimpo).then(() => alert(`${nome} (Link Direto) copiado!`));
+            navigator.clipboard.writeText(linkLimpo).then(() => mostrarToast(`${nome} copiado!`));
         }
 
         function renderLinkRow(label, link, ico) {
@@ -172,7 +163,7 @@
                 <div class="linha-link">
                     <div class="link-nome"><span>${ico}</span> ${label}</div>
                     <div class="link-acoes">
-                        <button class="btn-mini btn-abrir" onclick="abrirLinkSeguro('${link}')">Abrir</button>
+                        <button class="btn-mini btn-abrir" onclick="window.open('${gerarLinkDireto(link)}', '_blank')">Abrir</button>
                         <button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">Copiar</button>
                     </div>
                 </div>`;
@@ -204,38 +195,32 @@
         function exibirPainelDireito(item, nomeCidade) {
             const painel = document.getElementById('detalhes-residencial');
             let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
-            
             const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
             vizinhos.forEach(v => {
                 html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'>
                             <strong>${v.nome}</strong> <span class="estoque-status">${v.estoque == '0' ? 'VENDIDO' : v.estoque + ' un.'}</span>
                          </button>`;
             });
-
             html += `
                 <div class="ficha-card">
                     <span class="ficha-header">${item.nome}</span>
                     <div class="local-info"><span>📍</span> <span>${item.endereco_comp}</span></div>
-                    
                     <div class="ficha-grid">
                         <div class="grid-item"><div class="grid-label">💰 Preço:</div>${item.menor_preco || 'Sob consulta'}</div>
                         <div class="grid-item"><div class="grid-label">🔑 Entrega:</div>${item.entrega}</div>
                         <div class="grid-item"><div class="grid-label">📐 Plantas:</div>${item.plantas_txt}</div>
                         <div class="grid-item"><div class="grid-label">🏗️ Obra:</div>${item.obra}%</div>
                     </div>
-
                     ${item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 Dica:</span>${item.dica}</div>` : ''}
                     ${item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 Observações</span>${item.obs}</div>` : ''}
-
                     <span class="secao-titulo">Destaques da Região</span>
                     <div class="bloco-destaques">
                         ${item.localizacao ? `<div class="destaque-item"><span class="destaque-icon">📍</span><div class="destaque-texto"><strong>Localização</strong>${item.localizacao}</div></div>` : ''}
                         ${item.mobilidade ? `<div class="destaque-item"><span class="destaque-icon">🚆</span><div class="destaque-texto"><strong>Mobilidade</strong>${item.mobilidade}</div></div>` : ''}
                         ${item.cultura_lazer ? `<div class="destaque-item"><span class="destaque-icon">🌳</span><div class="destaque-texto"><strong>Lazer</strong>${item.cultura_lazer}</div></div>` : ''}
                         ${item.comercio ? `<div class="destaque-item"><span class="destaque-icon">🛒</span><div class="destaque-texto"><strong>Comércio</strong>${item.comercio}</div></div>` : ''}
-                        ${item.saude_educacao ? `<div class="destaque-item"><span class="destaque-icon">🏥</span><div class="destaque-texto"><strong>Saúde e Educação</strong>${item.saude_educacao}</div></div>` : ''}
+                        ${item.saude_educacao ? `<div class="destaque-item"><span class="destaque-icon">🏥</span><div class="destaque-texto"><strong>Saúde</strong>${item.saude_educacao}</div></div>` : ''}
                     </div>
-
                     <span class="secao-titulo">Materiais de Apoio</span>
                     ${renderLinkRow("Book Cliente", item.book_cli, "📄")}
                     ${renderLinkRow("Book Corretor", item.book_corr, "💼")}
@@ -243,13 +228,11 @@
                     ${renderLinkRow("Vídeo 2", item.video2, "🎥")}
                     ${renderLinkRow("Localização", item.linkLocalizacao, "📍")}
                     ${renderLinkRow("Descritivo", item.linkDescritivo, "📑")}
-
                     <span class="secao-titulo">Plantas</span>
                     ${renderLinkRow("Apto c/ Varanda", item.aptVaranda, "🏢")}
                     ${renderLinkRow("Apto s/ Varanda", item.aptSemVaranda, "🏢")}
                     ${renderLinkRow("Apto Garden", item.aptGarden, "🏡")}
                     ${renderLinkRow("Outra Planta", item.outraPlanta, "📐")}
-
                     <span class="secao-titulo">Diversos</span>
                     ${renderLinkRow("Informações Adicionais", item.div1, "🔗")}
                 </div>`;
@@ -297,7 +280,6 @@
             if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
         }
 
-        // EVENTOS DE HOVER E CLIQUE REATIVADOS PARA TODOS OS PATHS
         document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
             const p = e.target.closest('.pos-cima path');
             if (p) document.getElementById('display-nome').innerText = p.getAttribute('data-name');
@@ -313,8 +295,8 @@
             if (p) {
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id.toLowerCase());
-                if(item) selecionarResidencial(item, null);
-                else destacarNoMapa(p); // Permite destacar mesmo cidades sem MRV
+                // Só processa o clique se a cidade tiver MRV (classe commrv)
+                if(item && p.classList.contains('commrv')) selecionarResidencial(item, null);
             }
         });
 
