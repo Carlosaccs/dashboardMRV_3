@@ -52,11 +52,6 @@
         .grid-item { font-size: 0.72rem; color: #333; }
         .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; font-size: 0.65rem; text-transform: uppercase; }
         
-        .bloco-texto { margin-bottom: 10px; padding: 10px; border-radius: 6px; font-size: 0.75rem; line-height: 1.5; }
-        .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.6rem; display: block; margin-bottom: 5px; }
-        .dica-box { background: #fff5e6; border: 1px solid #ffe0b3; color: #7a5a00; }
-        .obs-box { background: #f1f3f5; border-left: 4px solid #adb5bd; color: #495057; }
-        
         .secao-titulo { font-size: 0.65rem; font-weight: bold; color: #999; text-transform: uppercase; margin: 15px 0 8px 0; display: block; border-top: 1px solid #eee; padding-top: 10px; }
         
         .linha-link { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; }
@@ -98,6 +93,8 @@
             try {
                 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv&cachebuster=" + new Date().getTime();
                 const response = await fetch(url);
+                if (!response.ok) throw new Error("Falha ao buscar planilha");
+                
                 const texto = await response.text();
                 const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
                 
@@ -105,40 +102,41 @@
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                     if (!col[2] || col[2].length < 3) return null;
 
+                    // Criamos o objeto com segurança: se a coluna não existir, fica vazio
                     return {
                         id_path: (col[0] || "").toLowerCase().trim(), 
                         regiao: (col[1] || "").toLowerCase(), 
-                        nome: col[2],
+                        nome: col[2] || "Sem Nome",
                         estoque: parseInt(col[3]) || 0, 
-                        rua: col[4], num: col[5], cidade: col[6], entrega: col[7], menor_preco: col[8],
-                        plantas: `de ${col[9]} até ${col[10]}`, obra: col[11] || "0",
-                        dica: col[17], obs: col[18], 
-                        book_cli: col[19], book_corr: col[20], 
-                        video1: col[21], video2: col[22],
-                        aptVaranda: col[23], aptSemVaranda: col[24], aptGarden: col[25], outroApt1: col[26], outroApt2: col[27],
-                        linkLocalizacao: col[28], linkDescritivo: col[29],
-                        // CAMPOS DIVERSOS (30 a 39)
-                        div1: col[30], div2: col[31], div3: col[32], div4: col[33], div5: col[34],
-                        div6: col[35], div7: col[36], div8: col[37], div9: col[38], div10: col[39]
+                        rua: col[4] || "", num: col[5] || "", cidade: col[6] || "", entrega: col[7] || "", menor_preco: col[8] || "",
+                        plantas: (col[9] || col[10]) ? `de ${col[9] || '?'} até ${col[10] || '?'}` : "Sob consulta", 
+                        obra: col[11] || "0",
+                        dica: col[17] || "", obs: col[18] || "", 
+                        book_cli: col[19] || "", book_corr: col[20] || "", 
+                        video1: col[21] || "", video2: col[22] || "",
+                        aptVaranda: col[23] || "", aptSemVaranda: col[24] || "", aptGarden: col[25] || "", 
+                        outroApt1: col[26] || "", outroApt2: col[27] || "",
+                        linkLocalizacao: col[28] || "", linkDescritivo: col[29] || "",
+                        div1: col[30] || "", div2: col[31] || "", div3: col[32] || "", div4: col[33] || "", div5: col[34] || ""
                     };
                 }).filter(item => item !== null);
 
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaGeral();
                 desenharIniciais();
-            } catch (e) { console.error("Erro nos dados:", e); }
+            } catch (e) { 
+                console.error("Erro nos dados:", e);
+                document.getElementById('menu-residenciais').innerText = "Erro ao carregar dados.";
+            }
         }
 
-        // FUNÇÃO DE ABERTURA FORÇADA EM PREVIEW (LIMPO)
+        // FUNÇÃO DE ABERTURA BLINDADA (FOCADO EM PREVIEW)
         function abrirLinkSeguro(url) {
             if (!url || url.length < 10) return;
             let linkFinal = url;
             if (url.includes("drive.google.com")) {
-                // Extrai o ID do arquivo e força o modo preview externo
-                const match = url.match(/\/file\/d\/(.+?)\//) || url.match(/id=(.+?)(&|$)/);
-                if (match && match[1]) {
-                    linkFinal = `https://drive.google.com/file/d/${match[1]}/preview`;
-                }
+                // Remove tudo após o ID e força o /preview
+                linkFinal = url.split('?')[0].replace(/\/view$/, "").replace(/\/edit$/, "").replace(/\/preview$/, "") + "/preview";
             }
             window.open(linkFinal, '_blank');
         }
@@ -161,9 +159,10 @@
         function exibirPainelDireito(item, nomeCidade) {
             const painel = document.getElementById('detalhes-residencial');
             let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
+            
             const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
             vizinhos.forEach(v => {
-                html += `<button class="btRes" onclick='selecionarResidencial(${JSON.stringify(v).replace(/'/g, "&apos;")}, null)'><strong>${v.nome}</strong> ${v.estoque === 0 ? 'VENDIDO' : 'restam ' + v.estoque + ' un.'}</button>`;
+                html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'><strong>${v.nome}</strong> ${v.estoque === 0 ? 'VENDIDO' : 'restam ' + v.estoque + ' un.'}</button>`;
             });
 
             html += `
@@ -183,24 +182,18 @@
                     ${renderLinkRow("Localização", item.linkLocalizacao, "📍")}
                     ${renderLinkRow("Descritivo", item.linkDescritivo, "📑")}
 
-                    <span class="secao-titulo">Plantas e Modelos</span>
+                    <span class="secao-titulo">Vídeos</span>
+                    ${renderLinkRow("Vídeo 1", item.video1, "🎥")}
+                    ${renderLinkRow("Vídeo 2", item.video2, "🎥")}
+
+                    <span class="secao-titulo">Plantas</span>
                     ${renderLinkRow("Apto c/ Varanda", item.aptVaranda, "🏢")}
                     ${renderLinkRow("Apto s/ Varanda", item.aptSemVaranda, "🏢")}
                     ${renderLinkRow("Apto Garden", item.aptGarden, "🏡")}
-                    ${renderLinkRow("Planta Opcional 1", item.outroApt1, "📐")}
-                    ${renderLinkRow("Planta Opcional 2", item.outroApt2, "📐")}
 
-                    <span class="secao-titulo">Outros Materiais</span>
+                    <span class="secao-titulo">Diversos</span>
                     ${renderLinkRow("Material 1", item.div1, "🔗")}
                     ${renderLinkRow("Material 2", item.div2, "🔗")}
-                    ${renderLinkRow("Material 3", item.div3, "🔗")}
-                    ${renderLinkRow("Material 4", item.div4, "🔗")}
-                    ${renderLinkRow("Material 5", item.div5, "🔗")}
-                    ${renderLinkRow("Material 6", item.div6, "🔗")}
-                    ${renderLinkRow("Material 7", item.div7, "🔗")}
-                    ${renderLinkRow("Material 8", item.div8, "🔗")}
-                    ${renderLinkRow("Material 9", item.div9, "🔗")}
-                    ${renderLinkRow("Material 10", item.div10, "🔗")}
                 </div>`;
             painel.innerHTML = html;
         }
@@ -247,6 +240,7 @@
         }
 
         function selecionarResidencial(item, btn) {
+            if (!item) return;
             if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
             const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
             if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'auto', block: 'nearest' }); botaoSelecionado = btnEsq; }
@@ -254,6 +248,19 @@
             const el = document.getElementById(item.id_path);
             if(el) destacarNoMapa(el);
             exibirPainelDireito(item, el ? el.getAttribute('data-name') : "Região");
+        }
+
+        function gerarListaGeral() {
+            const menu = document.getElementById('menu-residenciais');
+            menu.innerHTML = "";
+            DADOS_PLANILHA.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'btRes';
+                btn.id = `btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                btn.innerHTML = `<strong>${item.nome}</strong> <span class="estoque-status">${item.estoque === 0 ? 'VENDIDO' : 'restam ' + item.estoque + ' un.'}</span>`;
+                btn.onclick = () => selecionarResidencial(item, btn);
+                menu.appendChild(btn);
+            });
         }
 
         document.getElementById('container-mapas').addEventListener('click', (e) => {
