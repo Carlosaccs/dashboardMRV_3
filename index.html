@@ -113,9 +113,11 @@
                     if (!nomeLimpo.toLowerCase().startsWith("res") && !nomeLimpo.toLowerCase().startsWith("vista")) return null;
 
                     return {
-                        id_path: col[0], regiao: col[1] ? col[1].toLowerCase() : "", nome: nomeLimpo,
+                        id_path: col[0], 
+                        regiao: col[1] ? col[1].toLowerCase() : "", 
+                        nome: nomeLimpo,
                         estoque: parseInt(col[3]) || 0, 
-                        // AJUSTE ENDEREÇO: Logradouro, nº - Bairro (Ignora col[6] que é a cidade)
+                        // AJUSTE PRECISO: Coluna 4 (Rua), Coluna 5 (Nº) e Coluna 6 (Bairro). A Coluna 7 (Cidade) é ignorada.
                         endereco_comp: `${col[4]}, ${col[5]} - ${col[6]}`,
                         entrega: col[7], menor_preco: col[8], plantas: `de ${col[9]} até ${col[10]}`,
                         obra: col[11], localizacao: col[12], mobilidade: col[13], cultura_lazer: col[14], comercio: col[15], saude_educacao: col[16],
