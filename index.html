@@ -13,10 +13,17 @@
             align-items: center; justify-content: center; color: white; 
             z-index: 100; position: relative;
         }
+
+        /* BOTÃO SOBRE */
+        .btn-sobre {
+            position: absolute; right: 20px; background: rgba(255,255,255,0.2);
+            color: white; border: 1px solid white; padding: 5px 15px;
+            border-radius: 20px; cursor: pointer; font-size: 0.75rem; transition: 0.3s;
+        }
+        .btn-sobre:hover { background: white; color: rgb(6, 94, 3); }
         
         .main-wrapper { display: flex; height: calc(100% - 50px); width: 100%; background: #fff; }
 
-        /* AJUSTE DE LARGURA: Esquerda 21%, Direita 32% */
         .col-lateral-esq { width: 21%; background: #fff; overflow-y: auto; padding: 10px; border-right: 1px solid #ddd; }
         .col-lateral-dir { width: 32%; background: #fff; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
         .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
@@ -27,7 +34,6 @@
             text-align: left; cursor: pointer; font-size: 0.72rem; 
             border-radius: 4px; display: flex; justify-content: space-between; align-items: center;
         }
-        /* HOVER ESCURECIDO */
         .btRes:hover { background: #e0e0e0; border-left-color: #ff8c00; }
         .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%; text-transform: uppercase; }
         .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; }
@@ -71,6 +77,27 @@
         .btn-abrir { background: #065e03; }
         .btn-copiar { background: #ff8c00; }
 
+        /* MODAL SOBRE */
+        .modal-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.6); display: none; align-items: center;
+            justify-content: center; z-index: 1000;
+        }
+        .modal-caixa {
+            background: white; width: 90%; max-width: 500px; padding: 25px;
+            border-radius: 12px; position: relative; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .modal-fechar { position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 1.5rem; color: #999; }
+        .modal-titulo { color: #065e03; font-weight: bold; margin-bottom: 15px; }
+        .modal-texto { font-size: 0.85rem; color: #444; line-height: 1.6; margin-bottom: 20px; text-align: left; }
+        .btn-whatsapp {
+            display: inline-block; background: #25d366; color: white; padding: 12px 25px;
+            text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 0.9rem;
+            transition: 0.3s;
+        }
+        .btn-whatsapp:hover { background: #128c7e; transform: scale(1.05); }
+
         #toast {
             visibility: hidden; min-width: 200px; background-color: #333; color: #fff;
             text-align: center; border-radius: 4px; padding: 10px; position: fixed;
@@ -83,7 +110,10 @@
 </head>
 <body>
 
-    <header><h1>Residenciais MRV em São Paulo</h1></header>
+    <header>
+        <h1>Residenciais MRV em São Paulo</h1>
+        <button class="btn-sobre" onclick="toggleModal(true)">Sobre</button>
+    </header>
 
     <div class="main-wrapper">
         <aside class="col-lateral-esq" id="menu-residenciais">Carregando...</aside>
@@ -101,6 +131,22 @@
         </aside>
     </div>
 
+    <div class="modal-overlay" id="modal-sobre" onclick="toggleModal(false)">
+        <div class="modal-caixa" onclick="event.stopPropagation()">
+            <span class="modal-fechar" onclick="toggleModal(false)">&times;</span>
+            <div class="modal-titulo">Sobre o Projeto</div>
+            <div class="modal-texto">
+                Este dashboard foi desenvolvido para agilizar o acesso a informações básicas sobre os residenciais MRV de SP, auxiliando no atendimento rápido aos nossos leads.<br><br>
+                <strong>⚠️ Aviso Importante:</strong> As informações mostradas podem estar desatualizadas e até incorretas.<br><br>
+                <strong>🤝 Colabore com o projeto!</strong><br>
+                Sentiu falta de algum material? Se você tiver Books (PDF), Vídeos ou fotos de decorados que ainda não estão aqui, ou se encontrou alguma informação incorreta, por favor, envie para que possamos manter a ferramenta completa para todos.
+            </div>
+            <a href="https://wa.me/551192617026?text=Olá Carlos, gostaria de colaborar com o Dashboard MRV!" target="_blank" class="btn-whatsapp">
+                Carlos Custódio - (11) 9261-7026
+            </a>
+        </div>
+    </div>
+
     <div id="toast">Link copiado!</div>
 
     <script src="mrv-data.js"></script>
@@ -109,6 +155,10 @@
         let botaoSelecionado = null;
         let regiaoAtual = "gsp"; 
         let DADOS_PLANILHA = [];
+
+        function toggleModal(show) {
+            document.getElementById('modal-sobre').style.display = show ? 'flex' : 'none';
+        }
 
         async function carregarPlanilha() {
             try {
@@ -212,7 +262,7 @@
                         <div class="grid-item"><div class="grid-label">📐 Plantas:</div>${item.plantas_txt}</div>
                         <div class="grid-item"><div class="grid-label">🏗️ Obra:</div>${item.obra}%</div>
                     </div>
-                    ${item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 Dica:</span>${item.dica}</div>` : ''}
+                    ${item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 DICA DO ESPECIALISTA</span>${item.dica}</div>` : ''}
                     ${item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 Observações</span>${item.obs}</div>` : ''}
                     <span class="secao-titulo">Destaques da Região</span>
                     <div class="bloco-destaques">
@@ -249,13 +299,10 @@
 
         function solicitarTroca(manterFicha = false) {
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
-            
-            // RESET DO BOTÃO NA ESQUERDA SE TROCAR O MAPA
             if (!manterFicha && botaoSelecionado) {
                 botaoSelecionado.classList.remove('ativo');
                 botaoSelecionado = null;
             }
-
             const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b');
             const container = document.getElementById('container-mapas');
             if (cA.classList.contains('pos-cima')) {
