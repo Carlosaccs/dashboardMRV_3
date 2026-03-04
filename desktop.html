@@ -43,7 +43,6 @@
 
         .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; background: #fdfdfd; color: #333; }
         
-        /* CONTAINER MAPAS SEM BORDAS */
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; border: none; }
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; border: none; }
         .pos-cima { height: 78%; z-index: 5; }
@@ -96,23 +95,30 @@
         .btn-abrir { background: #065e03; }
         .btn-copiar { background: #ff8c00; }
 
-        /* MODAL */
+        /* MODAL - TEXTO CORRIGIDO */
         .modal-overlay {
             position: fixed; top:0; left:0; width:100%; height:100%;
             background: rgba(0,0,0,0.6); display: none; align-items: center;
             justify-content: center; z-index: 1000;
         }
         .modal-caixa {
-            background: white; width: 90%; max-width: 550px; padding: 40px;
+            background: white; width: 90%; max-width: 600px; padding: 40px;
             border-radius: 15px; position: relative; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         .modal-fechar { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 1.5rem; color: #bbb; }
         .modal-titulo { color: rgb(6, 94, 3); font-weight: bold; margin-bottom: 25px; font-size: 1.4rem; }
+        
+        .modal-texto-p { font-size: 0.95rem; color: #444; line-height: 1.6; margin-bottom: 15px; }
+        .modal-alerta { color: #d32f2f; font-weight: bold; display: block; margin: 20px 0; }
+        .modal-colabore { font-weight: bold; color: #333; font-size: 1.1rem; display: block; margin-bottom: 10px; }
+        
         .btn-whatsapp {
             display: inline-block; background: #25d366; color: white; padding: 15px 35px;
-            text-decoration: none; border-radius: 40px; font-weight: bold; font-size: 1.1rem;
-            transition: 0.3s; margin-top: 10px;
+            text-decoration: none; border-radius: 40px; font-weight: bold; font-size: 1rem;
+            transition: 0.3s; margin-top: 15px;
         }
+        .btn-whatsapp:hover { background: #1eb954; transform: scale(1.02); }
 
         #toast {
             visibility: hidden; min-width: 200px; background-color: #333; color: #fff;
@@ -127,7 +133,7 @@
 <body>
 
     <header>
-        <h1>Residenciais MRV in São Paulo</h1>
+        <h1>Residenciais MRV em São Paulo</h1>
         <button class="btn-sobre" onclick="toggleModal(true)">Sobre</button>
     </header>
 
@@ -151,8 +157,17 @@
         <div class="modal-caixa" onclick="event.stopPropagation()">
             <span class="modal-fechar" onclick="toggleModal(false)">&times;</span>
             <div class="modal-titulo">Sobre o Projeto</div>
-            <p style="margin-bottom: 20px; color: #555;">Dashboard de consulta rápida para residenciais MRV em São Paulo.</p>
-            <p style="font-weight: bold; color: #d32f2f;">⚠️ Informações sujeitas a alterações.</p>
+            
+            <p class="modal-texto-p">Este dashboard foi feito para agilizar o acesso a informações básicas sobre os residenciais MRV de SP, auxiliando no atendimento rápido aos nossos leads.</p>
+            
+            <span class="modal-alerta">⚠️ Aviso Importante: As informações mostradas podem estar desatualizadas e até incorretas.</span>
+            
+            <span class="modal-colabore">🤝 Colabore com o projeto!</span>
+            
+            <p class="modal-texto-p" style="font-weight: bold; margin-bottom: 5px;">Sentiu falta de algum material?</p>
+            
+            <p class="modal-texto-p" style="font-size: 0.88rem;">Se você tiver Books, vídeos ou fotos de decorados que ainda não estão aqui, se encontrou alguma informação incorreta, se pode colaborar com dicas melhores ou observações sobre um residencial, por favor, envie para que possamos manter a ferramenta completa para todos.</p>
+
             <a href="https://wa.me/551192617026" target="_blank" class="btn-whatsapp">Carlos Custódio - (11) 9261-7026</a>
         </div>
     </div>
@@ -298,11 +313,9 @@
             atualizarTituloTopo();
         }
 
-        // --- FUNÇÃO DE TROCA CORRIGIDA ---
         function solicitarTroca(manterFicha = false) {
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
             
-            // 1. Limpa os estados dos botões da lista lateral
             if (botaoSelecionado) {
                 botaoSelecionado.classList.remove('ativo');
                 botaoSelecionado = null;
@@ -322,7 +335,6 @@
             if (!manterFicha) {
                 if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
                 pathSelecionado = null;
-                // 2. Placeholder atualizado
                 document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial ou clique em uma região verde do mapa.</div>';
             }
             atualizarTituloTopo();
