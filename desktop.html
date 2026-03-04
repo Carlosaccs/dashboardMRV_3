@@ -138,11 +138,17 @@
 
         function toggleModal(show) { document.getElementById('modal-sobre').style.display = show ? 'flex' : 'none'; }
 
-        // --- FUNÇÃO DE SEGURANÇA PARA DRIVE ---
+        // --- FUNÇÃO DE SEGURANÇA REFORÇADA PARA DRIVE ---
         function limparLinkDrive(url) {
             if (!url || !url.includes('drive.google.com')) return url;
-            // Converte links de visualização padrão em links de preview (sem controles de drive)
-            return url.replace(/\/view(\?.*)?$/, '/preview').replace(/\/edit(\?.*)?$/, '/preview');
+            let driveId = "";
+            // Tenta extrair o ID de diferentes formatos de link do Drive
+            const matchId = url.match(/\/d\/(.+?)\//) || url.match(/id=(.+?)(&|$)/);
+            if (matchId) {
+                driveId = matchId[1];
+                return `https://drive.google.com/file/d/${driveId}/preview`;
+            }
+            return url;
         }
 
         function atualizarTituloTopo() {
@@ -166,28 +172,44 @@
                 const response = await fetch(url);
                 const texto = await response.text();
                 const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
+                
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                     if (!col[2]) return null;
                     return {
-                        id_path: col[0].toLowerCase().trim(), regiao: col[1] ? col[1].toLowerCase() : "", 
-                        nome: col[2], estoque: col[3] || "0", endereco_comp: col[4], 
-                        entrega: col[7], menor_preco: col[8], plantas_txt: `de ${col[9]} até ${col[10]}`,
-                        obra: col[11], dica: col[17], obs: col[18],  
-                        book_cli: col[19], video1: col[21],
-                        aptVaranda: col[23], aptSemVaranda: col[24], aptGarden: col[25]
+                        id_path: col[0].toLowerCase().trim(),
+                        regiao: col[1] ? col[1].toLowerCase() : "",
+                        nome: col[2],
+                        estoque: col[3] || "0",
+                        endereco_comp: `${col[4]}, ${col[5]} - ${col[6]}`, // Concatenando Endereço, Bairro e Cidade
+                        entrega: col[7],
+                        menor_preco: col[8],
+                        plantas_txt: `de ${col[9]} até ${col[10]}`,
+                        obra: col[11],
+                        dica: col[17],
+                        obs: col[18],
+                        book_cli: col[19],
+                        book_corretor: col[20], // Coluna U
+                        video1: col[21],
+                        video2: col[22], // Coluna W
+                        aptVaranda: col[23],
+                        aptSemVaranda: col[24],
+                        aptGarden: col[25],
+                        diversos1: col[30], // Coluna AE
+                        diversos2: col[31]  // Coluna AF
                     };
                 }).filter(item => item !== null);
+
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaGeral();
                 desenharIniciais();
-            } catch (e) { console.error("Erro:", e); }
+            } catch (e) { console.error("Erro no carregamento:", e); }
         }
 
         function copiarLink(url, nome) {
             if(!url) return;
-            const linkLimpo = limparLinkDrive(url); // Proteção no copiar
-            navigator.clipboard.writeText(linkLimpo).then(() => {
+            const linkSeguro = limparLinkDrive(url);
+            navigator.clipboard.writeText(linkSeguro).then(() => {
                 const x = document.getElementById("toast");
                 x.innerText = `${nome} copiado!`; x.className = "show";
                 setTimeout(() => { x.className = ""; }, 2000);
@@ -195,19 +217,20 @@
         }
 
         function renderLinkRow(label, link, ico) {
-            if (!link || link.length < 5) return "";
-            const linkLimpo = limparLinkDrive(link); // Proteção no abrir
+            if (!link || link.length < 10) return "";
+            const linkSeguro = limparLinkDrive(link);
             return `<div class="linha-link">
                 <div class="link-nome"><span>${ico}</span> ${label}</div>
                 <div>
-                    <button class="btn-mini btn-abrir" onclick="window.open('${linkLimpo}', '_blank')">Abrir</button>
-                    <button class="btn-mini btn-copiar" onclick="copiarLink('${linkLimpo}', '${label}')">Copiar</button>
+                    <button class="btn-mini btn-abrir" onclick="window.open('${linkSeguro}', '_blank')">Abrir</button>
+                    <button class="btn-mini btn-copiar" onclick="copiarLink('${linkSeguro}', '${label}')">Copiar</button>
                 </div>
             </div>`;
         }
 
         function gerarListaGeral() {
-            const menu = document.getElementById('menu-residenciais'); menu.innerHTML = "";
+            const menu = document.getElementById('menu-residenciais');
+            menu.innerHTML = "";
             DADOS_PLANILHA.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
@@ -231,11 +254,13 @@
         function exibirPainelDireito(item, nomeCidade) {
             const painel = document.getElementById('detalhes-residencial');
             let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
+            
             DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome).forEach(v => {
                 html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'>
                             <strong>${v.nome}</strong> ${obterHtmlEstoque(v.estoque)}
                          </button>`;
             });
+
             html += `
                 <div class="ficha-card">
                     <div class="ficha-header"><span>${item.nome}</span>${obterHtmlEstoque(item.estoque)}</div>
@@ -248,12 +273,21 @@
                     </div>
                     ${item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 DICA</span>${item.dica}</div>` : ''}
                     ${item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 OBS</span>${item.obs}</div>` : ''}
-                    <span class="secao-titulo">Materiais e Plantas</span>
+                    
+                    <span class="secao-titulo">Materiais de Venda</span>
                     ${renderLinkRow("Book Cliente", item.book_cli, "📄")}
+                    ${renderLinkRow("Book Corretor", item.book_corretor, "🔐")}
                     ${renderLinkRow("Vídeo 1", item.video1, "🎥")}
+                    ${renderLinkRow("Vídeo 2", item.video2, "🎥")}
+
+                    <span class="secao-titulo">Plantas</span>
                     ${renderLinkRow("Apto c/ Varanda", item.aptVaranda, "🏢")}
                     ${renderLinkRow("Apto s/ Varanda", item.aptSemVaranda, "🏢")}
                     ${renderLinkRow("Apto Garden", item.aptGarden, "🏡")}
+
+                    ${(item.diversos1 || item.diversos2) ? '<span class="secao-titulo">Materiais Diversos</span>' : ''}
+                    ${renderLinkRow("Diversos 1", item.diversos1, "📁")}
+                    ${renderLinkRow("Diversos 2", item.diversos2, "📁")}
                 </div>`;
             painel.innerHTML = html;
         }
