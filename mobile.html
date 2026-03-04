@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <title>Dashboard MRV SP - Mobile v3.1</title>
+    <title>Dashboard MRV SP - Mobile v3.2</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; width: 100vw; overflow: hidden; background: #fff; display: flex; }
@@ -20,24 +20,24 @@
         }
         @media (orientation: portrait) { #aviso-rotacao { display: flex; } }
 
-        /* Sidebar Verde - Agora com função Toggle */
+        /* Sidebar Verde - Largura ajustada para ícones maiores */
         .sidebar-titulo {
             background: rgb(6, 94, 3);
             width: 45px; height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            padding: 20px 0; color: white; flex-shrink: 0; z-index: 30;
+            padding: 15px 0; color: white; flex-shrink: 0; z-index: 30;
             cursor: pointer;
         }
 
         .titulo-vertical {
             writing-mode: vertical-rl; transform: rotate(180deg);
-            text-transform: uppercase; font-size: 0.75rem; font-weight: bold;
-            letter-spacing: 1.5px; white-space: nowrap; margin: 20px 0;
+            text-transform: uppercase; font-size: 0.72rem; font-weight: bold;
+            letter-spacing: 1.2px; white-space: nowrap; margin: 10px 0;
         }
 
-        /* Ícone de Expansão/Recolhimento maior */
-        .icon-expand { width: 28px; height: 28px; fill: white; transition: 0.2s; }
-        .icon-expand:active { transform: scale(1.2); opacity: 0.7; }
+        /* Ícone de Expansão/Recolhimento */
+        .icon-expand { width: 30px; height: 30px; fill: white; transition: transform 0.1s; }
+        .icon-expand:active { transform: scale(1.3); opacity: 0.8; }
 
         .main-wrapper { display: flex; flex: 1; height: 100vh; background: #fff; overflow: hidden; }
 
@@ -55,12 +55,11 @@
         .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; }
         
         .estoque-status { font-size: 0.48rem; font-weight: bold; color: #777; }
-        .estoque-alerta { color: #d32f2f !important; }
 
         .centro-topo { height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.65rem; border-bottom: 1px solid #eee; background: #fdfdfd; color: #333; }
         
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; background: #fff; }
-        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; }
+        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
         
         .pos-cima { height: 75%; z-index: 5; transform: scale(1.15); }
         .pos-baixo { height: 25%; z-index: 10; cursor: pointer; transform: scale(0.95); opacity: 0.9; }
@@ -71,13 +70,8 @@
         }
 
         svg { width: 100%; height: 100%; display: block; }
-        
-        /* Mapas */
         path { stroke: #fff; stroke-width: 0.6; fill: #838383; transition: fill 0.2s; }
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
-        
-        /* O efeito de clique/ativo só deve aparecer no que é clicável */
-        .commrv:active, #grandesaopaulo:active { fill: #ff8c00 !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000 !important; stroke-width: 1.5px !important; }
 
         /* Ficha Técnica */
@@ -136,7 +130,7 @@
         </main>
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
-            <div style="text-align: center; color: #999; margin-top: 40px; font-size: 0.55rem; padding: 10px;">Toque em uma região verde.</div>
+            <div style="text-align: center; color: #999; margin-top: 40px; font-size: 0.55rem; padding: 10px;">Toque em uma região verde para ampliar.</div>
         </aside>
     </div>
 
@@ -146,12 +140,18 @@
     <script>
         let pathSelecionado = null, botaoSelecionado = null, regiaoAtual = "gsp", DADOS_PLANILHA = [];
 
-        // --- FUNÇÃO TOGGLE (ENTRA E SAI DO FULLSCREEN) ---
-        function toggleFullScreen() {
+        // --- FUNÇÃO DE EXPANSÃO (USADA PELO TOGGLE E PELO AUTO-EXPAND) ---
+        function expandirTela() {
             if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
                 const el = document.documentElement;
                 const rfs = el.requestFullscreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-                if (rfs) rfs.call(el).catch(err => console.log(err));
+                if (rfs) rfs.call(el).catch(err => console.log("Erro ao expandir"));
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+                expandirTela();
             } else {
                 const efs = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
                 if (efs) efs.call(document);
@@ -186,11 +186,10 @@
                         menor_preco: col[8],
                         plantas_txt: `de ${col[9]} até ${col[10]}`,
                         obra: col[11],
-                        loc: col[12], mob: col[13], cult: col[14], com: col[15], saude: col[16],
                         dica: col[17],
                         obs: col[18],
-                        book_cli: col[19], book_cor: col[20], vid1: col[21], vid2: col[22],
-                        p_var: col[23], p_sem: col[24], p_gar: col[25], div1: col[30], div2: col[31]
+                        book_cli: col[19], book_cor: col[20], vid1: col[21],
+                        p_var: col[23], p_gar: col[25]
                     };
                 }).filter(item => item !== null);
 
@@ -212,14 +211,6 @@
             </div>`;
         }
 
-        function renderDestaque(titulo, texto, ico) {
-            if (!texto || texto.length < 3) return "";
-            return `<div class="destaque-item">
-                <span class="destaque-icon">${ico}</span>
-                <div><span class="destaque-titulo">${titulo}</span>${texto}</div>
-            </div>`;
-        }
-
         function copiarLink(url) {
             navigator.clipboard.writeText(url).then(() => {
                 const x = document.getElementById("toast");
@@ -234,13 +225,13 @@
             
             DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome).forEach(v => {
                 html += `<button class="btRes" onclick='event.stopPropagation(); selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'>
-                            <strong>${v.nome}</strong> <span class="estoque-status">${v.estoque} un.</span>
+                            <strong>${v.nome}</strong> <span class="estoque-status">${v.estoque} u.</span>
                          </button>`;
             });
 
             html += `
                 <div class="ficha-card">
-                    <div class="ficha-header"><span>${item.nome}</span> <span style="color:#ff8c00">${item.estoque} un.</span></div>
+                    <div class="ficha-header"><span>${item.nome}</span> <span style="color:#ff8c00">${item.estoque} u.</span></div>
                     <div class="local-info">📍 ${item.endereco_comp}</div>
                     <div class="ficha-grid">
                         <div class="grid-item"><div class="grid-label">💰 Preço</div>${item.menor_preco}</div>
@@ -262,6 +253,7 @@
         }
 
         function selecionarResidencial(item, btn) {
+            expandirTela(); // AUTO-EXPAND AO CLICAR NA LISTA
             if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
             const btnEsq = btn || document.getElementById(`btn-esq-mob-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
             if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); botaoSelecionado = btnEsq; }
@@ -278,6 +270,7 @@
         }
 
         function solicitarTroca(manterFicha = false) {
+            expandirTela(); // AUTO-EXPAND AO CLICAR NA TROCA DE REGIÃO
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
             if (!manterFicha && botaoSelecionado) { botaoSelecionado.classList.remove('ativo'); botaoSelecionado = null; }
             const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b'), container = document.getElementById('container-mapas');
@@ -298,7 +291,7 @@
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
                 btn.id = `btn-esq-mob-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`;
-                btn.innerHTML = `<strong>${item.nome}</strong> <span class="estoque-status">${item.estoque} un.</span>`;
+                btn.innerHTML = `<strong>${item.nome}</strong> <span class="estoque-status">${item.estoque} u.</span>`;
                 btn.onclick = (e) => { e.stopPropagation(); selecionarResidencial(item, btn); };
                 menu.appendChild(btn);
             });
@@ -320,13 +313,18 @@
 
         document.getElementById('container-mapas').addEventListener('click', (e) => {
             const caixaBaixo = e.target.closest('.pos-baixo');
-            if (caixaBaixo) { e.stopPropagation(); solicitarTroca(false); return; }
+            if (caixaBaixo) { 
+                e.stopPropagation(); 
+                solicitarTroca(false); 
+                return; 
+            }
             
             const p = e.target.closest('.pos-cima path');
             if (p) {
                 e.stopPropagation();
-                // --- AJUSTE: BLOQUEIO DE CLIQUE NO CINZA ---
                 if (!p.classList.contains('commrv') && p.id !== "grandesaopaulo") return;
+
+                expandirTela(); // AUTO-EXPAND AO CLICAR EM UMA CIDADE VERDE
 
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id.toLowerCase());
