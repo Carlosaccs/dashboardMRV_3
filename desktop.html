@@ -51,38 +51,42 @@
         
         svg { width: 100%; height: 100%; display: block; padding: 10px; border: none; }
         
-        /* --- ESTILOS DOS MAPAS E HOVER --- */
-        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: all 0.2s; pointer-events: all; }
+        /* --- ESTILOS DOS MAPAS ATUALIZADOS --- */
+        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: all 0.2s ease; pointer-events: all; }
 
-        /* Hover para as cidades CINZAS (Aumentado para 1.5) */
+        /* Hover para as cidades CINZAS (Brilho aumentado) */
         .pos-cima path:hover { 
             filter: brightness(1.5); 
-            stroke: #999;
+            stroke: #bbb;
             cursor: default; 
         }
 
-        /* Cores Base para áreas com MRV */
+        /* Cor Base das áreas com MRV (Verde) */
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer !important; }
 
-        /* Hover para as cidades VERDES (Agora ficam Laranja Claro) */
+        /* Hover para as cidades VERDES (Agora mudam para Laranja no Hover) */
         .pos-cima path.commrv:hover, .pos-cima #grandesaopaulo:hover { 
-            fill: #ffbc66 !important; 
+            fill: #ff8c00 !important; /* Laranja da MRV */
             filter: brightness(1.1);
+            stroke: #fff;
+            stroke-width: 1px;
             cursor: pointer !important; 
         }
 
-        /* Cidade SELECIONADA (Laranja MRV) */
+        /* Cidade SELECIONADA (Laranja Fixo com contorno forte) */
         .path-ativo { 
             fill: #ff8c00 !important; 
             stroke: #000 !important; 
-            stroke-width: 1.5px !important; 
+            stroke-width: 1.8px !important; 
             filter: none !important;
+            z-index: 20;
         }
 
-        /* --- FICHA E COMPONENTES --- */
+        /* --- COMPONENTES DA FICHA --- */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        
         .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .grid-item { font-size: 0.72rem; color: #333; }
         .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; font-size: 0.65rem; text-transform: uppercase; }
@@ -104,16 +108,13 @@
         .btn-abrir { background: #065e03; }
         .btn-copiar { background: #ff8c00; }
 
+        /* Modal e Toast */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-caixa { background: white; width: 90%; max-width: 600px; padding: 40px; border-radius: 15px; position: relative; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .modal-fechar { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 1.5rem; color: #bbb; }
         .modal-titulo { color: rgb(6, 94, 3); font-weight: bold; margin-bottom: 25px; font-size: 1.4rem; }
-        .modal-texto-p { font-size: 0.95rem; color: #444; line-height: 1.6; margin-bottom: 15px; }
-        .modal-alerta { color: #d32f2f; font-weight: bold; display: block; margin: 20px 0; }
-        .modal-colabore { font-weight: bold; color: #333; font-size: 1.1rem; display: block; margin-bottom: 10px; }
         .btn-whatsapp { display: inline-block; background: #25d366; color: white; padding: 15px 35px; text-decoration: none; border-radius: 40px; font-weight: bold; font-size: 1rem; transition: 0.3s; margin-top: 15px; }
-        .btn-whatsapp:hover { background: #1eb954; transform: scale(1.02); }
-
+        
         #toast { visibility: hidden; min-width: 200px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 10px; position: fixed; z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%); font-size: 0.8rem; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 1.5s; }
         @keyframes fadein { from {top: 0; opacity: 0;} to {top: 30px; opacity: 1;} }
@@ -147,11 +148,8 @@
         <div class="modal-caixa" onclick="event.stopPropagation()">
             <span class="modal-fechar" onclick="toggleModal(false)">&times;</span>
             <div class="modal-titulo">Sobre o Projeto</div>
-            <p class="modal-texto-p">Este dashboard foi feito para agilizar o acesso a informações básicas sobre os residenciais MRV de SP, auxiliando no atendimento rápido aos nossos leads.</p>
-            <span class="modal-alerta">⚠️ Aviso Importante: As informações mostradas podem estar desatualizadas e até incorretas.</span>
-            <span class="modal-colabore">🤝 Colabore com o projeto!</span>
-            <p class="modal-texto-p" style="font-weight: bold; margin-bottom: 5px;">Sentiu falta de algum material?</p>
-            <p class="modal-texto-p" style="font-size: 0.88rem;">Se você tiver Books, vídeos ou fotos de decorados que ainda não estão aqui, se encontrou alguma informação incorreta, se pode colaborar com dicas melhores ou observações sobre um residencial, por favor, envie para que possamos manter a ferramenta completa para todos.</p>
+            <p style="margin-bottom: 15px; color: #444;">Este dashboard auxilia no acesso rápido aos materiais da MRV SP.</p>
+            <span style="color: #d32f2f; font-weight: bold; display: block; margin-bottom: 20px;">⚠️ Aviso: Verifique sempre a disponibilidade no sistema oficial.</span>
             <a href="https://wa.me/551192617026" target="_blank" class="btn-whatsapp">Carlos Custódio - (11) 9261-7026</a>
         </div>
     </div>
@@ -167,22 +165,13 @@
 
         function toggleModal(show) { document.getElementById('modal-sobre').style.display = show ? 'flex' : 'none'; }
 
-        // --- SEGURANÇA MÁXIMA PARA DRIVE (FORÇA /PREVIEW) ---
+        // --- FUNÇÃO GLOBAL DE LIMPEZA DE LINKS DRIVE (FORÇA /PREVIEW) ---
         function limparLinkDrive(url) {
             if (!url || typeof url !== 'string' || !url.includes('drive.google.com')) return url;
             const match = url.match(/\/d\/(.+?)\/|\/d\/(.+?)$|id=(.+?)(&|$)/);
             const id = match ? (match[1] || match[2] || match[3]) : null;
             if (id) return `https://drive.google.com/file/d/${id}/preview`;
             return url;
-        }
-
-        function obterHtmlEstoque(valor) {
-            let num = parseInt(valor) || 0;
-            let classe = "estoque-status";
-            let texto = (valor === "VENDIDO" || num === 0) ? "VENDIDO" : `restam ${num} un.`;
-            if (valor === "VENDIDO" || num === 0) classe += " estoque-vendido";
-            else if (num < 6) classe += " estoque-alerta";
-            return `<span class="${classe}">${texto}</span>`;
         }
 
         async function carregarPlanilha() {
@@ -205,13 +194,16 @@
                         menor_preco: col[8],
                         plantas_txt: `de ${col[9]} até ${col[10]}`,
                         obra: col[11],
-                        loc_texto: col[12], mob_texto: col[13], cult_texto: col[14], com_texto: col[15], saude_texto: col[16],
+                        // Colunas 12-16: Destaques
+                        loc: col[12], mob: col[13], cult: col[14], com: col[15], saude: col[16],
                         dica: col[17],
                         obs: col[18],
-                        book_cli: col[19], book_cor: col[20], video1: col[21], video2: col[22],
-                        p_varanda: col[23], p_semvar: col[24], p_garden: col[25], p_outro1: col[26], p_outro2: col[27],
-                        div1: col[30], div2: col[31], div3: col[32], div4: col[33], div5: col[34],
-                        div6: col[35], div7: col[36], div8: col[37], div9: col[38], div10: col[39]
+                        // Colunas 19-22: Links Principais
+                        book_cli: col[19], book_cor: col[20], vid1: col[21], vid2: col[22],
+                        // Colunas 23-27: Plantas
+                        p_var: col[23], p_sem: col[24], p_gar: col[25], p_o1: col[26], p_o2: col[27],
+                        // Colunas 30-34: Diversos
+                        div1: col[30], div2: col[31], div3: col[32], div4: col[33], div5: col[34]
                     };
                 }).filter(item => item !== null);
 
@@ -219,16 +211,6 @@
                 gerarListaGeral();
                 desenharIniciais();
             } catch (e) { console.error("Erro no carregamento:", e); }
-        }
-
-        function copiarLink(url, nome) {
-            if(!url) return;
-            const linkSeguro = limparLinkDrive(url);
-            navigator.clipboard.writeText(linkSeguro).then(() => {
-                const x = document.getElementById("toast");
-                x.innerText = `${nome} copiado!`; x.className = "show";
-                setTimeout(() => { x.className = ""; }, 2000);
-            });
         }
 
         function renderLinkRow(label, link, ico) {
@@ -251,14 +233,12 @@
             </div>`;
         }
 
-        function selecionarResidencial(item, btn) {
-            if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
-            const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
-            if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); botaoSelecionado = btnEsq; }
-            if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca(true);
-            const el = document.getElementById(item.id_path);
-            if(el) destacarNoMapa(el);
-            exibirPainelDireito(item, el ? el.getAttribute('data-name') : "Região");
+        function copiarLink(url, nome) {
+            navigator.clipboard.writeText(url).then(() => {
+                const x = document.getElementById("toast");
+                x.innerText = `${nome} copiado!`; x.className = "show";
+                setTimeout(() => { x.className = ""; }, 2000);
+            });
         }
 
         function exibirPainelDireito(item, nomeCidade) {
@@ -283,43 +263,53 @@
                         <div class="grid-item"><div class="grid-label">🏗️ Obra:</div>${item.obra}%</div>
                     </div>
 
-                    ${item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 DICA DO ESPECIALISTA</span>${item.dica}</div>` : ''}
+                    ${item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 DICA</span>${item.dica}</div>` : ''}
                     ${item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 OBSERVAÇÕES</span>${item.obs}</div>` : ''}
                     
-                    ${(item.loc_texto || item.mob_texto) ? '<span class="secao-titulo">Destaques da Região</span>' : ''}
-                    ${renderDestaque("Localização", item.loc_texto, "📍")}
-                    ${renderDestaque("Mobilidade", item.mob_texto, "🚌")}
-                    ${renderDestaque("Cultura e Lazer", item.cult_texto, "🌳")}
-                    ${renderDestaque("Comércio", item.com_texto, "🛒")}
-                    ${renderDestaque("Saúde e Educação", item.saude_texto, "🏥")}
+                    ${(item.loc || item.mob) ? '<span class="secao-titulo">Destaques da Região</span>' : ''}
+                    ${renderDestaque("Localização", item.loc, "📍")}
+                    ${renderDestaque("Mobilidade", item.mob, "🚌")}
+                    ${renderDestaque("Cultura e Lazer", item.cult, "🌳")}
+                    ${renderDestaque("Comércio", item.com, "🛒")}
+                    ${renderDestaque("Saúde e Educação", item.saude, "🏥")}
 
                     <span class="secao-titulo">Materiais de Venda</span>
                     ${renderLinkRow("Book Cliente", item.book_cli, "📄")}
                     ${renderLinkRow("Book Corretor", item.book_cor, "🔐")}
-                    ${renderLinkRow("Vídeo 1", item.video1, "🎥")}
-                    ${renderLinkRow("Vídeo 2", item.video2, "🎥")}
+                    ${renderLinkRow("Vídeo 1", item.vid1, "🎥")}
+                    ${renderLinkRow("Vídeo 2", item.vid2, "🎥")}
 
                     <span class="secao-titulo">Plantas</span>
-                    ${renderLinkRow("Apto c/ Varanda", item.p_varanda, "🏢")}
-                    ${renderLinkRow("Apto s/ Varanda", item.p_semvar, "🏢")}
-                    ${renderLinkRow("Apto Garden", item.p_garden, "🏡")}
-                    ${renderLinkRow("Planta Adicional 1", item.p_outro1, "📐")}
-                    ${renderLinkRow("Planta Adicional 2", item.p_outro2, "📐")}
+                    ${renderLinkRow("Apto c/ Varanda", item.p_var, "🏢")}
+                    ${renderLinkRow("Apto s/ Varanda", item.p_sem, "🏢")}
+                    ${renderLinkRow("Apto Garden", item.p_gar, "🏡")}
 
                     <span class="secao-titulo">Diversos</span>
-                    ${renderLinkRow("Material 1", item.div1, "📁")}
-                    ${renderLinkRow("Material 2", item.div2, "📁")}
-                    ${renderLinkRow("Material 3", item.div3, "📁")}
-                    ${renderLinkRow("Material 4", item.div4, "📁")}
-                    ${renderLinkRow("Material 5", item.div5, "📁")}
+                    ${renderLinkRow("Diversos 1", item.div1, "📁")}
+                    ${renderLinkRow("Diversos 2", item.div2, "📁")}
+                    ${renderLinkRow("Diversos 3", item.div3, "📁")}
                 </div>`;
             painel.innerHTML = html;
         }
 
-        function atualizarTituloTopo() {
-            const display = document.getElementById('display-nome');
-            if (pathSelecionado) display.innerText = pathSelecionado.getAttribute('data-name');
-            else display.innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
+        // --- FUNÇÕES DE NAVEGAÇÃO E MAPA ---
+        function obterHtmlEstoque(valor) {
+            let num = parseInt(valor) || 0;
+            let classe = "estoque-status";
+            let texto = (valor === "VENDIDO" || num === 0) ? "VENDIDO" : `restam ${num} un.`;
+            if (valor === "VENDIDO" || num === 0) classe += " estoque-vendido";
+            else if (num < 6) classe += " estoque-alerta";
+            return `<span class="${classe}">${texto}</span>`;
+        }
+
+        function selecionarResidencial(item, btn) {
+            if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
+            const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
+            if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); botaoSelecionado = btnEsq; }
+            if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca(true);
+            const el = document.getElementById(item.id_path);
+            if(el) destacarNoMapa(el);
+            exibirPainelDireito(item, el ? el.getAttribute('data-name') : "Região");
         }
 
         function destacarNoMapa(el) {
@@ -327,6 +317,12 @@
             el.classList.add('path-ativo');
             pathSelecionado = el;
             atualizarTituloTopo();
+        }
+
+        function atualizarTituloTopo() {
+            const display = document.getElementById('display-nome');
+            if (pathSelecionado) display.innerText = pathSelecionado.getAttribute('data-name');
+            else display.innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
         }
 
         function solicitarTroca(manterFicha = false) {
