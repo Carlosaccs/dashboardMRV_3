@@ -42,15 +42,48 @@
         .estoque-vendido { text-decoration: line-through; color: #999 !important; }
 
         .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; background: #fdfdfd; color: #333; }
+        
+        /* CONTAINER MAPAS */
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         .pos-cima { height: 78%; z-index: 5; }
-        .pos-baixo { height: 22%; z-index: 10; cursor: pointer; opacity: 0.8; }
+        .pos-baixo { height: 22%; z-index: 10; cursor: pointer; opacity: 0.6; border-top: 1px solid #eee; background: #f9f9f9; transition: 0.3s; }
+        .pos-baixo:hover { opacity: 1; background: #f0f0f0; }
         
-        svg { width: 100%; height: 100%; display: block; padding: 10px; pointer-events: auto; }
-        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: fill 0.15s; pointer-events: auto; }
-        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
-        .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
+        svg { width: 100%; height: 100%; display: block; padding: 10px; }
+        
+        /* ESTILO DOS PATHS (CORREÇÃO AQUI) */
+        path { 
+            stroke: #fff; 
+            stroke-width: 0.5; 
+            fill: #d1d1d1; 
+            transition: fill 0.2s, stroke 0.2s; 
+            pointer-events: all; /* Garante que o mouse seja detectado */
+        }
+        
+        /* Efeito Hover Geral (Cinza) */
+        .pos-cima path:hover { 
+            fill: #bbbbbb; 
+        }
+
+        /* Paths com MRV (Verdes) */
+        .commrv, #grandesaopaulo { 
+            fill: rgb(6, 94, 3) !important; 
+            cursor: pointer; 
+        }
+        
+        /* Hover nos Verdes */
+        .pos-cima .commrv:hover, .pos-cima #grandesaopaulo:hover { 
+            fill: #0a7e05 !important; 
+            filter: brightness(1.2);
+        }
+
+        /* Path Selecionado (Laranja) */
+        .path-ativo { 
+            fill: #ff8c00 !important; 
+            stroke: #000 !important; 
+            stroke-width: 1.2px !important; 
+        }
 
         /* ESTILO FICHA DIREITA */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
@@ -77,7 +110,7 @@
         .btn-abrir { background: #065e03; }
         .btn-copiar { background: #ff8c00; }
 
-        /* MODAL ATUALIZADO CONFORME PRINT */
+        /* MODAL */
         .modal-overlay {
             position: fixed; top:0; left:0; width:100%; height:100%;
             background: rgba(0,0,0,0.6); display: none; align-items: center;
@@ -137,19 +170,10 @@
         <div class="modal-caixa" onclick="event.stopPropagation()">
             <span class="modal-fechar" onclick="toggleModal(false)">&times;</span>
             <div class="modal-titulo">Sobre o Projeto</div>
-            
-            <p class="modal-paragrafo">
-                Este dashboard foi desenvolvido para agilizar o acesso a informações básicas sobre os residenciais MRV de SP, auxiliando no atendimento rápido aos nossos leads.
-            </p>
-
+            <p class="modal-paragrafo">Este dashboard foi desenvolvido para agilizar o acesso a informações básicas sobre os residenciais MRV de SP, auxiliando no atendimento rápido aos nossos leads.</p>
             <span class="modal-alerta">⚠️ Aviso Importante: As informações mostradas podem estar desatualizadas e até incorretas.</span>
-
             <span class="modal-colabore">🤝 Colabore com o projeto!</span>
-            
-            <p class="modal-paragrafo" style="font-size: 0.85rem;">
-                Sentiu falta de algum material? Se você tiver Books (PDF), Vídeos ou fotos de decorados que ainda não estão aqui, se encontrou alguma informação incorretase ou se pode colaborar com dicas melhores ou observações sobre um residencial, por favor, envie para que possamos manter a ferramenta completa para todos.
-            </p>
-
+            <p class="modal-paragrafo" style="font-size: 0.85rem;">Sentiu falta de algum material? Se você tiver Books (PDF), Vídeos ou fotos de decorados que ainda não estão aqui, por favor, envie para que possamos manter a ferramenta completa.</p>
             <a href="https://wa.me/551192617026" target="_blank" class="btn-whatsapp">Carlos Custódio - (11) 9261-7026</a>
         </div>
     </div>
@@ -167,14 +191,11 @@
             document.getElementById('modal-sobre').style.display = show ? 'flex' : 'none';
         }
 
-        // CORREÇÃO: Título central mantém o nome do local selecionado
         function atualizarTituloTopo() {
             const display = document.getElementById('display-nome');
             if (pathSelecionado) {
-                // Prioridade máxima: se houver um path destacado, o nome dele fica fixo
                 display.innerText = pathSelecionado.getAttribute('data-name');
             } else {
-                // Se não houver nada clicado, volta para o nome da região padrão
                 display.innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
             }
         }
@@ -182,19 +203,15 @@
         function obterHtmlEstoque(valor) {
             let num = parseInt(valor) || 0;
             let classe = "estoque-status";
-            let texto = "";
-            if (valor === "VENDIDO" || num === 0) {
-                texto = "VENDIDO"; classe += " estoque-vendido";
-            } else {
-                texto = `restam ${num} un.`;
-                if (num < 6) classe += " estoque-alerta";
-            }
+            let texto = (valor === "VENDIDO" || num === 0) ? "VENDIDO" : `restam ${num} un.`;
+            if (valor === "VENDIDO" || num === 0) classe += " estoque-vendido";
+            else if (num < 6) classe += " estoque-alerta";
             return `<span class="${classe}">${texto}</span>`;
         }
 
         async function carregarPlanilha() {
             try {
-                const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv&cachebuster=" + new Date().getTime();
+                const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQzECvkefpM6aWy0IacqqI6l84_ti6zS1lSjcrgL0J4OcrtWZLb63sh7U1ZTQ4nsqDMeTU5ykl8xtDe/pub?output=csv&v=" + new Date().getTime();
                 const response = await fetch(url);
                 const texto = await response.text();
                 const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
@@ -223,8 +240,7 @@
         function gerarLinkDireto(url) {
             if (!url || !url.includes("drive.google.com")) return url;
             const match = url.match(/\/file\/d\/(.+?)\//) || url.match(/id=(.+?)(&|$)/);
-            if (match && match[1]) return `https://drive.google.com/file/d/${match[1].split('/')[0]}/preview`;
-            return url;
+            return match && match[1] ? `https://drive.google.com/file/d/${match[1].split('/')[0]}/preview` : url;
         }
 
         function copiarLink(url, nome) {
@@ -232,20 +248,19 @@
             navigator.clipboard.writeText(gerarLinkDireto(url)).then(() => {
                 const x = document.getElementById("toast");
                 x.innerText = `${nome} copiado!`; x.className = "show";
-                setTimeout(() => { x.className = x.className.replace("show", ""); }, 2000);
+                setTimeout(() => { x.className = ""; }, 2000);
             });
         }
 
         function renderLinkRow(label, link, ico) {
-            if (!link || link.trim() === "" || link.length < 5) return "";
-            return `
-                <div class="linha-link">
-                    <div class="link-nome"><span>${ico}</span> ${label}</div>
-                    <div class="link-acoes">
-                        <button class="btn-mini btn-abrir" onclick="window.open('${gerarLinkDireto(link)}', '_blank')">Abrir</button>
-                        <button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">Copiar</button>
-                    </div>
-                </div>`;
+            if (!link || link.length < 5) return "";
+            return `<div class="linha-link">
+                <div class="link-nome"><span>${ico}</span> ${label}</div>
+                <div>
+                    <button class="btn-mini btn-abrir" onclick="window.open('${gerarLinkDireto(link)}', '_blank')">Abrir</button>
+                    <button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">Copiar</button>
+                </div>
+            </div>`;
         }
 
         function gerarListaGeral() {
@@ -264,7 +279,7 @@
         function selecionarResidencial(item, btn) {
             if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
             const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
-            if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'auto', block: 'nearest' }); botaoSelecionado = btnEsq; }
+            if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); botaoSelecionado = btnEsq; }
             
             if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca(true);
             
@@ -277,8 +292,7 @@
         function exibirPainelDireito(item, nomeCidade) {
             const painel = document.getElementById('detalhes-residencial');
             let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
-            const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
-            vizinhos.forEach(v => {
+            DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome).forEach(v => {
                 html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'>
                             <strong>${v.nome}</strong> ${obterHtmlEstoque(v.estoque)}
                          </button>`;
@@ -304,20 +318,14 @@
                         ${item.comercio ? `<div class="destaque-item"><span class="destaque-icon">🛒</span><div class="destaque-texto"><strong>Comércio</strong>${item.comercio}</div></div>` : ''}
                         ${item.saude_educacao ? `<div class="destaque-item"><span class="destaque-icon">🏥</span><div class="destaque-texto"><strong>Saúde</strong>${item.saude_educacao}</div></div>` : ''}
                     </div>
-                    <span class="secao-titulo">Materiais de Apoio</span>
+                    <span class="secao-titulo">Materiais e Plantas</span>
                     ${renderLinkRow("Book Cliente", item.book_cli, "📄")}
                     ${renderLinkRow("Book Corretor", item.book_corr, "💼")}
                     ${renderLinkRow("Vídeo 1", item.video1, "🎥")}
-                    ${renderLinkRow("Vídeo 2", item.video2, "🎥")}
-                    ${renderLinkRow("Localização", item.linkLocalizacao, "📍")}
-                    ${renderLinkRow("Descritivo", item.linkDescritivo, "📑")}
-                    <span class="secao-titulo">Plantas</span>
+                    ${renderLinkRow("Localização Gmaps", item.linkLocalizacao, "📍")}
                     ${renderLinkRow("Apto c/ Varanda", item.aptVaranda, "🏢")}
                     ${renderLinkRow("Apto s/ Varanda", item.aptSemVaranda, "🏢")}
                     ${renderLinkRow("Apto Garden", item.aptGarden, "🏡")}
-                    ${renderLinkRow("Outra Planta", item.outraPlanta, "📐")}
-                    <span class="secao-titulo">Diversos</span>
-                    ${renderLinkRow("Informações Adicionais", item.div1, "🔗")}
                 </div>`;
             painel.innerHTML = html;
         }
@@ -362,10 +370,9 @@
             if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
         }
 
-        // EVENTOS DE MOUSE
+        // EVENTOS DE MOUSE - REATIVADOS E MELHORADOS
         document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
             const p = e.target.closest('.pos-cima path');
-            // Só muda o texto no hover se NÃO houver um residencial já selecionado
             if (p && !pathSelecionado) {
                 document.getElementById('display-nome').innerText = p.getAttribute('data-name');
             }
