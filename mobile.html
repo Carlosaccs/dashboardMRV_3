@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <title>Dashboard MRV SP - Mobile v3.0</title>
+    <title>Dashboard MRV SP - Mobile v3.1</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100vh; width: 100vw; overflow: hidden; background: #fff; display: flex; }
@@ -20,76 +20,74 @@
         }
         @media (orientation: portrait) { #aviso-rotacao { display: flex; } }
 
-        /* Sidebar Verde com Ícone de Expansão */
+        /* Sidebar Verde - Agora com função Toggle */
         .sidebar-titulo {
             background: rgb(6, 94, 3);
-            width: 35px; height: 100vh;
+            width: 45px; height: 100vh;
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            padding: 15px 0; color: white; flex-shrink: 0; z-index: 30;
+            padding: 20px 0; color: white; flex-shrink: 0; z-index: 30;
             cursor: pointer;
         }
 
         .titulo-vertical {
             writing-mode: vertical-rl; transform: rotate(180deg);
-            text-transform: uppercase; font-size: 0.7rem; font-weight: bold;
-            letter-spacing: 1.2px; white-space: nowrap;
+            text-transform: uppercase; font-size: 0.75rem; font-weight: bold;
+            letter-spacing: 1.5px; white-space: nowrap; margin: 20px 0;
         }
 
-        .icon-expand { width: 20px; height: 20px; fill: white; margin-bottom: 10px; }
+        /* Ícone de Expansão/Recolhimento maior */
+        .icon-expand { width: 28px; height: 28px; fill: white; transition: 0.2s; }
+        .icon-expand:active { transform: scale(1.2); opacity: 0.7; }
 
         .main-wrapper { display: flex; flex: 1; height: 100vh; background: #fff; overflow: hidden; }
 
-        .col-lateral-esq { width: 22%; background: #fff; overflow-y: auto; padding: 4px; border-right: 1px solid #ddd; z-index: 20; }
+        .col-lateral-esq { width: 22%; background: #fff; overflow-y: auto; padding: 4px; border-right: 1px solid #ddd; }
         .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
-        .col-lateral-dir { width: 33%; background: #fff; padding: 6px; overflow-y: auto; border-left: 1px solid #ddd; z-index: 20; }
+        .col-lateral-dir { width: 33%; background: #fff; padding: 6px; overflow-y: auto; border-left: 1px solid #ddd; }
 
         .btRes { 
-            width: 100%; padding: 5px 4px; margin-bottom: 3px; background: transparent; 
-            border: none; border-left: 3px solid rgb(6, 94, 3); 
+            width: 100%; padding: 6px 4px; margin-bottom: 4px; background: transparent; 
+            border: none; border-left: 4px solid rgb(6, 94, 3); 
             text-align: left; cursor: pointer; font-size: 0.55rem; 
             border-radius: 2px; display: flex; justify-content: space-between; align-items: center;
-            line-height: 1.1;
         }
         .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%; text-transform: uppercase; }
         .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; }
         
-        .estoque-status { font-size: 0.48rem; font-weight: bold; color: #777; white-space: nowrap; }
+        .estoque-status { font-size: 0.48rem; font-weight: bold; color: #777; }
         .estoque-alerta { color: #d32f2f !important; }
-        .estoque-vendido { text-decoration: line-through; color: #999 !important; }
 
-        .centro-topo { height: 26px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.65rem; border-bottom: 1px solid #eee; background: #fdfdfd; z-index: 20; color: #333; }
+        .centro-topo { height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.65rem; border-bottom: 1px solid #eee; background: #fdfdfd; color: #333; }
         
-        .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; padding: 0; background: #fff; }
-        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; background: #fff; }
+        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; }
         
-        .pos-cima { height: 75%; z-index: 5; transform: scale(1.15); transition: transform 0.3s; }
+        .pos-cima { height: 75%; z-index: 5; transform: scale(1.15); }
         .pos-baixo { height: 25%; z-index: 10; cursor: pointer; transform: scale(0.95); opacity: 0.9; }
         
         .label-troca {
             position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
-            font-size: 0.45rem; color: #065e03; font-weight: bold; text-transform: uppercase;
-            pointer-events: none; background: rgba(255,255,255,0.9); padding: 2px 8px; border-radius: 10px; border: 1px solid #eee;
+            font-size: 0.45rem; color: #065e03; font-weight: bold; background: rgba(255,255,255,0.9); padding: 2px 8px; border-radius: 10px; border: 1px solid #eee; pointer-events: none;
         }
 
         svg { width: 100%; height: 100%; display: block; }
         
-        /* Estilos de Mapa (Sincronizados com Desktop) */
-        path { stroke: #fff; stroke-width: 0.6; fill: #838383; transition: all 0.2s; }
-        .pos-cima path:hover { filter: brightness(1.5); stroke: #bbb; }
+        /* Mapas */
+        path { stroke: #fff; stroke-width: 0.6; fill: #838383; transition: fill 0.2s; }
+        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
         
-        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; }
-        .pos-cima path.commrv:hover, .pos-cima #grandesaopaulo:hover { fill: #ff8c00 !important; filter: brightness(1.1); }
-        
+        /* O efeito de clique/ativo só deve aparecer no que é clicável */
+        .commrv:active, #grandesaopaulo:active { fill: #ff8c00 !important; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000 !important; stroke-width: 1.5px !important; }
 
-        /* Ficha Técnica Mobile */
+        /* Ficha Técnica */
         .ficha-card { border-left: 3px solid #ff8c00; padding: 6px; border-radius: 4px; background: #fafafa; margin-top: 4px; }
         .ficha-header { font-size: 0.65rem; color: #065e03; font-weight: bold; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
         .local-info { font-size: 0.5rem; color: #444; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 4px; line-height: 1.2; }
         
         .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 6px; margin-bottom: 8px; }
         .grid-item { font-size: 0.52rem; color: #333; line-height: 1.1; }
-        .grid-label { font-weight: bold; color: #777; font-size: 0.42rem; text-transform: uppercase; margin-bottom: 1px; }
+        .grid-label { font-weight: bold; color: #777; font-size: 0.42rem; text-transform: uppercase; }
 
         .bloco-texto { margin-bottom: 6px; padding: 5px; border-radius: 4px; font-size: 0.52rem; line-height: 1.3; }
         .bloco-label { font-weight: bold; text-transform: uppercase; font-size: 0.45rem; display: block; margin-bottom: 2px; }
@@ -98,23 +96,19 @@
 
         .secao-titulo { font-size: 0.48rem; font-weight: bold; color: #aaa; text-transform: uppercase; margin: 8px 0 4px 0; border-top: 1px solid #eee; padding-top: 5px; display: block; }
         
-        .destaque-item { display: flex; gap: 6px; margin-bottom: 5px; font-size: 0.5rem; line-height: 1.2; }
-        .destaque-icon { font-size: 0.7rem; }
-        .destaque-titulo { font-weight: bold; color: #065e03; text-transform: uppercase; display: block; font-size: 0.45rem; }
-
-        .linha-link { display: flex; align-items: center; justify-content: space-between; padding: 3px 5px; background: #fff; border: 1px solid #eee; border-radius: 4px; margin-bottom: 3px; }
+        .linha-link { display: flex; align-items: center; justify-content: space-between; padding: 4px; background: #fff; border: 1px solid #eee; border-radius: 4px; margin-bottom: 3px; }
         .link-nome { font-size: 0.5rem; font-weight: bold; color: #444; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .btn-mini { padding: 4px 6px; border: none; border-radius: 3px; color: white; font-size: 0.45rem; font-weight: bold; margin-left: 3px; }
         .btn-abrir { background: #065e03; }
         .btn-copiar { background: #ff8c00; }
 
-        #toast { visibility: hidden; min-width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 8px; position: fixed; z-index: 1000; left: 50%; bottom: 20px; transform: translateX(-50%); font-size: 0.6rem; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        #toast { visibility: hidden; min-width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 8px; position: fixed; z-index: 1000; left: 50%; bottom: 20px; transform: translateX(-50%); font-size: 0.6rem; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 1.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 20px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 20px; opacity: 1;} to {bottom: 0; opacity: 0;} }
     </style>
 </head>
-<body onclick="entrarFullScreen()">
+<body>
 
     <div id="aviso-rotacao">
         <div style="font-size: 40px; margin-bottom: 15px;">🔄</div>
@@ -122,7 +116,7 @@
         <p>Dashboard otimizado para o modo horizontal.</p>
     </div>
 
-    <div class="sidebar-titulo" onclick="entrarFullScreen()">
+    <div class="sidebar-titulo" onclick="toggleFullScreen()">
         <svg class="icon-expand" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
         <div class="titulo-vertical">RESIDENCIAIS MRV EM SP</div>
         <svg class="icon-expand" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
@@ -142,7 +136,7 @@
         </main>
 
         <aside class="col-lateral-dir" id="detalhes-residencial">
-            <div style="text-align: center; color: #999; margin-top: 40px; font-size: 0.55rem; padding: 10px;">Toque em uma região verde ou selecione na lista.</div>
+            <div style="text-align: center; color: #999; margin-top: 40px; font-size: 0.55rem; padding: 10px;">Toque em uma região verde.</div>
         </aside>
     </div>
 
@@ -152,13 +146,18 @@
     <script>
         let pathSelecionado = null, botaoSelecionado = null, regiaoAtual = "gsp", DADOS_PLANILHA = [];
 
-        function entrarFullScreen() {
-            const el = document.documentElement;
-            const rfs = el.requestFullscreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-            if (rfs) rfs.call(el).catch(err => console.log("Fullscreen bloqueado"));
+        // --- FUNÇÃO TOGGLE (ENTRA E SAI DO FULLSCREEN) ---
+        function toggleFullScreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+                const el = document.documentElement;
+                const rfs = el.requestFullscreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+                if (rfs) rfs.call(el).catch(err => console.log(err));
+            } else {
+                const efs = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+                if (efs) efs.call(document);
+            }
         }
 
-        // Função de Limpeza de Links (Sincronizada com Desktop)
         function limparLinkDrive(url) {
             if (!url || typeof url !== 'string' || !url.includes('drive.google.com')) return url;
             const match = url.match(/\/d\/(.+?)\/|\/d\/(.+?)$|id=(.+?)(&|$)/);
@@ -208,7 +207,7 @@
                 <div class="link-nome"><span>${ico}</span> ${label}</div>
                 <div>
                     <button class="btn-mini btn-abrir" onclick="window.open('${linkSeguro}', '_blank')">Abrir</button>
-                    <button class="btn-mini btn-copiar" onclick="copiarLink('${linkSeguro}', '${label}')">Copiar</button>
+                    <button class="btn-mini btn-copiar" onclick="copiarLink('${linkSeguro}')">Copiar</button>
                 </div>
             </div>`;
         }
@@ -221,10 +220,10 @@
             </div>`;
         }
 
-        function copiarLink(url, nome) {
+        function copiarLink(url) {
             navigator.clipboard.writeText(url).then(() => {
                 const x = document.getElementById("toast");
-                x.innerText = "Link Copiado!"; x.className = "show";
+                x.innerText = "Copiado!"; x.className = "show";
                 setTimeout(() => { x.className = ""; }, 2000);
             });
         }
@@ -243,26 +242,18 @@
                 <div class="ficha-card">
                     <div class="ficha-header"><span>${item.nome}</span> <span style="color:#ff8c00">${item.estoque} un.</span></div>
                     <div class="local-info">📍 ${item.endereco_comp}</div>
-                    
                     <div class="ficha-grid">
                         <div class="grid-item"><div class="grid-label">💰 Preço</div>${item.menor_preco}</div>
                         <div class="grid-item"><div class="grid-label">🔑 Entrega</div>${item.entrega}</div>
                         <div class="grid-item"><div class="grid-label">📐 Plantas</div>${item.plantas_txt}</div>
                         <div class="grid-item"><div class="grid-label">🏗️ Obra</div>${item.obra}%</div>
                     </div>
-
                     ${item.dica ? `<div class="bloco-texto dica-box"><span class="bloco-label">💡 DICA</span>${item.dica}</div>` : ''}
                     ${item.obs ? `<div class="bloco-texto obs-box"><span class="bloco-label">📝 OBS</span>${item.obs}</div>` : ''}
-                    
-                    ${(item.loc || item.mob) ? '<span class="secao-titulo">Destaques Região</span>' : ''}
-                    ${renderDestaque("Local", item.loc, "📍")}
-                    ${renderDestaque("Bebê/Lazer", item.cult, "🌳")}
-
                     <span class="secao-titulo">Materiais</span>
                     ${renderLinkRow("Book Cli", item.book_cli, "📄")}
                     ${renderLinkRow("Book Cor", item.book_cor, "🔐")}
                     ${renderLinkRow("Vídeo", item.vid1, "🎥")}
-
                     <span class="secao-titulo">Plantas</span>
                     ${renderLinkRow("Varanda", item.p_var, "🏢")}
                     ${renderLinkRow("Garden", item.p_gar, "🏡")}
@@ -271,7 +262,6 @@
         }
 
         function selecionarResidencial(item, btn) {
-            entrarFullScreen(); // Força expansão no clique
             if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
             const btnEsq = btn || document.getElementById(`btn-esq-mob-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
             if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); botaoSelecionado = btnEsq; }
@@ -288,7 +278,6 @@
         }
 
         function solicitarTroca(manterFicha = false) {
-            entrarFullScreen();
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
             if (!manterFicha && botaoSelecionado) { botaoSelecionado.classList.remove('ativo'); botaoSelecionado = null; }
             const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b'), container = document.getElementById('container-mapas');
@@ -297,7 +286,7 @@
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
             pathSelecionado = null;
             if (!manterFicha) {
-                document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 40px; font-size: 0.55rem;">Toque em uma região.</div>';
+                document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 40px; font-size: 0.55rem;">Toque em uma região verde.</div>';
                 document.getElementById('display-nome').innerText = (regiaoAtual === "gsp" ? "Grande SP" : "Interior");
             }
         }
@@ -330,15 +319,18 @@
         }
 
         document.getElementById('container-mapas').addEventListener('click', (e) => {
-            entrarFullScreen(); // Ativa tela cheia no primeiro toque no mapa
             const caixaBaixo = e.target.closest('.pos-baixo');
             if (caixaBaixo) { e.stopPropagation(); solicitarTroca(false); return; }
+            
             const p = e.target.closest('.pos-cima path');
             if (p) {
                 e.stopPropagation();
+                // --- AJUSTE: BLOQUEIO DE CLIQUE NO CINZA ---
+                if (!p.classList.contains('commrv') && p.id !== "grandesaopaulo") return;
+
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
                 const item = DADOS_PLANILHA.find(d => d.id_path === p.id.toLowerCase());
-                if(item && p.classList.contains('commrv')) selecionarResidencial(item, null);
+                if(item) selecionarResidencial(item, null);
             }
         });
 
