@@ -37,12 +37,11 @@
         .btRes strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 65%; text-transform: uppercase; }
         .btRes.ativo { border-left-color: #ff8c00 !important; background: #fff5e6 !important; font-weight: bold; }
         
-        /* ESTILOS DE ESTOQUE CONDICIONAL */
         .estoque-status { font-size: 0.65rem; font-weight: bold; color: #666; white-space: nowrap; }
-        .estoque-alerta { color: #d32f2f !important; } /* Vermelho para < 6 */
+        .estoque-alerta { color: #d32f2f !important; }
         .estoque-vendido { text-decoration: line-through; color: #999 !important; }
 
-        .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; background: #fdfdfd; }
+        .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; background: #fdfdfd; color: #333; }
         .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         .pos-cima { height: 78%; z-index: 5; }
@@ -53,10 +52,10 @@
         .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer; }
         .path-ativo { fill: #ff8c00 !important; stroke: #000; stroke-width: 1.2px; }
 
+        /* ESTILO FICHA DIREITA */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-        
         .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .grid-item { font-size: 0.72rem; color: #333; }
         .grid-label { font-weight: bold; color: #666; margin-bottom: 2px; font-size: 0.65rem; text-transform: uppercase; }
@@ -78,23 +77,28 @@
         .btn-abrir { background: #065e03; }
         .btn-copiar { background: #ff8c00; }
 
+        /* MODAL ATUALIZADO CONFORME PRINT */
         .modal-overlay {
             position: fixed; top:0; left:0; width:100%; height:100%;
             background: rgba(0,0,0,0.6); display: none; align-items: center;
             justify-content: center; z-index: 1000;
         }
         .modal-caixa {
-            background: white; width: 90%; max-width: 500px; padding: 25px;
-            border-radius: 12px; position: relative; text-align: center;
+            background: white; width: 90%; max-width: 550px; padding: 40px;
+            border-radius: 15px; position: relative; text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        .modal-fechar { position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 1.5rem; color: #999; }
-        .modal-titulo { color: #065e03; font-weight: bold; margin-bottom: 15px; }
+        .modal-fechar { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 1.5rem; color: #bbb; }
+        .modal-titulo { color: rgb(6, 94, 3); font-weight: bold; margin-bottom: 25px; font-size: 1.4rem; }
+        .modal-paragrafo { font-size: 0.95rem; color: #555; line-height: 1.5; margin-bottom: 20px; }
+        .modal-alerta { color: #333; font-weight: bold; margin-bottom: 25px; font-size: 0.95rem; display: block; }
+        .modal-colabore { font-weight: bold; color: #333; font-size: 1rem; margin-bottom: 10px; display: block; }
         .btn-whatsapp {
-            display: inline-block; background: #25d366; color: white; padding: 12px 25px;
-            text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 0.9rem;
-            transition: 0.3s;
+            display: inline-block; background: #25d366; color: white; padding: 15px 35px;
+            text-decoration: none; border-radius: 40px; font-weight: bold; font-size: 1.1rem;
+            transition: 0.3s; margin-top: 10px;
         }
+        .btn-whatsapp:hover { background: #1eb954; transform: scale(1.02); }
 
         #toast {
             visibility: hidden; min-width: 200px; background-color: #333; color: #fff;
@@ -133,10 +137,19 @@
         <div class="modal-caixa" onclick="event.stopPropagation()">
             <span class="modal-fechar" onclick="toggleModal(false)">&times;</span>
             <div class="modal-titulo">Sobre o Projeto</div>
-            <div class="modal-texto" style="text-align:left; font-size:0.85rem; line-height:1.6; margin-bottom:15px;">
-                Este dashboard foi desenvolvido para agilizar o acesso a informações básicas sobre os residenciais MRV de SP.<br><br>
-                <strong>⚠️ Aviso:</strong> As informações podem sofrer alterações sem aviso prévio.
-            </div>
+            
+            <p class="modal-paragrafo">
+                Este dashboard foi desenvolvido para agilizar o acesso a informações básicas sobre os residenciais MRV de SP, auxiliando no atendimento rápido aos nossos leads.
+            </p>
+
+            <span class="modal-alerta">⚠️ Aviso Importante: As informações mostradas podem estar desatualizadas e até incorretas.</span>
+
+            <span class="modal-colabore">🤝 Colabore com o projeto!</span>
+            
+            <p class="modal-paragrafo" style="font-size: 0.85rem;">
+                Sentiu falta de algum material? Se você tiver Books (PDF), Vídeos ou fotos de decorados que ainda não estão aqui, se encontrou alguma informação incorretase ou se pode colaborar com dicas melhores ou observações sobre um residencial, por favor, envie para que possamos manter a ferramenta completa para todos.
+            </p>
+
             <a href="https://wa.me/551192617026" target="_blank" class="btn-whatsapp">Carlos Custódio - (11) 9261-7026</a>
         </div>
     </div>
@@ -154,14 +167,14 @@
             document.getElementById('modal-sobre').style.display = show ? 'flex' : 'none';
         }
 
-        // NOVO: Função para manter o título sempre correto
+        // CORREÇÃO: Título central mantém o nome do local selecionado
         function atualizarTituloTopo() {
             const display = document.getElementById('display-nome');
             if (pathSelecionado) {
-                // Se houver um path selecionado (clicado), mantém o nome dele
+                // Prioridade máxima: se houver um path destacado, o nome dele fica fixo
                 display.innerText = pathSelecionado.getAttribute('data-name');
             } else {
-                // Se não houver nada clicado, mostra o nome da região atual
+                // Se não houver nada clicado, volta para o nome da região padrão
                 display.innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
             }
         }
@@ -170,10 +183,8 @@
             let num = parseInt(valor) || 0;
             let classe = "estoque-status";
             let texto = "";
-
             if (valor === "VENDIDO" || num === 0) {
-                texto = "VENDIDO";
-                classe += " estoque-vendido";
+                texto = "VENDIDO"; classe += " estoque-vendido";
             } else {
                 texto = `restam ${num} un.`;
                 if (num < 6) classe += " estoque-alerta";
@@ -193,8 +204,7 @@
                     if (!col[2]) return null;
                     return {
                         id_path: col[0].toLowerCase().trim(), regiao: col[1] ? col[1].toLowerCase() : "", 
-                        nome: col[2], estoque: col[3] || "0", 
-                        endereco_comp: col[4], 
+                        nome: col[2], estoque: col[3] || "0", endereco_comp: col[4], 
                         entrega: col[7], menor_preco: col[8], plantas_txt: `de ${col[9]} até ${col[10]}`,
                         obra: col[11], localizacao: col[12], mobilidade: col[13], cultura_lazer: col[14],
                         comercio: col[15], saude_educacao: col[16], dica: col[17], obs: col[18],  
@@ -217,15 +227,13 @@
             return url;
         }
 
-        function mostrarToast(texto) {
-            const x = document.getElementById("toast");
-            x.innerText = texto; x.className = "show";
-            setTimeout(() => { x.className = x.className.replace("show", ""); }, 2000);
-        }
-
         function copiarLink(url, nome) {
             if(!url || url.length < 5) return;
-            navigator.clipboard.writeText(gerarLinkDireto(url)).then(() => mostrarToast(`${nome} copiado!`));
+            navigator.clipboard.writeText(gerarLinkDireto(url)).then(() => {
+                const x = document.getElementById("toast");
+                x.innerText = `${nome} copiado!`; x.className = "show";
+                setTimeout(() => { x.className = x.className.replace("show", ""); }, 2000);
+            });
         }
 
         function renderLinkRow(label, link, ico) {
@@ -258,7 +266,6 @@
             const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
             if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'auto', block: 'nearest' }); botaoSelecionado = btnEsq; }
             
-            // Se o residencial for de outra região, troca o mapa
             if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca(true);
             
             const el = document.getElementById(item.id_path);
@@ -270,7 +277,6 @@
         function exibirPainelDireito(item, nomeCidade) {
             const painel = document.getElementById('detalhes-residencial');
             let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
-            
             const vizinhos = DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome);
             vizinhos.forEach(v => {
                 html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'>
@@ -280,10 +286,7 @@
 
             html += `
                 <div class="ficha-card">
-                    <div class="ficha-header">
-                        <span>${item.nome}</span>
-                        ${obterHtmlEstoque(item.estoque)}
-                    </div>
+                    <div class="ficha-header"><span>${item.nome}</span>${obterHtmlEstoque(item.estoque)}</div>
                     <div class="local-info"><span>📍</span> <span>${item.endereco_comp}</span></div>
                     <div class="ficha-grid">
                         <div class="grid-item"><div class="grid-label">💰 Preço:</div>${item.menor_preco || 'Sob consulta'}</div>
@@ -323,15 +326,12 @@
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
             el.classList.add('path-ativo');
             pathSelecionado = el;
-            atualizarTituloTopo(); // Atualiza o título imediatamente ao destacar
+            atualizarTituloTopo();
         }
 
         function solicitarTroca(manterFicha = false) {
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
-            if (!manterFicha && botaoSelecionado) {
-                botaoSelecionado.classList.remove('ativo');
-                botaoSelecionado = null;
-            }
+            if (!manterFicha && botaoSelecionado) { botaoSelecionado.classList.remove('ativo'); botaoSelecionado = null; }
             const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b');
             const container = document.getElementById('container-mapas');
             if (cA.classList.contains('pos-cima')) {
@@ -341,15 +341,10 @@
                 cB.className = 'caixa-troca pos-baixo'; cA.className = 'caixa-troca pos-cima';
                 container.appendChild(cB); 
             }
-            
-            // Ao trocar de mapa, removemos a seleção do path anterior
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
             pathSelecionado = null;
-            
-            if (!manterFicha) {
-                document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>';
-            }
-            atualizarTituloTopo(); // Garante que o título mude para a região correta (Grande SP ou Interior)
+            if (!manterFicha) document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>';
+            atualizarTituloTopo();
         }
 
         function desenhar(idContainer, dados) {
@@ -367,20 +362,22 @@
             if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
         }
 
-        // EVENTOS DE MOUSE NO MAPA
+        // EVENTOS DE MOUSE
         document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
             const p = e.target.closest('.pos-cima path');
-            if (p) document.getElementById('display-nome').innerText = p.getAttribute('data-name');
+            // Só muda o texto no hover se NÃO houver um residencial já selecionado
+            if (p && !pathSelecionado) {
+                document.getElementById('display-nome').innerText = p.getAttribute('data-name');
+            }
         });
 
         document.getElementById('container-mapas').addEventListener('mouseleave', () => {
-            atualizarTituloTopo(); // Ao sair do mapa, volta para o path clicado ou para o nome da região
+            atualizarTituloTopo();
         });
 
         document.getElementById('container-mapas').addEventListener('click', (e) => {
             const caixaBaixo = e.target.closest('.pos-baixo');
             if (caixaBaixo) { solicitarTroca(false); return; }
-            
             const p = e.target.closest('.pos-cima path');
             if (p) {
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
