@@ -154,7 +154,18 @@
             document.getElementById('modal-sobre').style.display = show ? 'flex' : 'none';
         }
 
-        // FUNÇÃO CENTRAL PARA FORMATAR O TEXTO E CLASSE DO ESTOQUE
+        // NOVO: Função para manter o título sempre correto
+        function atualizarTituloTopo() {
+            const display = document.getElementById('display-nome');
+            if (pathSelecionado) {
+                // Se houver um path selecionado (clicado), mantém o nome dele
+                display.innerText = pathSelecionado.getAttribute('data-name');
+            } else {
+                // Se não houver nada clicado, mostra o nome da região atual
+                display.innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
+            }
+        }
+
         function obterHtmlEstoque(valor) {
             let num = parseInt(valor) || 0;
             let classe = "estoque-status";
@@ -183,7 +194,7 @@
                     return {
                         id_path: col[0].toLowerCase().trim(), regiao: col[1] ? col[1].toLowerCase() : "", 
                         nome: col[2], estoque: col[3] || "0", 
-                        endereco_comp: col[4], // Apenas col[4] conforme pedido
+                        endereco_comp: col[4], 
                         entrega: col[7], menor_preco: col[8], plantas_txt: `de ${col[9]} até ${col[10]}`,
                         obra: col[11], localizacao: col[12], mobilidade: col[13], cultura_lazer: col[14],
                         comercio: col[15], saude_educacao: col[16], dica: col[17], obs: col[18],  
@@ -246,9 +257,13 @@
             if (botaoSelecionado) botaoSelecionado.classList.remove('ativo');
             const btnEsq = btn || document.getElementById(`btn-esq-${item.nome.replace(/[^a-zA-Z0-9]/g, '-')}`);
             if (btnEsq) { btnEsq.classList.add('ativo'); btnEsq.scrollIntoView({ behavior: 'auto', block: 'nearest' }); botaoSelecionado = btnEsq; }
+            
+            // Se o residencial for de outra região, troca o mapa
             if (item.regiao && item.regiao !== regiaoAtual) solicitarTroca(true);
+            
             const el = document.getElementById(item.id_path);
             if(el) destacarNoMapa(el);
+            
             exibirPainelDireito(item, el ? el.getAttribute('data-name') : "Região");
         }
 
@@ -308,7 +323,7 @@
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
             el.classList.add('path-ativo');
             pathSelecionado = el;
-            document.getElementById('display-nome').innerText = el.getAttribute('data-name');
+            atualizarTituloTopo(); // Atualiza o título imediatamente ao destacar
         }
 
         function solicitarTroca(manterFicha = false) {
@@ -326,12 +341,15 @@
                 cB.className = 'caixa-troca pos-baixo'; cA.className = 'caixa-troca pos-cima';
                 container.appendChild(cB); 
             }
+            
+            // Ao trocar de mapa, removemos a seleção do path anterior
             if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
             pathSelecionado = null;
+            
             if (!manterFicha) {
                 document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>';
-                document.getElementById('display-nome').innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
             }
+            atualizarTituloTopo(); // Garante que o título mude para a região correta (Grande SP ou Interior)
         }
 
         function desenhar(idContainer, dados) {
@@ -349,17 +367,20 @@
             if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
         }
 
+        // EVENTOS DE MOUSE NO MAPA
         document.getElementById('container-mapas').addEventListener('mouseover', (e) => {
             const p = e.target.closest('.pos-cima path');
             if (p) document.getElementById('display-nome').innerText = p.getAttribute('data-name');
         });
+
         document.getElementById('container-mapas').addEventListener('mouseleave', () => {
-            document.getElementById('display-nome').innerText = pathSelecionado ? pathSelecionado.getAttribute('data-name') : (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
+            atualizarTituloTopo(); // Ao sair do mapa, volta para o path clicado ou para o nome da região
         });
 
         document.getElementById('container-mapas').addEventListener('click', (e) => {
             const caixaBaixo = e.target.closest('.pos-baixo');
             if (caixaBaixo) { solicitarTroca(false); return; }
+            
             const p = e.target.closest('.pos-cima path');
             if (p) {
                 if (p.id === "grandesaopaulo") { solicitarTroca(false); return; }
