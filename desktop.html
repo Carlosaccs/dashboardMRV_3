@@ -43,18 +43,18 @@
 
         .centro-topo { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; border-bottom: 1px solid #eee; background: #fdfdfd; color: #333; }
         
-        .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        /* CONTAINER MAPAS SEM BORDAS */
+        .container-mapas { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; border: none; }
+        .caixa-troca { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; border: none; }
         .pos-cima { height: 78%; z-index: 5; }
-        .pos-baixo { height: 22%; z-index: 10; cursor: pointer; opacity: 0.8; border-top: 1px solid #eee; }
+        .pos-baixo { height: 22%; z-index: 10; cursor: pointer; opacity: 0.8; border: none; }
         
-        svg { width: 100%; height: 100%; display: block; padding: 10px; }
+        svg { width: 100%; height: 100%; display: block; padding: 10px; border: none; }
         
-        /* ESTILO DOS PATHS */
         path { 
             stroke: #fff; 
             stroke-width: 0.5; 
-            fill: #838383; /* Cinza original restaurado */
+            fill: #838383; 
             transition: filter 0.1s; 
             pointer-events: all; 
         }
@@ -75,7 +75,7 @@
             stroke-width: 1.2px !important; 
         }
 
-        /* FICHA DIREITA (image_52bf2d.png) */
+        /* ESTILO FICHA DIREITA */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; border-bottom: 1px solid #eee; padding-bottom: 8px; }
@@ -89,8 +89,6 @@
         .obs-box { background: #f1f3f5; border-left: 4px solid #adb5bd; color: #495057; }
 
         .secao-titulo { font-size: 0.65rem; font-weight: bold; color: #999; text-transform: uppercase; margin: 15px 0 8px 0; display: block; border-top: 1px solid #eee; padding-top: 10px; }
-        .bloco-destaques { background: #fff; padding: 8px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 15px; }
-        .destaque-item { font-size: 0.7rem; color: #555; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; line-height: 1.2; }
         
         .linha-link { display: flex; align-items: center; justify-content: space-between; padding: 8px; background: #fff; border: 1px solid #eee; border-radius: 6px; margin-bottom: 6px; gap: 8px; }
         .link-nome { font-size: 0.72rem; font-weight: bold; color: #444; display: flex; align-items: center; gap: 6px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -98,7 +96,7 @@
         .btn-abrir { background: #065e03; }
         .btn-copiar { background: #ff8c00; }
 
-        /* MODAL (image_46e27d.png) */
+        /* MODAL */
         .modal-overlay {
             position: fixed; top:0; left:0; width:100%; height:100%;
             background: rgba(0,0,0,0.6); display: none; align-items: center;
@@ -129,7 +127,7 @@
 <body>
 
     <header>
-        <h1>Residenciais MRV em São Paulo</h1>
+        <h1>Residenciais MRV in São Paulo</h1>
         <button class="btn-sobre" onclick="toggleModal(true)">Sobre</button>
     </header>
 
@@ -153,8 +151,8 @@
         <div class="modal-caixa" onclick="event.stopPropagation()">
             <span class="modal-fechar" onclick="toggleModal(false)">&times;</span>
             <div class="modal-titulo">Sobre o Projeto</div>
-            <p class="modal-paragrafo">Este dashboard foi desenvolvido para agilizar o acesso a informações básicas sobre os residenciais MRV de SP.</p>
-            <p class="modal-alerta">⚠️ Aviso Importante: As informações mostradas podem estar desatualizadas.</p>
+            <p style="margin-bottom: 20px; color: #555;">Dashboard de consulta rápida para residenciais MRV em São Paulo.</p>
+            <p style="font-weight: bold; color: #d32f2f;">⚠️ Informações sujeitas a alterações.</p>
             <a href="https://wa.me/551192617026" target="_blank" class="btn-whatsapp">Carlos Custódio - (11) 9261-7026</a>
         </div>
     </div>
@@ -172,7 +170,6 @@
             document.getElementById('modal-sobre').style.display = show ? 'flex' : 'none';
         }
 
-        // Lógica de Título: Prioriza Seleção > Região Geral
         function atualizarTituloTopo() {
             const display = document.getElementById('display-nome');
             if (pathSelecionado) {
@@ -207,8 +204,8 @@
                         entrega: col[7], menor_preco: col[8], plantas_txt: `de ${col[9]} até ${col[10]}`,
                         obra: col[11], localizacao: col[12], mobilidade: col[13], cultura_lazer: col[14],
                         comercio: col[15], saude_educacao: col[16], dica: col[17], obs: col[18],  
-                        book_cli: col[19], book_corr: col[20], video1: col[21], video2: col[22],
-                        aptVaranda: col[23], aptSemVaranda: col[24], aptGarden: col[25], outraPlanta: col[26],
+                        book_cli: col[19], video1: col[21],
+                        aptVaranda: col[23], aptSemVaranda: col[24], aptGarden: col[25],
                         linkLocalizacao: col[28]
                     };
                 }).filter(item => item !== null);
@@ -266,7 +263,6 @@
             const painel = document.getElementById('detalhes-residencial');
             let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
             
-            // Filtra outros do mesmo local
             DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome).forEach(v => {
                 html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'>
                             <strong>${v.nome}</strong> ${obterHtmlEstoque(v.estoque)}
@@ -302,10 +298,19 @@
             atualizarTituloTopo();
         }
 
+        // --- FUNÇÃO DE TROCA CORRIGIDA ---
         function solicitarTroca(manterFicha = false) {
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
+            
+            // 1. Limpa os estados dos botões da lista lateral
+            if (botaoSelecionado) {
+                botaoSelecionado.classList.remove('ativo');
+                botaoSelecionado = null;
+            }
+
             const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b');
             const container = document.getElementById('container-mapas');
+            
             if (cA.classList.contains('pos-cima')) {
                 cA.className = 'caixa-troca pos-baixo'; cB.className = 'caixa-troca pos-cima';
                 container.appendChild(cA); 
@@ -313,10 +318,12 @@
                 cB.className = 'caixa-troca pos-baixo'; cA.className = 'caixa-troca pos-cima';
                 container.appendChild(cB); 
             }
+
             if (!manterFicha) {
                 if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
                 pathSelecionado = null;
-                document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial.</div>';
+                // 2. Placeholder atualizado
+                document.getElementById('detalhes-residencial').innerHTML = '<div style="text-align: center; color: #999; margin-top: 50px;">Selecione um residencial ou clique em uma região verde do mapa.</div>';
             }
             atualizarTituloTopo();
         }
@@ -336,22 +343,15 @@
             if (typeof MAPA_INTERIOR !== 'undefined') desenhar('caixa-b', MAPA_INTERIOR);
         }
 
-        // --- CORREÇÃO DOS EVENTOS DE MOUSE ---
         const mapContainer = document.getElementById('container-mapas');
 
         mapContainer.addEventListener('mousemove', (e) => {
             const p = e.target.closest('.pos-cima path');
-            if (p) {
-                // Se está em cima de uma cidade, mostra o nome dela
-                document.getElementById('display-nome').innerText = p.getAttribute('data-name');
-            } else {
-                // Se está no mapa, mas não em cima de uma cidade (espaço branco), reseta
-                atualizarTituloTopo();
-            }
+            if (p) document.getElementById('display-nome').innerText = p.getAttribute('data-name');
+            else atualizarTituloTopo();
         });
 
         mapContainer.addEventListener('mouseleave', () => {
-            // Garante o reset total ao tirar o mouse do container
             atualizarTituloTopo();
         });
 
