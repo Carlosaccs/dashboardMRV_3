@@ -27,6 +27,7 @@
         .col-lateral-dir { width: 32%; background: #fff; padding: 15px; overflow-y: auto; border-left: 1px solid #ddd; }
         .col-central { flex: 1; display: flex; flex-direction: column; background: #fff; position: relative; overflow: hidden; }
 
+        /* Botões da Lista Lateral */
         .btRes { 
             width: 100%; padding: 8px 12px; margin-bottom: 4px; background: transparent; 
             border: none; border-left: 5px solid rgb(6, 94, 3); 
@@ -50,12 +51,35 @@
         
         svg { width: 100%; height: 100%; display: block; padding: 10px; border: none; }
         
-        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: filter 0.1s; pointer-events: all; }
-        .pos-cima path:hover { filter: brightness(1.2); cursor: default; }
-        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer !important; }
-        .path-ativo { fill: #ff8c00 !important; stroke: #000 !important; stroke-width: 1.2px !important; }
+        /* --- ESTILOS DOS MAPAS E HOVER --- */
+        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: all 0.2s; pointer-events: all; }
 
-        /* Estilos da Ficha Direita */
+        /* Hover para as cidades CINZAS (Aumentado para 1.5) */
+        .pos-cima path:hover { 
+            filter: brightness(1.5); 
+            stroke: #999;
+            cursor: default; 
+        }
+
+        /* Cores Base para áreas com MRV */
+        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer !important; }
+
+        /* Hover para as cidades VERDES (Agora ficam Laranja Claro) */
+        .pos-cima path.commrv:hover, .pos-cima #grandesaopaulo:hover { 
+            fill: #ffbc66 !important; 
+            filter: brightness(1.1);
+            cursor: pointer !important; 
+        }
+
+        /* Cidade SELECIONADA (Laranja MRV) */
+        .path-ativo { 
+            fill: #ff8c00 !important; 
+            stroke: #000 !important; 
+            stroke-width: 1.5px !important; 
+            filter: none !important;
+        }
+
+        /* --- FICHA E COMPONENTES --- */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; border-bottom: 1px solid #eee; padding-bottom: 8px; }
@@ -68,7 +92,6 @@
         .dica-box { background: #fff5e6; border: 1px solid #ffe0b3; color: #7a5a00; }
         .obs-box { background: #f1f3f5; border-left: 4px solid #adb5bd; color: #495057; }
 
-        /* Destaques da Região */
         .destaque-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.72rem; line-height: 1.3; }
         .destaque-icon { font-size: 1rem; min-width: 20px; }
         .destaque-titulo { font-weight: bold; color: #065e03; text-transform: uppercase; display: block; font-size: 0.65rem; }
@@ -182,15 +205,11 @@
                         menor_preco: col[8],
                         plantas_txt: `de ${col[9]} até ${col[10]}`,
                         obra: col[11],
-                        // Destaques da Região (Colunas 12 a 16)
                         loc_texto: col[12], mob_texto: col[13], cult_texto: col[14], com_texto: col[15], saude_texto: col[16],
                         dica: col[17],
                         obs: col[18],
-                        // Materiais (Colunas 19 a 22)
                         book_cli: col[19], book_cor: col[20], video1: col[21], video2: col[22],
-                        // Plantas (Colunas 23 a 27)
                         p_varanda: col[23], p_semvar: col[24], p_garden: col[25], p_outro1: col[26], p_outro2: col[27],
-                        // Diversos (Colunas 30 a 39)
                         div1: col[30], div2: col[31], div3: col[32], div4: col[33], div5: col[34],
                         div6: col[35], div7: col[36], div8: col[37], div9: col[38], div10: col[39]
                     };
@@ -297,7 +316,6 @@
             painel.innerHTML = html;
         }
 
-        // --- FUNÇÕES DE NAVEGAÇÃO E MAPA ---
         function atualizarTituloTopo() {
             const display = document.getElementById('display-nome');
             if (pathSelecionado) display.innerText = pathSelecionado.getAttribute('data-name');
