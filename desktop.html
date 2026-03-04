@@ -50,31 +50,11 @@
         
         svg { width: 100%; height: 100%; display: block; padding: 10px; border: none; }
         
-        path { 
-            stroke: #fff; 
-            stroke-width: 0.5; 
-            fill: #838383; 
-            transition: filter 0.1s; 
-            pointer-events: all; 
-        }
-        
-        .pos-cima path:hover { 
-            filter: brightness(1.2); 
-            cursor: default;
-        }
+        path { stroke: #fff; stroke-width: 0.5; fill: #838383; transition: filter 0.1s; pointer-events: all; }
+        .pos-cima path:hover { filter: brightness(1.2); cursor: default; }
+        .commrv, #grandesaopaulo { fill: rgb(6, 94, 3) !important; cursor: pointer !important; }
+        .path-ativo { fill: #ff8c00 !important; stroke: #000 !important; stroke-width: 1.2px !important; }
 
-        .commrv, #grandesaopaulo { 
-            fill: rgb(6, 94, 3) !important; 
-            cursor: pointer !important; 
-        }
-
-        .path-ativo { 
-            fill: #ff8c00 !important; 
-            stroke: #000 !important; 
-            stroke-width: 1.2px !important; 
-        }
-
-        /* ESTILO FICHA DIREITA */
         .ficha-card { border-left: 5px solid #ff8c00; padding: 12px; border-radius: 4px; background: #fafafa; margin-top: 15px; }
         .ficha-header { font-size: 0.9rem; color: #065e03; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .local-info { font-size: 0.75rem; color: #333; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; border-bottom: 1px solid #eee; padding-bottom: 8px; }
@@ -95,36 +75,17 @@
         .btn-abrir { background: #065e03; }
         .btn-copiar { background: #ff8c00; }
 
-        /* MODAL - TEXTO CORRIGIDO */
-        .modal-overlay {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.6); display: none; align-items: center;
-            justify-content: center; z-index: 1000;
-        }
-        .modal-caixa {
-            background: white; width: 90%; max-width: 600px; padding: 40px;
-            border-radius: 15px; position: relative; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-caixa { background: white; width: 90%; max-width: 600px; padding: 40px; border-radius: 15px; position: relative; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .modal-fechar { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 1.5rem; color: #bbb; }
         .modal-titulo { color: rgb(6, 94, 3); font-weight: bold; margin-bottom: 25px; font-size: 1.4rem; }
-        
         .modal-texto-p { font-size: 0.95rem; color: #444; line-height: 1.6; margin-bottom: 15px; }
         .modal-alerta { color: #d32f2f; font-weight: bold; display: block; margin: 20px 0; }
         .modal-colabore { font-weight: bold; color: #333; font-size: 1.1rem; display: block; margin-bottom: 10px; }
-        
-        .btn-whatsapp {
-            display: inline-block; background: #25d366; color: white; padding: 15px 35px;
-            text-decoration: none; border-radius: 40px; font-weight: bold; font-size: 1rem;
-            transition: 0.3s; margin-top: 15px;
-        }
+        .btn-whatsapp { display: inline-block; background: #25d366; color: white; padding: 15px 35px; text-decoration: none; border-radius: 40px; font-weight: bold; font-size: 1rem; transition: 0.3s; margin-top: 15px; }
         .btn-whatsapp:hover { background: #1eb954; transform: scale(1.02); }
 
-        #toast {
-            visibility: hidden; min-width: 200px; background-color: #333; color: #fff;
-            text-align: center; border-radius: 4px; padding: 10px; position: fixed;
-            z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%); font-size: 0.8rem;
-        }
+        #toast { visibility: hidden; min-width: 200px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 10px; position: fixed; z-index: 1000; left: 50%; top: 30px; transform: translateX(-50%); font-size: 0.8rem; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 1.5s; }
         @keyframes fadein { from {top: 0; opacity: 0;} to {top: 30px; opacity: 1;} }
         @keyframes fadeout { from {top: 30px; opacity: 1;} to {top: 0; opacity: 0;} }
@@ -157,17 +118,11 @@
         <div class="modal-caixa" onclick="event.stopPropagation()">
             <span class="modal-fechar" onclick="toggleModal(false)">&times;</span>
             <div class="modal-titulo">Sobre o Projeto</div>
-            
             <p class="modal-texto-p">Este dashboard foi feito para agilizar o acesso a informações básicas sobre os residenciais MRV de SP, auxiliando no atendimento rápido aos nossos leads.</p>
-            
             <span class="modal-alerta">⚠️ Aviso Importante: As informações mostradas podem estar desatualizadas e até incorretas.</span>
-            
             <span class="modal-colabore">🤝 Colabore com o projeto!</span>
-            
             <p class="modal-texto-p" style="font-weight: bold; margin-bottom: 5px;">Sentiu falta de algum material?</p>
-            
             <p class="modal-texto-p" style="font-size: 0.88rem;">Se você tiver Books, vídeos ou fotos de decorados que ainda não estão aqui, se encontrou alguma informação incorreta, se pode colaborar com dicas melhores ou observações sobre um residencial, por favor, envie para que possamos manter a ferramenta completa para todos.</p>
-
             <a href="https://wa.me/551192617026" target="_blank" class="btn-whatsapp">Carlos Custódio - (11) 9261-7026</a>
         </div>
     </div>
@@ -181,17 +136,19 @@
         let regiaoAtual = "gsp"; 
         let DADOS_PLANILHA = [];
 
-        function toggleModal(show) {
-            document.getElementById('modal-sobre').style.display = show ? 'flex' : 'none';
+        function toggleModal(show) { document.getElementById('modal-sobre').style.display = show ? 'flex' : 'none'; }
+
+        // --- FUNÇÃO DE SEGURANÇA PARA DRIVE ---
+        function limparLinkDrive(url) {
+            if (!url || !url.includes('drive.google.com')) return url;
+            // Converte links de visualização padrão em links de preview (sem controles de drive)
+            return url.replace(/\/view(\?.*)?$/, '/preview').replace(/\/edit(\?.*)?$/, '/preview');
         }
 
         function atualizarTituloTopo() {
             const display = document.getElementById('display-nome');
-            if (pathSelecionado) {
-                display.innerText = pathSelecionado.getAttribute('data-name');
-            } else {
-                display.innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
-            }
+            if (pathSelecionado) display.innerText = pathSelecionado.getAttribute('data-name');
+            else display.innerText = (regiaoAtual === "gsp" ? "Grande São Paulo" : "Interior / Litoral");
         }
 
         function obterHtmlEstoque(valor) {
@@ -209,7 +166,6 @@
                 const response = await fetch(url);
                 const texto = await response.text();
                 const linhas = texto.split(/\r?\n/).filter(l => l.trim() !== "");
-                
                 DADOS_PLANILHA = linhas.slice(1).map(linha => {
                     const col = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
                     if (!col[2]) return null;
@@ -217,23 +173,21 @@
                         id_path: col[0].toLowerCase().trim(), regiao: col[1] ? col[1].toLowerCase() : "", 
                         nome: col[2], estoque: col[3] || "0", endereco_comp: col[4], 
                         entrega: col[7], menor_preco: col[8], plantas_txt: `de ${col[9]} até ${col[10]}`,
-                        obra: col[11], localizacao: col[12], mobilidade: col[13], cultura_lazer: col[14],
-                        comercio: col[15], saude_educacao: col[16], dica: col[17], obs: col[18],  
+                        obra: col[11], dica: col[17], obs: col[18],  
                         book_cli: col[19], video1: col[21],
-                        aptVaranda: col[23], aptSemVaranda: col[24], aptGarden: col[25],
-                        linkLocalizacao: col[28]
+                        aptVaranda: col[23], aptSemVaranda: col[24], aptGarden: col[25]
                     };
                 }).filter(item => item !== null);
-
                 DADOS_PLANILHA.sort((a, b) => a.nome.localeCompare(b.nome));
                 gerarListaGeral();
                 desenharIniciais();
-            } catch (e) { console.error("Erro nos dados:", e); }
+            } catch (e) { console.error("Erro:", e); }
         }
 
         function copiarLink(url, nome) {
             if(!url) return;
-            navigator.clipboard.writeText(url).then(() => {
+            const linkLimpo = limparLinkDrive(url); // Proteção no copiar
+            navigator.clipboard.writeText(linkLimpo).then(() => {
                 const x = document.getElementById("toast");
                 x.innerText = `${nome} copiado!`; x.className = "show";
                 setTimeout(() => { x.className = ""; }, 2000);
@@ -242,18 +196,18 @@
 
         function renderLinkRow(label, link, ico) {
             if (!link || link.length < 5) return "";
+            const linkLimpo = limparLinkDrive(link); // Proteção no abrir
             return `<div class="linha-link">
                 <div class="link-nome"><span>${ico}</span> ${label}</div>
                 <div>
-                    <button class="btn-mini btn-abrir" onclick="window.open('${link}', '_blank')">Abrir</button>
-                    <button class="btn-mini btn-copiar" onclick="copiarLink('${link}', '${label}')">Copiar</button>
+                    <button class="btn-mini btn-abrir" onclick="window.open('${linkLimpo}', '_blank')">Abrir</button>
+                    <button class="btn-mini btn-copiar" onclick="copiarLink('${linkLimpo}', '${label}')">Copiar</button>
                 </div>
             </div>`;
         }
 
         function gerarListaGeral() {
-            const menu = document.getElementById('menu-residenciais');
-            menu.innerHTML = "";
+            const menu = document.getElementById('menu-residenciais'); menu.innerHTML = "";
             DADOS_PLANILHA.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = 'btRes';
@@ -277,13 +231,11 @@
         function exibirPainelDireito(item, nomeCidade) {
             const painel = document.getElementById('detalhes-residencial');
             let html = `<div style="font-size:0.75rem; font-weight:bold; color:#065e03; margin-bottom:12px;">MRV em ${nomeCidade}:</div>`;
-            
             DADOS_PLANILHA.filter(d => d.id_path === item.id_path && d.nome !== item.nome).forEach(v => {
                 html += `<button class="btRes" onclick='selecionarResidencial(DADOS_PLANILHA.find(x=>x.nome=="${v.nome}"), null)'>
                             <strong>${v.nome}</strong> ${obterHtmlEstoque(v.estoque)}
                          </button>`;
             });
-
             html += `
                 <div class="ficha-card">
                     <div class="ficha-header"><span>${item.nome}</span>${obterHtmlEstoque(item.estoque)}</div>
@@ -315,23 +267,10 @@
 
         function solicitarTroca(manterFicha = false) {
             regiaoAtual = (regiaoAtual === "gsp") ? "esp" : "gsp";
-            
-            if (botaoSelecionado) {
-                botaoSelecionado.classList.remove('ativo');
-                botaoSelecionado = null;
-            }
-
-            const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b');
-            const container = document.getElementById('container-mapas');
-            
-            if (cA.classList.contains('pos-cima')) {
-                cA.className = 'caixa-troca pos-baixo'; cB.className = 'caixa-troca pos-cima';
-                container.appendChild(cA); 
-            } else {
-                cB.className = 'caixa-troca pos-baixo'; cA.className = 'caixa-troca pos-cima';
-                container.appendChild(cB); 
-            }
-
+            if (botaoSelecionado) { botaoSelecionado.classList.remove('ativo'); botaoSelecionado = null; }
+            const cA = document.getElementById('caixa-a'), cB = document.getElementById('caixa-b'), container = document.getElementById('container-mapas');
+            if (cA.classList.contains('pos-cima')) { cA.className = 'caixa-troca pos-baixo'; cB.className = 'caixa-troca pos-cima'; container.appendChild(cA); } 
+            else { cB.className = 'caixa-troca pos-baixo'; cA.className = 'caixa-troca pos-cima'; container.appendChild(cB); }
             if (!manterFicha) {
                 if (pathSelecionado) pathSelecionado.classList.remove('path-ativo');
                 pathSelecionado = null;
@@ -356,17 +295,12 @@
         }
 
         const mapContainer = document.getElementById('container-mapas');
-
         mapContainer.addEventListener('mousemove', (e) => {
             const p = e.target.closest('.pos-cima path');
             if (p) document.getElementById('display-nome').innerText = p.getAttribute('data-name');
             else atualizarTituloTopo();
         });
-
-        mapContainer.addEventListener('mouseleave', () => {
-            atualizarTituloTopo();
-        });
-
+        mapContainer.addEventListener('mouseleave', () => { atualizarTituloTopo(); });
         mapContainer.addEventListener('click', (e) => {
             const caixaBaixo = e.target.closest('.pos-baixo');
             if (caixaBaixo) { solicitarTroca(false); return; }
